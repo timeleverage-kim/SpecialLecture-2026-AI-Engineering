@@ -10,6 +10,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DOCS = path.join(ROOT, 'docs');
 const OUT = path.join(ROOT, 'html');
 
+const RAW_BASE = 'https://raw.githubusercontent.com/timeleverage-kim/SpecialLecture-2026-AI-Engineering/main/docs/images/';
+const STANDALONE = path.join(OUT, 'standalone');
+
 const COURSE = 'AI와 함께하는 풀스택 개발 — 바이브코딩에서 그래프 엔지니어링까지';
 
 export const WEEKS = [
@@ -323,11 +326,24 @@ ${TAIL_SCRIPTS}
 `;
 }
 
+// 노션 임베드·단독 배포용: CSS·JS를 파일 안에 넣고 이미지는 GitHub 절대 주소로 바꾼 버전
+function standalone(html) {
+  const css = fs.readFileSync(path.join(OUT, 'assets', 'style.css'), 'utf8');
+  const js = fs.readFileSync(path.join(OUT, 'assets', 'app.js'), 'utf8');
+  return html
+    .replace('<link rel="stylesheet" href="assets/style.css">', () => `<style>\n${css}\n</style>`)
+    .replace('<script defer src="assets/app.js"></script>',
+      () => `<script>\nwindow.addEventListener('DOMContentLoaded', function () {\n${js}\n});\n</script>`)
+    .replace(/src="images\//g, `src="${RAW_BASE}`);
+}
+
 // ── 실행 ──
 fs.mkdirSync(OUT, { recursive: true });
 WEEKS.forEach((w, i) => {
   const html = weekPage(w, WEEKS[i - 1], WEEKS[i + 1]);
   fs.writeFileSync(path.join(OUT, w.file.replace(/\.md$/, '.html')), html);
+  fs.mkdirSync(STANDALONE, { recursive: true });
+  fs.writeFileSync(path.join(STANDALONE, w.file.replace(/\.md$/, '.html')), standalone(html));
   console.log('✔', w.file.replace(/\.md$/, '.html'));
 });
 fs.writeFileSync(path.join(OUT, 'index.html'), indexPage());

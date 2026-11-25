@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6주차 · 루프 엔지니어링 | AI와 함께하는 풀스택 개발 — 바이브코딩에서 그래프 엔지니어링까지</title>
+<meta name="description" content="Stop Hook 검증 루프와 헤드리스 수정 루프, Gemini Function Calling으로 도구를 반복 호출하는 AI 스터디 코치를 구현합니다.">
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css">
+<style>
+/* AI 엔지니어링 특강 — 강의 자료 공통 스타일 */
+:root {
+  --bg: #f7f8fb;
+  --paper: #ffffff;
+  --ink: #1d2433;
+  --ink-soft: #5b6476;
+  --line: #e4e7ee;
+  --brand: #4338ca;
+  --brand-soft: #eef0ff;
+  --code-bg: #0f172a;
+  --code-ink: #e2e8f0;
+  --tip: #0e7490;   --tip-bg: #ecfeff;
+  --warn: #b45309;  --warn-bg: #fffbeb;
+  --key: #4338ca;   --key-bg: #eef2ff;
+  --sec: #be123c;   --sec-bg: #fff1f2;
+  --sidebar-w: 260px;
+  --toc-w: 240px;
+  font-family: 'Pretendard', 'Noto Sans KR', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: var(--brand); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── 상단 바 ── */
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 12px;
+  height: 56px; padding: 0 20px;
+  background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar .brand { font-weight: 800; color: var(--ink); letter-spacing: -0.01em; }
+.topbar .brand span { color: var(--brand); }
+.topbar .spacer { flex: 1; }
+.topbar .md-link { font-size: 0.85rem; color: var(--ink-soft); border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; }
+.menu-btn { display: none; background: none; border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; font-size: 1.1rem; cursor: pointer; }
+
+/* ── 3단 레이아웃 ── */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr) var(--toc-w);
+  max-width: 1480px; margin: 0 auto;
+}
+.sidebar, .toc {
+  position: sticky; top: 56px; align-self: start;
+  height: calc(100vh - 56px); overflow-y: auto;
+  padding: 24px 16px; font-size: 0.9rem;
+}
+.sidebar { border-right: 1px solid var(--line); }
+.sidebar h4, .toc h4 { margin: 0 0 10px; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.sidebar ol { list-style: none; padding: 0; margin: 0; }
+.sidebar li a { display: block; padding: 7px 10px; border-radius: 8px; color: var(--ink); line-height: 1.35; }
+.sidebar li a small { display: block; color: var(--ink-soft); font-size: 0.75rem; }
+.sidebar li a:hover { background: var(--brand-soft); text-decoration: none; }
+.sidebar li a.active { background: var(--brand); color: #fff; }
+.sidebar li a.active small { color: #c7d2fe; }
+.toc { border-left: 1px solid var(--line); }
+.toc a { display: block; padding: 3px 0; color: var(--ink-soft); line-height: 1.4; }
+.toc a.h3 { padding-left: 12px; font-size: 0.82rem; }
+.toc a.active { color: var(--brand); font-weight: 700; }
+
+/* ── 본문 ── */
+main.content { padding: 32px 48px 80px; min-width: 0; }
+.paper { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 40px 48px; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04); }
+.paper h1 { font-size: 2rem; line-height: 1.3; margin: 0 0 16px; letter-spacing: -0.02em; }
+.paper h2 { font-size: 1.45rem; margin: 2.4em 0 0.8em; padding-top: 0.6em; border-top: 1px solid var(--line); letter-spacing: -0.01em; }
+.paper h3 { font-size: 1.15rem; margin: 1.8em 0 0.6em; }
+.paper h4 { font-size: 1rem; margin: 1.4em 0 0.4em; }
+.paper h2, .paper h3 { scroll-margin-top: 72px; }
+.paper hr { border: none; border-top: 1px dashed var(--line); margin: 2em 0; }
+.paper img { max-width: 100%; }
+.anchor { margin-left: 6px; color: var(--line); font-weight: 400; visibility: hidden; }
+h2:hover .anchor, h3:hover .anchor { visibility: visible; }
+
+/* 표 */
+.table-wrap { overflow-x: auto; margin: 1em 0 1.4em; border: 1px solid var(--line); border-radius: 12px; }
+.table-wrap table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+.table-wrap th { background: #f3f4f8; text-align: left; font-weight: 700; }
+.table-wrap th, .table-wrap td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.table-wrap tr:last-child td { border-bottom: none; }
+
+/* 인라인 코드 */
+:not(pre) > code { background: #f1f3f9; border: 1px solid #e6e9f2; border-radius: 6px; padding: 0.1em 0.4em; font-size: 0.88em; font-family: 'JetBrains Mono', 'D2Coding', ui-monospace, Consolas, monospace; }
+
+/* 코드 블록 */
+.code-block { position: relative; margin: 1em 0 1.4em; border-radius: 12px; overflow: hidden; background: var(--code-bg); }
+.code-block .code-head { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; font-size: 0.75rem; color: #94a3b8; background: #1e293b; font-family: ui-monospace, monospace; }
+.code-block .copy { background: none; border: 1px solid #334155; color: #cbd5e1; border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer; }
+.code-block .copy:hover { background: #334155; }
+.code-block pre { margin: 0; padding: 14px 16px; overflow-x: auto; }
+.code-block pre code { font-family: 'JetBrains Mono', 'D2Coding', ui-monospace, Consolas, monospace; font-size: 0.85rem; line-height: 1.6; color: var(--code-ink); background: none; }
+.code-block pre code.hljs { padding: 0; background: none; }
+
+/* Mermaid */
+.diagram { margin: 1.2em 0 1.6em; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: #fcfcfe; text-align: center; overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; background: none; font-size: 0.85rem; white-space: pre; text-align: left; }
+.diagram pre.mermaid[data-processed] { text-align: center; }
+
+/* 수식 */
+.math-block { overflow-x: auto; padding: 14px 8px; margin: 1em 0; background: #fafbff; border: 1px solid #eceffa; border-radius: 12px; text-align: center; }
+
+/* 콜아웃 */
+blockquote { margin: 1.2em 0; padding: 12px 18px; border-left: 4px solid var(--line); background: #f8f9fc; border-radius: 0 12px 12px 0; color: var(--ink); }
+blockquote p { margin: 0.4em 0; }
+blockquote.tip { border-color: var(--tip); background: var(--tip-bg); }
+blockquote.warn { border-color: var(--warn); background: var(--warn-bg); }
+blockquote.key { border-color: var(--key); background: var(--key-bg); }
+blockquote.sec { border-color: var(--sec); background: var(--sec-bg); }
+
+/* 주차 머리 배지 */
+.week-hero { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.week-hero .pill { font-size: 0.78rem; padding: 3px 10px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+
+/* 이전/다음 */
+.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 28px; }
+.pager a { display: block; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
+.pager a:hover { border-color: var(--brand); text-decoration: none; }
+.pager a small { display: block; color: var(--ink-soft); font-size: 0.78rem; }
+.pager a.next { text-align: right; }
+
+/* ── 첫 화면(index) ── */
+.hero { padding: 64px 24px 40px; text-align: center; background: radial-gradient(1200px 400px at 50% -10%, #e0e7ff 0%, transparent 70%); }
+.hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin: 0 0 12px; letter-spacing: -0.03em; }
+.hero p { color: var(--ink-soft); max-width: 760px; margin: 0 auto; font-size: 1.05rem; }
+.ladder { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 28px auto 0; max-width: 980px; }
+.ladder span { padding: 8px 14px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); font-weight: 600; font-size: 0.9rem; }
+.ladder i { align-self: center; color: var(--ink-soft); font-style: normal; }
+.section { max-width: 1180px; margin: 0 auto; padding: 24px; }
+.section h2 { font-size: 1.35rem; margin: 24px 0 14px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.card { display: flex; flex-direction: column; gap: 6px; padding: 20px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; color: var(--ink); transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(67, 56, 202, 0.08); border-color: #c7d2fe; text-decoration: none; }
+.card .num { font-size: 0.78rem; font-weight: 700; color: var(--brand); letter-spacing: 0.06em; }
+.card h3 { margin: 0; font-size: 1.1rem; }
+.card p { margin: 0; color: var(--ink-soft); font-size: 0.92rem; }
+.card .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 8px; }
+.card .tags span { font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; background: #f1f3f9; color: var(--ink-soft); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.box { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; }
+.box h3 { margin-top: 0; }
+footer.site { text-align: center; color: var(--ink-soft); font-size: 0.85rem; padding: 40px 16px; }
+
+/* ── 반응형 ── */
+@media (max-width: 1200px) {
+  .layout { grid-template-columns: var(--sidebar-w) minmax(0, 1fr); }
+  .toc { display: none; }
+}
+@media (max-width: 860px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .menu-btn { display: inline-block; }
+  .sidebar { position: fixed; left: 0; top: 56px; width: 280px; background: var(--paper); z-index: 30; transform: translateX(-100%); transition: transform 0.2s; box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08); }
+  body.nav-open .sidebar { transform: none; }
+  main.content { padding: 16px 10px 60px; }
+  .paper { padding: 24px 18px; border-radius: 12px; }
+}
+
+/* ── 인쇄 ── */
+@media print {
+  .topbar, .sidebar, .toc, .pager, .copy { display: none !important; }
+  .layout { display: block; }
+  main.content { padding: 0; }
+  .paper { border: none; box-shadow: none; padding: 0; }
+  .code-block { background: #f6f8fa; }
+  .code-block pre code { color: #111; }
+  h2, h3 { break-after: avoid; }
+  .code-block, .diagram, .table-wrap { break-inside: avoid; }
+}
+
+/* ── 실습 단계 머리표 (🤖 ⌨️ ✅ 📄) ── */
+.paper h4.step { display: flex; align-items: center; gap: 10px; margin: 1.8em 0 0.7em; padding: 9px 14px; border-radius: 10px; border-left: 5px solid; font-size: 1rem; line-height: 1.4; }
+.paper h4.step .step-icon { font-size: 1.15rem; }
+.paper h4.step-ai { background: #eef2ff; border-color: #4338ca; color: #312e81; }
+.paper h4.step-cmd { background: #f1f5f9; border-color: #475569; color: #1e293b; }
+.paper h4.step-result { background: #ecfdf5; border-color: #059669; color: #064e3b; }
+.paper h4.step-ref { background: #fff7ed; border-color: #ea580c; color: #7c2d12; }
+.code-block.prompt { background: #1e1b4b; box-shadow: 0 0 0 2px #6366f1 inset; }
+.code-block.prompt .code-head { background: #312e81; color: #c7d2fe; }
+.code-block.prompt pre code { color: #e0e7ff; white-space: pre-wrap; }
+blockquote.term { border-color: #7c3aed; background: #f5f3ff; }
+blockquote.speak { border-color: #db2777; background: #fdf2f8; }
+.paper img { display: block; margin: 0.8em auto 1.4em; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px; }
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <button class="menu-btn" type="button" aria-label="메뉴">☰</button>
+  <a class="brand" href="index.html">AI <span>Engineering</span> Lab</a>
+  <div class="spacer"></div>
+  <a class="md-link" href="../docs/week06-loop-engineering.md">📄 Markdown 원본</a>
+</header>
+<div class="layout">
+<aside class="sidebar"><h4>강의 목차</h4><ol>
+<li><a href="index.html">🏠 과정 소개<small>개요 · 로드맵</small></a></li>
+<li><a href="week01-overview.html">1주차 · 전체 지도<small>개요</small></a></li>
+<li><a href="week02-vibe-coding.html">2주차 · 바이브코딩<small>① 바이브</small></a></li>
+<li><a href="week03-prompt-engineering.html">3주차 · 프롬프트<small>② 프롬프트</small></a></li>
+<li><a href="week04-context-engineering.html">4주차 · 컨텍스트<small>③ 컨텍스트</small></a></li>
+<li><a href="week05-harness-engineering.html">5주차 · 하네스<small>④ 하네스</small></a></li>
+<li><a href="week06-loop-engineering.html" class="active">6주차 · 루프<small>⑤ 루프</small></a></li>
+<li><a href="week07-graph-engineering.html">7주차 · 그래프<small>⑥ 그래프</small></a></li>
+<li><a href="week08-cicd-aws.html">8주차 · CI/CD·AWS<small>배포</small></a></li>
+<li><a href="week09-portfolio-readme.html">9주차 · 포트폴리오<small>정리</small></a></li>
+</ol></aside>
+<main class="content">
+<article class="paper">
+<h1>6주차 · 루프 엔지니어링 (Loop Engineering)</h1>
+<div class="week-hero"><span class="pill">6주차</span><span class="pill">3시간 (설명 + 실습)</span><span class="pill">⑤ 루프</span></div>
+<blockquote>
+<p><strong>&quot;한 번에 맞히는 AI는 없다. 스스로 확인하고 고치게 만들 뿐이다.&quot;</strong></p>
+<p>지난주 Hook이 컴파일 오류를 돌려주자 Claude가 스스로 고쳤습니다. 오늘은 이 <strong>&quot;행동 → 관찰 → 판단&quot;의 반복을 의도적으로 설계</strong>합니다. 그리고 앱 안에 <strong>도구를 반복 호출하는 AI 스터디 코치 에이전트</strong>를 직접 만듭니다.</p>
+</blockquote>
+<hr>
+<h2 id="0-수업-진행표-3시간">0. 수업 진행표 (3시간)<a class="anchor" href="#0-수업-진행표-3시간" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>시간</th>
+<th>내용</th>
+<th>형태</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0:00 ~ 0:40</td>
+<td>루프의 구조 · 4가지 루프 · 설계 질문 4개 · 실패 패턴</td>
+<td>설명</td>
+</tr>
+<tr>
+<td>0:40 ~ 1:15</td>
+<td>실습 A. 개발 루프: Stop Hook 검증기 + 헤드리스 수정 루프</td>
+<td>실습</td>
+</tr>
+<tr>
+<td>1:15 ~ 1:25</td>
+<td>휴식</td>
+<td></td>
+</tr>
+<tr>
+<td>1:25 ~ 1:45</td>
+<td>Function Calling 원리 (JSON으로 따라가기)</td>
+<td>설명</td>
+</tr>
+<tr>
+<td>1:45 ~ 2:45</td>
+<td>실습 B. 앱 루프: AI 스터디 코치 에이전트 구현 + 테스트</td>
+<td>실습</td>
+</tr>
+<tr>
+<td>2:45 ~ 3:00</td>
+<td>실습 C. 프론트엔드 코치 화면 · 정리</td>
+<td>실습</td>
+</tr>
+</tbody></table></div>
+<h2 id="1-학습-목표">1. 학습 목표<a class="anchor" href="#1-학습-목표" aria-label="이 절의 링크">#</a></h2>
+<ol>
+<li>에이전트 루프(ReAct)의 <strong>생각 → 행동 → 관찰</strong> 구조를 그림으로 설명할 수 있다.</li>
+<li>루프 설계의 4가지 질문(<strong>무엇을 재시도 / 무엇으로 검증 / 언제 멈춤 / 언제 사람에게</strong>)에 답할 수 있다.</li>
+<li>Claude Code의 <strong>Stop Hook</strong>과 <strong>헤드리스 모드(<code>claude -p</code>)</strong> 로 &quot;테스트가 통과할 때까지&quot; 도는 개발 루프를 만들 수 있다.</li>
+<li>Gemini <strong>Function Calling</strong>으로 도구를 반복 호출하는 에이전트 루프를 Java로 직접 구현하고, <strong>가짜 모델로 테스트</strong>할 수 있다.</li>
+</ol>
+<hr>
+<h2 id="2-개념-①-루프란-무엇인가">2. 개념 ① 루프란 무엇인가<a class="anchor" href="#2-개념-①-루프란-무엇인가" aria-label="이 절의 링크">#</a></h2>
+<h3 id="21-정의">2.1 정의<a class="anchor" href="#21-정의" aria-label="이 절의 링크">#</a></h3>
+<blockquote>
+<p><strong>루프 엔지니어링</strong>: AI가 목표를 이룰 때까지 <strong>반복 실행되는 흐름</strong>을 설계하고, <strong>검증 방법과 멈춤 조건</strong>을 정하는 일. 개발자의 역할이 &quot;AI에게 지시하는 사람&quot;에서 <strong>&quot;AI를 지시·확인·안내하는 자동 시스템을 설계하는 사람&quot;</strong> 으로 바뀝니다.</p>
+</blockquote>
+<h3 id="22-비유-자율주행-로봇-청소기">2.2 비유: 자율주행 로봇 청소기<a class="anchor" href="#22-비유-자율주행-로봇-청소기" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>로봇 청소기</th>
+<th>AI 에이전트</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>센서로 주변 확인</td>
+<td><strong>관찰</strong> (도구 결과, 테스트 결과)</td>
+</tr>
+<tr>
+<td>어디로 갈지 판단</td>
+<td><strong>생각</strong> (LLM 추론)</td>
+</tr>
+<tr>
+<td>바퀴를 움직임</td>
+<td><strong>행동</strong> (도구 호출, 파일 수정)</td>
+</tr>
+<tr>
+<td>먼지 센서가 &quot;깨끗함&quot; 표시</td>
+<td><strong>검증 통과 → 종료</strong></td>
+</tr>
+<tr>
+<td>배터리 20% 이하 → 충전대 복귀</td>
+<td><strong>최대 반복·비용 한도 → 중단</strong></td>
+</tr>
+<tr>
+<td>끼어서 못 움직임 → 앱 알림</td>
+<td><strong>사람에게 도움 요청</strong></td>
+</tr>
+</tbody></table></div>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 에이전트 (Agent)와 루프 (Loop)</strong></p>
+<p><strong>에이전트</strong>: 한 번 답하고 끝나는 챗봇과 달리, <strong>목표를 이루기 위해 스스로 다음 행동을 정하고 도구를 쓰는</strong> AI 프로그램. Claude Code가 대표적인 예입니다.</p>
+<p><strong>루프</strong>: 프로그래밍의 <code>for</code>·<code>while</code>처럼 <strong>같은 과정을 반복</strong>하는 구조. 에이전트는 &quot;생각 → 행동 → 관찰&quot;을 반복합니다.</p>
+<p><strong>왜 반복이 필요한가</strong>: 사람도 한 번에 완벽한 코드를 쓰지 못하고 &quot;실행 → 오류 확인 → 수정&quot;을 반복합니다. AI도 마찬가지로, <strong>결과를 보고 고칠 기회</strong>를 줘야 품질이 올라갑니다.</p>
+</blockquote>
+<h3 id="23-에이전트-루프-react-reasoning-acting">2.3 에이전트 루프 (ReAct: Reasoning + Acting)<a class="anchor" href="#23-에이전트-루프-react-reasoning-acting" aria-label="이 절의 링크">#</a></h3>
+<div class="diagram"><pre class="mermaid">flowchart TB
+    G[&quot;🎯 목표 (사용자 요청)&quot;] --&gt; T[&quot;🧠 생각&lt;br/&gt;LLM: 다음에 무엇을 할까?&quot;]
+    T --&gt;|&quot;도구가 필요&quot;| A[&quot;🛠 행동&lt;br/&gt;도구 호출 (list_tasks 등)&quot;]
+    A --&gt; O[&quot;👀 관찰&lt;br/&gt;도구 결과를 대화 기록에 추가&quot;]
+    O --&gt; C{&quot;멈춤 조건?&quot;}
+    C --&gt;|&quot;아니오&quot;| T
+    C --&gt;|&quot;최대 반복 초과&quot;| H[&quot;🙋 중단 + 사람에게 보고&quot;]
+    T --&gt;|&quot;충분함&quot;| F[&quot;✅ 최종 답변&quot;]</pre></div>
+<p>점화식으로 쓰면:</p>
+<div class="math-block">\[s_{t+1} = s_t \oplus \text{observe}\big(\text{act}(\text{LLM}(s_t))\big), \qquad \text{종료: } \text{LLM}(s_t) = \text{답변} \ \lor\ t = t_{\max}\]</div>
+<ul>
+<li><span class="math-inline">\(s_t\)</span>: <span class="math-inline">\(t\)</span>번째 반복 시점의 상태(대화 기록 전체)</li>
+<li><span class="math-inline">\(\oplus\)</span>: 기록에 이어 붙이기</li>
+</ul>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — ReAct</strong></p>
+<p><strong>Re</strong>asoning(추론) + <strong>Act</strong>ing(행동). 2022년 논문에서 제안된 방식으로, LLM이 &quot;생각을 말로 정리 → 도구로 행동 → 결과를 보고 다시 생각&quot;을 번갈아 하게 합니다. 오늘날 대부분의 에이전트(Claude Code 포함)가 이 구조를 기반으로 합니다.</p>
+</blockquote>
+<h3 id="24-네-가지-루프-안쪽부터-바깥쪽으로">2.4 네 가지 루프 (안쪽부터 바깥쪽으로)<a class="anchor" href="#24-네-가지-루프-안쪽부터-바깥쪽으로" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>루프</th>
+<th>주기</th>
+<th>무엇이 반복되나</th>
+<th>오늘 실습</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>① 에이전트 루프</strong></td>
+<td>초~분</td>
+<td>모델 ↔ 도구 호출</td>
+<td>실습 B (스터디 코치)</td>
+</tr>
+<tr>
+<td><strong>② 검증 루프</strong></td>
+<td>분</td>
+<td>작업 → 테스트 → 수정</td>
+<td>실습 A (Stop Hook, 수정 루프)</td>
+</tr>
+<tr>
+<td><strong>③ 이벤트 루프</strong></td>
+<td>시간</td>
+<td>push·PR·일정 같은 <strong>사건</strong>이 루프를 시작</td>
+<td>5주차 CI, 8주차 배포</td>
+</tr>
+<tr>
+<td><strong>④ 개선 루프</strong></td>
+<td>일~주</td>
+<td>실패 기록을 보고 <strong>하네스 자체를 개선</strong></td>
+<td>회고 → <code>CLAUDE.md</code>·Hook 수정</td>
+</tr>
+</tbody></table></div>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    subgraph L4[&quot;④ 개선 루프 (회고)&quot;]
+        subgraph L3[&quot;③ 이벤트 루프 (CI)&quot;]
+            subgraph L2[&quot;② 검증 루프 (테스트)&quot;]
+                subgraph L1[&quot;① 에이전트 루프&quot;]
+                    M((&quot;LLM&quot;)) &lt;--&gt; TL[&quot;도구&quot;]
+                end
+            end
+        end
+    end</pre></div>
+<h3 id="25-루프-설계의-4가지-질문">2.5 루프 설계의 4가지 질문<a class="anchor" href="#25-루프-설계의-4가지-질문" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>질문</th>
+<th>나쁜 설계</th>
+<th>좋은 설계 (오늘 실습)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>무엇을 재시도?</strong></td>
+<td>전부 처음부터</td>
+<td>실패한 부분만, 실패 로그를 근거로</td>
+</tr>
+<tr>
+<td><strong>무엇으로 검증?</strong></td>
+<td>AI의 &quot;다 했습니다&quot;</td>
+<td><strong>테스트 통과</strong>, 도구 결과 (계산형 검증기)</td>
+</tr>
+<tr>
+<td><strong>언제 멈춤?</strong></td>
+<td>될 때까지 무한히</td>
+<td>검증 통과 <strong>또는</strong> 최대 N회</td>
+</tr>
+<tr>
+<td><strong>언제 사람에게?</strong></td>
+<td>묻지 않음</td>
+<td>N회 실패 시, 되돌릴 수 없는 작업 전</td>
+</tr>
+</tbody></table></div>
+<blockquote class="key"><p>📌 <strong>&quot;검증기를 먼저 설계하라.&quot;</strong> 검증 방법이 없는 루프는 <strong>확신에 찬 오답</strong>을 반복할 뿐입니다.</p>
+</blockquote>
+<h3 id="26-비용은-반복-횟수보다-빠르게-늘어난다">2.6 비용은 반복 횟수보다 빠르게 늘어난다<a class="anchor" href="#26-비용은-반복-횟수보다-빠르게-늘어난다" aria-label="이 절의 링크">#</a></h3>
+<p>루프는 매 반복마다 <strong>이전 기록 전체</strong>를 다시 모델에 보냅니다. 처음 입력이 <span class="math-inline">\(T_0\)</span> 토큰이고 반복마다 <span class="math-inline">\(\Delta\)</span> 토큰씩 기록이 늘면, <span class="math-inline">\(n\)</span>번 반복의 총 입력 토큰은:</p>
+<div class="math-block">\[\text{총 토큰} = \sum_{k=0}^{n-1} (T_0 + k\Delta) = nT_0 + \Delta \cdot \frac{n(n-1)}{2}\]</div>
+<p><span class="math-inline">\(T_0 = 1{,}000\)</span>, <span class="math-inline">\(\Delta = 500\)</span>일 때:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>반복 <span class="math-inline">\(n\)</span></th>
+<th>총 입력 토큰</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>3</td>
+<td>4,500</td>
+</tr>
+<tr>
+<td>6</td>
+<td>13,500</td>
+</tr>
+<tr>
+<td>12</td>
+<td>45,000</td>
+</tr>
+<tr>
+<td>24</td>
+<td>162,000</td>
+</tr>
+</tbody></table></div>
+<p>반복이 2배가 되면 비용은 <strong>3~4배</strong>가 됩니다. 그래서 <strong>최대 반복 횟수</strong>는 선택이 아니라 필수입니다.</p>
+<h3 id="27-루프의-실패-패턴">2.7 루프의 실패 패턴<a class="anchor" href="#27-루프의-실패-패턴" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>패턴</th>
+<th>증상</th>
+<th>대책</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>무한 루프</strong></td>
+<td>같은 도구를 계속 호출</td>
+<td>최대 반복 횟수, 같은 호출 반복 감지</td>
+</tr>
+<tr>
+<td><strong>조기 종료</strong></td>
+<td>안 끝났는데 &quot;완료했습니다&quot;</td>
+<td>계산형 검증기(테스트)로 종료 판정</td>
+</tr>
+<tr>
+<td><strong>진동</strong></td>
+<td>A 고치면 B 깨지고, B 고치면 A 깨짐</td>
+<td>전체 테스트로 검증, N회 후 사람에게</td>
+</tr>
+<tr>
+<td><strong>보상 해킹</strong></td>
+<td>테스트를 <strong>지우거나 건너뛰어</strong> 통과시킴</td>
+<td>테스트 파일 수정 금지 규칙·Hook, 리뷰</td>
+</tr>
+<tr>
+<td><strong>환각 도구 호출</strong></td>
+<td>없는 도구·잘못된 인자</td>
+<td>오류를 관찰 결과로 돌려주어 스스로 수정하게</td>
+</tr>
+</tbody></table></div>
+<hr>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 보상 해킹 (Reward Hacking)</strong></p>
+<p><strong>뜻</strong>: AI가 <strong>진짜 목표 대신 &quot;검사 통과&quot;만 노리는</strong> 꼼수. 예: 테스트를 고치라고 했더니 <strong>테스트를 지워서</strong> 통과시킴.</p>
+<p><strong>비유</strong>: &quot;시험 점수 올려&quot;라고 했더니 공부 대신 <strong>채점표를 고치는</strong> 학생.</p>
+<p><strong>대책</strong>: 검사 기준(테스트)을 AI가 못 바꾸게 막고(하네스), 사람이 결과를 리뷰합니다.</p>
+</blockquote>
+<h2 id="3-실습-a-개발-루프-테스트가-통과할-때까지">3. 실습 A. 개발 루프 — &quot;테스트가 통과할 때까지&quot;<a class="anchor" href="#3-실습-a-개발-루프-테스트가-통과할-때까지" aria-label="이 절의 링크">#</a></h2>
+<h3 id="a-1-stop-hook-검증기">A-1. Stop Hook 검증기<a class="anchor" href="#a-1-stop-hook-검증기" aria-label="이 절의 링크">#</a></h3>
+<p>Claude가 <strong>응답을 끝내려는 순간</strong> 테스트를 실행하고, 실패하면 <strong>종료를 막고 오류를 돌려줍니다.</strong> 단, <strong>최대 3라운드</strong>까지만.</p>
+<div class="diagram"><pre class="mermaid">stateDiagram-v2
+    [*] --&gt; 작업중
+    작업중 --&gt; 종료시도: Claude가 응답 완료
+    종료시도 --&gt; 테스트: Stop Hook 실행
+    테스트 --&gt; [*]: 통과 (exit 0)
+    테스트 --&gt; 작업중: 실패, 3라운드 미만이면 exit 2로 되돌림
+    테스트 --&gt; 사람확인: 실패, 3라운드 도달
+    사람확인 --&gt; [*]</pre></div>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — Stop Hook</strong></p>
+<p>Claude가 <strong>응답을 마치려는 순간</strong> 실행되는 Hook. 5주차의 PostToolUse가 &quot;파일을 고칠 때마다&quot; 검사했다면, Stop은 &quot;<strong>다 했다고 말하기 직전</strong>&quot;에 최종 검사합니다. 종료 코드 2를 돌려주면 Claude는 <strong>끝내지 못하고</strong> 오류를 읽고 계속 작업합니다. → 검증 루프 완성!</p>
+</blockquote>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — (선택) Stop Hook 초안 만들기</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">.claude/hooks/stop-gate.mjs를 만들어 줘 (Node.js ESM, 외부 패키지 없이).
+- git status --porcelain으로 변경 파일이 없으면 바로 exit 0
+- backend에서 gradlew test -q 실행(Windows면 gradlew.bat), 통과하면 카운터 파일 삭제 후 exit 0
+- 실패하면 세션별 카운터(os.tmpdir()의 파일, stdin JSON의 session_id 사용)를 1 올리고,
+  &quot;테스트를 삭제·@Disabled 하지 말고 main 코드를 고쳐라&quot; + 로그 마지막 60줄을 stderr로 보내고 exit 2
+- 카운터가 3에 도달하면 &quot;사람의 확인이 필요합니다&quot;를 stderr로 보내고 exit 1 (루프 종료)
+그리고 .claude/settings.json의 hooks에 Stop 이벤트로 등록해 줘. 기존 Hook은 그대로 둬.</code></pre></div>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — stop-gate.mjs</span></h4>
+<p><code>.claude/hooks/stop-gate.mjs</code></p>
+<div class="code-block"><div class="code-head"><span>js</span><button class="copy" type="button">복사</button></div><pre><code class="language-javascript">// Stop Hook: 응답을 마치기 전에 백엔드 테스트로 검증한다. (최대 MAX_ROUNDS번 되돌려 보냄)
+import { execSync } from 'node:child_process';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+
+const MAX_ROUNDS = 3;
+
+let raw = '';
+for await (const chunk of process.stdin) raw += chunk;
+const data = JSON.parse(raw || '{}');
+const root = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
+const counterFile = path.join(os.tmpdir(), `claude-stop-gate-${data.session_id ?? 'default'}.txt`);
+
+// 변경된 파일이 없으면 검증할 것도 없다
+const changed = execSync('git status --porcelain', { cwd: root }).toString().trim();
+if (!changed) process.exit(0);
+
+const round = fs.existsSync(counterFile) ? Number(fs.readFileSync(counterFile, 'utf8')) : 0;
+const isWindows = process.platform === 'win32';
+
+try {
+  execSync(isWindows ? 'gradlew.bat test -q' : './gradlew test -q', {
+    cwd: path.join(root, 'backend'),
+    stdio: 'pipe',
+    timeout: 600_000,
+  });
+  fs.rmSync(counterFile, { force: true });   // 통과: 카운터 초기화
+  process.exit(0);
+} catch (e) {
+  const log = `${e.stdout ?? ''}${e.stderr ?? ''}`.split('\n').slice(-60).join('\n');
+  if (round &gt;= MAX_ROUNDS) {
+    fs.rmSync(counterFile, { force: true });
+    console.error(`[루프 검증기] ${MAX_ROUNDS}회 수정 후에도 테스트가 실패합니다. 사람의 확인이 필요합니다.`);
+    process.exit(1);                          // 루프 종료 → 사람에게
+  }
+  fs.writeFileSync(counterFile, String(round + 1));
+  console.error(
+    `[루프 검증기 ${round + 1}/${MAX_ROUNDS}] 백엔드 테스트가 실패했습니다.\n` +
+      `테스트 코드를 삭제하거나 @Disabled로 건너뛰지 말고, main 코드의 원인을 고치세요.\n${log}`,
+  );
+  process.exit(2);                            // 종료 차단 → Claude가 계속 작업
+}</code></pre></div>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — settings.json에 추가할 부분</span></h4>
+<p><code>.claude/settings.json</code>의 <code>hooks</code>에 <strong>Stop</strong> 이벤트를 추가합니다. (기존 PreToolUse·PostToolUse는 그대로, <code>&quot;PostToolUse&quot;: [...]</code> 뒤에 쉼표를 찍고 추가)</p>
+<div class="code-block"><div class="code-head"><span>json</span><button class="copy" type="button">복사</button></div><pre><code class="language-json">    &quot;Stop&quot;: [
+      {
+        &quot;hooks&quot;: [
+          { &quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;node \&quot;$CLAUDE_PROJECT_DIR/.claude/hooks/stop-gate.mjs\&quot;&quot;, &quot;timeout&quot;: 600 }
+        ]
+      }
+    ]</code></pre></div>
+<p><code>CLAUDE.md</code>에도 한 줄 추가합니다. (가이드 + 센서 = 이중 장치)</p>
+<div class="code-block"><div class="code-head"><span>markdown</span><button class="copy" type="button">복사</button></div><pre><code class="language-markdown">- 테스트를 통과시키기 위해 테스트 코드를 삭제·수정·@Disabled 처리하지 않는다. 테스트 변경이 필요하면 먼저 묻는다.</code></pre></div>
+<h3 id="a-2-버그-심기-실험">A-2. 버그 심기 실험<a class="anchor" href="#a-2-버그-심기-실험" aria-label="이 절의 링크">#</a></h3>
+<p>일부러 버그를 심고 루프가 고치는지 봅니다.</p>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — 버그 심기 (AI 몰래, 편집기로 직접)</span></h4>
+<p><code>Tokenizer.java</code>에서 한 글자를 바꿉니다.</p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">// 원래:  for (int i = 0; i + 2 &lt;= word.length(); i++) {
+for (int i = 0; i + 2 &lt; word.length(); i++) {   // 🐛 마지막 2-그램을 빠뜨림</code></pre></div>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">cd backend &amp;&amp; ./gradlew test     # AiServiceTest가 실패하는지 먼저 확인</code></pre></div>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 버그를 알려 주지 않고 다른 일 시키기</span></h4>
+<p>Claude Code를 <strong>다시 시작</strong>(Hook 반영)한 뒤, 버그 얘기는 하지 않고 다른 일을 시킵니다.</p>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">TaskService에 마감일이 지난 할 일 개수를 세는 countOverdue() 메서드를 추가해 줘.</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — Stop Hook이 루프를 만드는 모습 (예시)</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">● countOverdue() 메서드를 추가했습니다. 마감일이 오늘보다 이전이고 DONE이 아닌 할 일 개수를 셉니다.
+
+  ⎿ Stop hook feedback:
+    [루프 검증기 1/3] 백엔드 테스트가 실패했습니다.
+    테스트 코드를 삭제하거나 @Disabled로 건너뛰지 말고, main 코드의 원인을 고치세요.
+    AiServiceTest &gt; 관련_노트가_있으면_노트를_컨텍스트에_넣어_LLM을_한번_호출한다() FAILED
+        java.lang.AssertionError: Expecting actual not to be empty
+
+● 테스트가 실패해서 원인을 찾겠습니다. 이번 변경과는 무관한 AiServiceTest가 실패합니다.
+● Read(backend/src/main/java/com/example/planner/ai/rag/Tokenizer.java)
+● 2-그램을 만드는 반복 조건이 `i + 2 &lt; word.length()`라서 마지막 2글자를 빠뜨립니다. `&lt;=`로 고치겠습니다.
+● Update(Tokenizer.java)
+● 수정 후 테스트가 모두 통과했습니다.</code></pre></div>
+<p>관찰 포인트:</p>
+<ol>
+<li>Claude가 작업을 마치려 할 때 Stop Hook이 테스트 실패를 돌려주는가?</li>
+<li>Claude가 <strong>테스트를 고치려 하는가, main 코드를 고치려 하는가?</strong> (보상 해킹 여부)</li>
+<li>몇 라운드 만에 통과하는가?</li>
+</ol>
+<h3 id="a-3-헤드리스-수정-루프-claude--p">A-3. 헤드리스 수정 루프 (<code>claude -p</code>)<a class="anchor" href="#a-3-헤드리스-수정-루프-claude--p" aria-label="이 절의 링크">#</a></h3>
+<p>Claude Code는 대화창 없이 <strong>명령 한 줄로 실행</strong>할 수도 있습니다(헤드리스 모드). 이를 셸 스크립트의 <code>for</code> 문에 넣으면 <strong>루프를 코드로 설계</strong>할 수 있습니다.</p>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 헤드리스 (Headless) 모드</strong></p>
+<p><strong>뜻</strong>: 화면(대화창) 없이 <strong>명령 한 줄로 실행하고 결과만 받는</strong> 방식. <code>claude -p &quot;지시&quot;</code>처럼 씁니다. (<code>-p</code> = print, 결과를 출력하고 종료)</p>
+<p><strong>왜 쓰나</strong>: 사람이 대화하지 않아도 되므로 <strong>스크립트·CI·예약 작업</strong> 안에 AI를 넣을 수 있습니다. 루프를 &quot;사람의 대화&quot;가 아니라 <strong>코드로 설계</strong>하는 첫걸음입니다.</p>
+<p><strong><code>--allowedTools</code></strong>: 이 실행에서 쓸 수 있는 도구를 제한합니다. 사람이 지켜보지 않으므로 <strong>권한을 더 좁게</strong> 주는 것이 원칙입니다.</p>
+</blockquote>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — fix-loop.sh (이 파일은 사람이 직접 작성·검토 권장)</span></h4>
+<p><code>scripts/fix-loop.sh</code></p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">#!/usr/bin/env bash
+# 테스트가 통과할 때까지 Claude Code를 헤드리스로 반복 실행한다. (최대 MAX회)
+set -u
+MAX=${1:-3}
+LOG=$(mktemp)
+cd &quot;$(dirname &quot;$0&quot;)/../backend&quot;
+
+for i in $(seq 1 &quot;$MAX&quot;); do
+  echo &quot;=== [$i/$MAX] 테스트 실행 ===&quot;
+  if ./gradlew test -q &gt; &quot;$LOG&quot; 2&gt;&amp;1; then
+    echo &quot;✅ 테스트 통과! (수정 시도 $((i - 1))회)&quot;
+    exit 0
+  fi
+  echo &quot;❌ 실패 → Claude에게 수정 요청&quot;
+  tail -n 60 &quot;$LOG&quot; | claude -p \
+    &quot;위 입력은 backend 테스트 실패 로그다. 테스트 코드는 수정하지 말고 main 코드의 원인을 찾아 최소한으로 고쳐라. 고친 내용을 3줄로 요약하라.&quot; \
+    --allowedTools &quot;Read,Edit,Grep,Glob,Bash(./gradlew test:*)&quot;
+done
+
+echo &quot;⛔ ${MAX}회 반복 후에도 실패했습니다. 사람이 확인하세요.&quot;
+exit 1</code></pre></div>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — 버그를 다시 심고 수정 루프 돌리기</span></h4>
+<p>A-2에서 버그가 이미 고쳐졌다면 <code>Tokenizer.java</code>에 같은 버그를 <strong>다시 심은 뒤</strong> 실행합니다.</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">chmod +x scripts/fix-loop.sh
+./scripts/fix-loop.sh 3</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 (예시)</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">=== [1/3] 테스트 실행 ===
+❌ 실패 → Claude에게 수정 요청
+Tokenizer.java의 2-그램 반복 조건(i + 2 &lt; length)이 마지막 글자 쌍을 빠뜨리고 있었습니다.
+조건을 i + 2 &lt;= length로 수정했습니다.
+테스트 코드는 변경하지 않았습니다.
+=== [2/3] 테스트 실행 ===
+✅ 테스트 통과! (수정 시도 1회)</code></pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>구성 요소</th>
+<th>스크립트의 어느 부분?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>검증기</td>
+<td><code>./gradlew test</code></td>
+</tr>
+<tr>
+<td>재시도 대상</td>
+<td>실패 로그 마지막 60줄</td>
+</tr>
+<tr>
+<td>멈춤 조건</td>
+<td>통과 또는 <code>MAX</code>회</td>
+</tr>
+<tr>
+<td>사람에게 넘김</td>
+<td>마지막 <code>exit 1</code> 메시지</td>
+</tr>
+<tr>
+<td>권한 제한(하네스)</td>
+<td><code>--allowedTools</code></td>
+</tr>
+</tbody></table></div>
+<blockquote class="warn"><p>⚠️ Windows는 Git Bash 또는 WSL에서 실행하세요. 실험이 끝나면 심은 버그가 고쳐졌는지 <code>git diff</code>로 확인하고 커밋합니다.</p>
+</blockquote>
+<hr>
+<h2 id="4-개념-②-function-calling-llm이-도구를-쓰는-원리">4. 개념 ② Function Calling — LLM이 &quot;도구&quot;를 쓰는 원리<a class="anchor" href="#4-개념-②-function-calling-llm이-도구를-쓰는-원리" aria-label="이 절의 링크">#</a></h2>
+<h3 id="41-오해와-진실">4.1 오해와 진실<a class="anchor" href="#41-오해와-진실" aria-label="이 절의 링크">#</a></h3>
+<blockquote>
+<p>❌ &quot;LLM이 직접 DB를 조회한다&quot;</p>
+<p>✅ LLM은 <strong>&quot;이 도구를 이런 인자로 불러 주세요&quot;라는 JSON을 출력</strong>할 뿐이고, <strong>실제 실행은 우리 코드</strong>가 합니다. 그 결과를 다시 LLM에게 보여 주는 것을 반복하는 것이 에이전트 루프입니다.</p>
+</blockquote>
+<div class="diagram"><pre class="mermaid">sequenceDiagram
+    participant U as 사용자
+    participant A as 우리 코드 (StudyCoachAgent)
+    participant G as Gemini
+    participant T as 도구 (TaskService)
+    U-&gt;&gt;A: &quot;마감 가까운 할 일 알려 줘&quot;
+    A-&gt;&gt;G: ① 질문 + 도구 목록(get_today, list_tasks ...)
+    G--&gt;&gt;A: functionCall: get_today {}
+    A-&gt;&gt;T: 실행
+    T--&gt;&gt;A: {&quot;today&quot;:&quot;2026-11-25&quot;}
+    A-&gt;&gt;G: ② 기록 + functionResponse
+    G--&gt;&gt;A: functionCall: list_tasks {&quot;status&quot;:&quot;TODO&quot;}
+    A-&gt;&gt;T: 실행
+    T--&gt;&gt;A: {&quot;count&quot;:3,&quot;tasks&quot;:[...]}
+    A-&gt;&gt;G: ③ 기록 + functionResponse
+    G--&gt;&gt;A: text: &quot;가장 급한 일은 ... 입니다&quot;
+    A--&gt;&gt;U: 최종 답변 + 루프 기록</pre></div>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — Function Calling (함수 호출 / 도구 호출)</strong></p>
+<p><strong>뜻</strong>: LLM에게 &quot;이런 함수(도구)들이 있다&quot;고 <strong>설명서를 주면</strong>, LLM이 필요할 때 <strong>&quot;이 함수를 이 인자로 불러 줘&quot;라는 JSON</strong>을 출력하는 기능.</p>
+<p><strong>비유</strong>: 레스토랑 손님(LLM)이 메뉴판(도구 설명서)을 보고 <strong>주문서</strong>(functionCall)를 쓰면, 주방(우리 코드)이 요리(실행)해서 가져다주는 것.</p>
+<p><strong>왜 쓰나</strong>: LLM은 <strong>오늘 날짜도, 우리 DB도 모릅니다.</strong> 도구를 주면 추측 대신 <strong>실제 데이터를 확인</strong>하고, 할 일 추가처럼 <strong>실제 행동</strong>도 할 수 있습니다.</p>
+</blockquote>
+<h3 id="42-json으로-따라가기">4.2 JSON으로 따라가기<a class="anchor" href="#42-json으로-따라가기" aria-label="이 절의 링크">#</a></h3>
+<p><strong>① 요청: 도구 목록을 함께 보낸다</strong></p>
+<div class="code-block"><div class="code-head"><span>json</span><button class="copy" type="button">복사</button></div><pre><code class="language-json">{
+  &quot;systemInstruction&quot;: { &quot;parts&quot;: [{ &quot;text&quot;: &quot;너는 AI 스터디 코치다 ...&quot; }] },
+  &quot;contents&quot;: [
+    { &quot;role&quot;: &quot;user&quot;, &quot;parts&quot;: [{ &quot;text&quot;: &quot;마감 가까운 할 일 알려 줘&quot; }] }
+  ],
+  &quot;tools&quot;: [{
+    &quot;functionDeclarations&quot;: [
+      { &quot;name&quot;: &quot;get_today&quot;, &quot;description&quot;: &quot;오늘 날짜와 요일을 알려 준다.&quot; },
+      {
+        &quot;name&quot;: &quot;list_tasks&quot;,
+        &quot;description&quot;: &quot;할 일 목록을 조회한다.&quot;,
+        &quot;parameters&quot;: {
+          &quot;type&quot;: &quot;object&quot;,
+          &quot;properties&quot;: {
+            &quot;status&quot;: { &quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;TODO&quot;, &quot;DOING&quot;, &quot;DONE&quot;] }
+          }
+        }
+      }
+    ]
+  }]
+}</code></pre></div>
+<p><strong>② 응답: 텍스트 대신 &quot;도구 호출 요청&quot;이 온다</strong></p>
+<div class="code-block"><div class="code-head"><span>json</span><button class="copy" type="button">복사</button></div><pre><code class="language-json">{
+  &quot;candidates&quot;: [{
+    &quot;content&quot;: {
+      &quot;role&quot;: &quot;model&quot;,
+      &quot;parts&quot;: [{ &quot;functionCall&quot;: { &quot;name&quot;: &quot;get_today&quot;, &quot;args&quot;: {} }, &quot;thoughtSignature&quot;: &quot;...&quot; }]
+    }
+  }]
+}</code></pre></div>
+<p><strong>③ 다음 요청: 모델의 응답을 기록에 그대로 넣고, 도구 결과를 덧붙인다</strong></p>
+<div class="code-block"><div class="code-head"><span>json</span><button class="copy" type="button">복사</button></div><pre><code class="language-json">&quot;contents&quot;: [
+  { &quot;role&quot;: &quot;user&quot;,  &quot;parts&quot;: [{ &quot;text&quot;: &quot;마감 가까운 할 일 알려 줘&quot; }] },
+  { &quot;role&quot;: &quot;model&quot;, &quot;parts&quot;: [{ &quot;functionCall&quot;: { &quot;name&quot;: &quot;get_today&quot;, &quot;args&quot;: {} }, &quot;thoughtSignature&quot;: &quot;...&quot; }] },
+  { &quot;role&quot;: &quot;user&quot;,  &quot;parts&quot;: [{ &quot;functionResponse&quot;: { &quot;name&quot;: &quot;get_today&quot;, &quot;response&quot;: { &quot;today&quot;: &quot;2026-11-25&quot;, &quot;dayOfWeek&quot;: &quot;수요일&quot; } } }] }
+]</code></pre></div>
+<blockquote class="warn"><p>⚠️ 최신 Gemini 모델은 응답에 <code>thoughtSignature</code>(사고 과정 서명)를 붙일 수 있고, 다음 요청에 <strong>모델 응답을 원본 그대로</strong> 돌려보내야 합니다. 그래서 우리 코드는 모델 응답(<code>Content</code>)을 <strong>손대지 않고</strong> 기록에 추가합니다. (3주차 <code>Part</code> record에 <code>thoughtSignature</code> 필드를 넣어 둔 이유!)</p>
+</blockquote>
+<h3 id="43-좋은-도구-설계-원칙">4.3 좋은 도구 설계 원칙<a class="anchor" href="#43-좋은-도구-설계-원칙" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>원칙</th>
+<th>예</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>이름은 <strong>동사_명사</strong></td>
+<td><code>list_tasks</code>, <code>create_task</code></td>
+</tr>
+<tr>
+<td>설명에 <strong>언제 쓰는지</strong> 적기</td>
+<td>&quot;날짜 계산이 필요할 때 먼저 호출한다&quot;</td>
+</tr>
+<tr>
+<td>인자는 <strong>최소한</strong>, 가능하면 <code>enum</code></td>
+<td><code>status: TODO/DOING/DONE</code></td>
+</tr>
+<tr>
+<td>결과는 <strong>작고 구조화된 JSON</strong></td>
+<td>필요한 필드만, 개수 포함</td>
+</tr>
+<tr>
+<td>실패해도 <strong>예외 대신 오류 JSON</strong></td>
+<td><code>{&quot;error&quot;: &quot;id=99 할 일 없음&quot;}</code> → 모델이 스스로 수정</td>
+</tr>
+<tr>
+<td>위험한 도구는 <strong>만들지 않거나</strong> 확인 단계</td>
+<td>전체 삭제 도구는 제공하지 않음</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="5-실습-b-ai-스터디-코치-에이전트-구현">5. 실습 B. AI 스터디 코치 에이전트 구현<a class="anchor" href="#5-실습-b-ai-스터디-코치-에이전트-구현" aria-label="이 절의 링크">#</a></h2>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 에이전트 구현 (계획 모드 권장)</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">앱 안에 Gemini Function Calling으로 도구를 반복 호출하는 &quot;AI 스터디 코치&quot; 에이전트를 만들어 줘.
+1. ai.gemini.GeminiApi 인터페이스(call(GeminiRequest) → GeminiResponse)를 만들고 GeminiClient가 구현하게 해.
+2. agent.AgentTool 인터페이스: name, description, parameters(JSON Schema Map, 인자 없으면 null), execute(args), declaration()
+3. agent.tools: get_today(오늘 날짜·요일, Asia/Seoul), list_tasks(status 선택), create_task(title 필수, subject, dueDate, estimatedMinutes),
+   update_task_status(id, status). 결과는 작은 Map, null 값은 빈 문자열
+4. agent.StudyCoachAgent: 최대 6단계 루프. 매 단계 전체 기록을 보내고, 모델 응답은 원본 그대로 기록에 추가(thoughtSignature 보존),
+   functionCall이 없으면 최종 답변으로 종료, 있으면 모두 실행해서 functionResponse를 role=user로 추가.
+   도구 예외·없는 도구는 {&quot;error&quot;: ...}로 돌려준다. 단계별 기록(AgentStep)을 결과에 포함.
+5. POST /api/ai/coach {message} → {answer, steps, completed}
+6. 진짜 모델 없이 각본대로 응답하는 가짜 GeminiApi로 StudyCoachAgentTest 작성(정상 종료, 최대 반복 중단, 없는 도구)</code></pre></div>
+<h3 id="b-1-참고-파일-구성">B-1. 📄 참고 — 파일 구성<a class="anchor" href="#b-1-참고-파일-구성" aria-label="이 절의 링크">#</a></h3>
+<h3 id="b-1-파일-구성">B-1. 파일 구성<a class="anchor" href="#b-1-파일-구성" aria-label="이 절의 링크">#</a></h3>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">backend/src/main/java/com/example/planner/
+├── ai/gemini/
+│   ├── GeminiApi.java            # (신규) generateContent 호출 인터페이스
+│   └── GeminiClient.java         # implements GeminiApi 추가
+└── agent/
+    ├── AgentTool.java            # 도구 인터페이스
+    ├── AgentStep.java            # 루프 기록 1줄
+    ├── AgentResult.java          # 최종 결과
+    ├── StudyCoachAgent.java      # ★ 에이전트 루프
+    ├── AgentController.java      # POST /api/ai/coach
+    └── tools/
+        ├── GetTodayTool.java
+        ├── ListTasksTool.java
+        ├── CreateTaskTool.java
+        └── UpdateTaskStatusTool.java</code></pre></div>
+<h3 id="b-2-참고-코드-geminiapi-인터페이스-테스트-가능하게-만들기">B-2. 📄 참고 코드 — GeminiApi 인터페이스 (테스트 가능하게 만들기)<a class="anchor" href="#b-2-참고-코드-geminiapi-인터페이스-테스트-가능하게-만들기" aria-label="이 절의 링크">#</a></h3>
+<p><code>ai/gemini/GeminiApi.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.ai.gemini;
+
+import com.example.planner.ai.gemini.GeminiDtos.GeminiRequest;
+import com.example.planner.ai.gemini.GeminiDtos.GeminiResponse;
+
+/** Gemini generateContent 호출. 테스트에서는 각본대로 응답하는 가짜로 교체한다. */
+@FunctionalInterface
+public interface GeminiApi {
+
+    GeminiResponse call(GeminiRequest request);
+}</code></pre></div>
+<p><code>ai/gemini/GeminiClient.java</code> — 클래스 선언과 <code>call</code> 메서드만 바꿉니다.</p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">public class GeminiClient implements LlmClient, GeminiApi {
+    // ...
+    @Override
+    public GeminiResponse call(GeminiRequest request) {
+        // (기존 코드 그대로)
+    }</code></pre></div>
+<h3 id="b-3-참고-코드-도구-정의">B-3. 📄 참고 코드 — 도구 정의<a class="anchor" href="#b-3-참고-코드-도구-정의" aria-label="이 절의 링크">#</a></h3>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — JSON Schema</strong></p>
+<p>데이터의 <strong>모양을 설명하는 규칙</strong>. <code>{&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;status&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [...]}}}</code>는 &quot;status라는 문자열 필드가 있고 값은 셋 중 하나&quot;라는 뜻입니다. LLM은 이 설명을 보고 <strong>올바른 인자</strong>를 만듭니다.</p>
+</blockquote>
+<p><code>agent/AgentTool.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.agent;
+
+import java.util.Map;
+
+import com.example.planner.ai.gemini.GeminiDtos.FunctionDeclaration;
+
+/** 에이전트가 사용할 수 있는 도구 하나 */
+public interface AgentTool {
+
+    /** 모델이 부를 이름 (동사_명사) */
+    String name();
+
+    /** 언제·왜 쓰는지 — 모델은 이 설명을 보고 도구를 고른다 */
+    String description();
+
+    /** 인자 JSON Schema. 인자가 없으면 null */
+    Map&lt;String, Object&gt; parameters();
+
+    /** 실제 실행. 결과는 모델에게 보여 줄 작은 JSON(Map) */
+    Map&lt;String, Object&gt; execute(Map&lt;String, Object&gt; args);
+
+    default FunctionDeclaration declaration() {
+        return new FunctionDeclaration(name(), description(), parameters());
+    }
+}</code></pre></div>
+<p><code>agent/tools/GetTodayTool.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.agent.tools;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.TextStyle;
+import java.util.Locale;
+import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
+import com.example.planner.agent.AgentTool;
+
+@Component
+public class GetTodayTool implements AgentTool {
+
+    @Override
+    public String name() {
+        return &quot;get_today&quot;;
+    }
+
+    @Override
+    public String description() {
+        return &quot;오늘 날짜(YYYY-MM-DD)와 요일을 알려 준다. 날짜·마감 계산이 필요하면 가장 먼저 호출한다.&quot;;
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; parameters() {
+        return null; // 인자 없음 (Gemini는 빈 properties를 허용하지 않으므로 생략)
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; execute(Map&lt;String, Object&gt; args) {
+        LocalDate today = LocalDate.now(ZoneId.of(&quot;Asia/Seoul&quot;));
+        return Map.of(
+                &quot;today&quot;, today.toString(),
+                &quot;dayOfWeek&quot;, today.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.KOREAN));
+    }
+}</code></pre></div>
+<p><code>agent/tools/ListTasksTool.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.agent.tools;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
+import com.example.planner.agent.AgentTool;
+import com.example.planner.task.TaskResponse;
+import com.example.planner.task.TaskService;
+import com.example.planner.task.TaskStatus;
+
+@Component
+public class ListTasksTool implements AgentTool {
+
+    private final TaskService taskService;
+
+    public ListTasksTool(TaskService taskService) {
+        this.taskService = taskService;
+    }
+
+    @Override
+    public String name() {
+        return &quot;list_tasks&quot;;
+    }
+
+    @Override
+    public String description() {
+        return &quot;학생의 할 일 목록을 마감일 순으로 조회한다. status로 필터링할 수 있고, 생략하면 전체를 조회한다.&quot;;
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; parameters() {
+        return Map.of(
+                &quot;type&quot;, &quot;object&quot;,
+                &quot;properties&quot;, Map.of(
+                        &quot;status&quot;, Map.of(
+                                &quot;type&quot;, &quot;string&quot;,
+                                &quot;enum&quot;, List.of(&quot;TODO&quot;, &quot;DOING&quot;, &quot;DONE&quot;),
+                                &quot;description&quot;, &quot;조회할 상태 (선택)&quot;)));
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; execute(Map&lt;String, Object&gt; args) {
+        Object status = args.get(&quot;status&quot;);
+        List&lt;TaskResponse&gt; tasks = status == null
+                ? taskService.findAll()
+                : taskService.findByStatus(TaskStatus.valueOf(status.toString()));
+        return Map.of(&quot;count&quot;, tasks.size(), &quot;tasks&quot;, tasks.stream().map(ListTasksTool::toMap).toList());
+    }
+
+    /** 모델에게 보여 줄 형태로 변환 (null 값은 빈 문자열로) */
+    static Map&lt;String, Object&gt; toMap(TaskResponse t) {
+        Map&lt;String, Object&gt; m = new LinkedHashMap&lt;&gt;();
+        m.put(&quot;id&quot;, t.id());
+        m.put(&quot;title&quot;, t.title());
+        m.put(&quot;subject&quot;, t.subject() == null ? &quot;&quot; : t.subject());
+        m.put(&quot;dueDate&quot;, t.dueDate() == null ? &quot;&quot; : t.dueDate().toString());
+        m.put(&quot;status&quot;, t.status().name());
+        m.put(&quot;estimatedMinutes&quot;, t.estimatedMinutes());
+        return m;
+    }
+}</code></pre></div>
+<p><code>agent/tools/CreateTaskTool.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.agent.tools;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
+import com.example.planner.agent.AgentTool;
+import com.example.planner.task.TaskRequest;
+import com.example.planner.task.TaskResponse;
+import com.example.planner.task.TaskService;
+
+@Component
+public class CreateTaskTool implements AgentTool {
+
+    private final TaskService taskService;
+
+    public CreateTaskTool(TaskService taskService) {
+        this.taskService = taskService;
+    }
+
+    @Override
+    public String name() {
+        return &quot;create_task&quot;;
+    }
+
+    @Override
+    public String description() {
+        return &quot;새 할 일을 등록한다. 사용자가 명확히 추가를 요청했을 때만 사용한다.&quot;;
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; parameters() {
+        return Map.of(
+                &quot;type&quot;, &quot;object&quot;,
+                &quot;properties&quot;, Map.of(
+                        &quot;title&quot;, Map.of(&quot;type&quot;, &quot;string&quot;, &quot;description&quot;, &quot;할 일 제목 (100자 이내)&quot;),
+                        &quot;subject&quot;, Map.of(&quot;type&quot;, &quot;string&quot;, &quot;description&quot;, &quot;과목명&quot;),
+                        &quot;dueDate&quot;, Map.of(&quot;type&quot;, &quot;string&quot;, &quot;description&quot;, &quot;마감일 YYYY-MM-DD&quot;),
+                        &quot;estimatedMinutes&quot;, Map.of(&quot;type&quot;, &quot;integer&quot;, &quot;description&quot;, &quot;예상 소요 시간(분), 0~600&quot;)),
+                &quot;required&quot;, List.of(&quot;title&quot;));
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; execute(Map&lt;String, Object&gt; args) {
+        String title = String.valueOf(args.get(&quot;title&quot;));
+        String subject = args.get(&quot;subject&quot;) == null ? null : args.get(&quot;subject&quot;).toString();
+        LocalDate dueDate = args.get(&quot;dueDate&quot;) == null || args.get(&quot;dueDate&quot;).toString().isBlank()
+                ? null : LocalDate.parse(args.get(&quot;dueDate&quot;).toString());
+        int minutes = args.get(&quot;estimatedMinutes&quot;) instanceof Number n ? n.intValue() : 60;
+
+        TaskResponse created = taskService.create(new TaskRequest(title, subject, dueDate, minutes));
+        return Map.of(&quot;created&quot;, ListTasksTool.toMap(created));
+    }
+}</code></pre></div>
+<p><code>agent/tools/UpdateTaskStatusTool.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.agent.tools;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
+import com.example.planner.agent.AgentTool;
+import com.example.planner.task.TaskResponse;
+import com.example.planner.task.TaskService;
+import com.example.planner.task.TaskStatus;
+
+@Component
+public class UpdateTaskStatusTool implements AgentTool {
+
+    private final TaskService taskService;
+
+    public UpdateTaskStatusTool(TaskService taskService) {
+        this.taskService = taskService;
+    }
+
+    @Override
+    public String name() {
+        return &quot;update_task_status&quot;;
+    }
+
+    @Override
+    public String description() {
+        return &quot;할 일의 상태를 바꾼다. id는 반드시 list_tasks 결과에서 확인한 값을 사용한다.&quot;;
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; parameters() {
+        return Map.of(
+                &quot;type&quot;, &quot;object&quot;,
+                &quot;properties&quot;, Map.of(
+                        &quot;id&quot;, Map.of(&quot;type&quot;, &quot;integer&quot;, &quot;description&quot;, &quot;할 일 id&quot;),
+                        &quot;status&quot;, Map.of(&quot;type&quot;, &quot;string&quot;, &quot;enum&quot;, List.of(&quot;TODO&quot;, &quot;DOING&quot;, &quot;DONE&quot;))),
+                &quot;required&quot;, List.of(&quot;id&quot;, &quot;status&quot;));
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; execute(Map&lt;String, Object&gt; args) {
+        long id = ((Number) args.get(&quot;id&quot;)).longValue();
+        TaskStatus status = TaskStatus.valueOf(args.get(&quot;status&quot;).toString());
+        TaskResponse updated = taskService.changeStatus(id, status);
+        return Map.of(&quot;updated&quot;, ListTasksTool.toMap(updated));
+    }
+}</code></pre></div>
+<h3 id="b-4-참고-코드-루프-기록과-결과">B-4. 📄 참고 코드 — 루프 기록과 결과<a class="anchor" href="#b-4-참고-코드-루프-기록과-결과" aria-label="이 절의 링크">#</a></h3>
+<p><code>agent/AgentStep.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.agent;
+
+/**
+ * 루프 기록 한 줄.
+ * @param type TOOL(도구 호출) / ANSWER(최종 답변) / STOP(강제 중단)
+ */
+public record AgentStep(int step, String type, String action, String observation) {
+}</code></pre></div>
+<p><code>agent/AgentResult.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.agent;
+
+import java.util.List;
+
+/** @param completed false면 멈춤 조건(최대 반복)으로 중단된 것 */
+public record AgentResult(String answer, List&lt;AgentStep&gt; steps, boolean completed) {
+}</code></pre></div>
+<h3 id="b-5-참고-코드-에이전트-루프">B-5. 📄 참고 코드 — ★ 에이전트 루프<a class="anchor" href="#b-5-참고-코드-에이전트-루프" aria-label="이 절의 링크">#</a></h3>
+<p>코드를 읽기 전에 흐름부터 봅시다.</p>
+<div class="diagram"><pre class="mermaid">flowchart TB
+    S[&quot;history = [사용자 질문]&quot;] --&gt; L{&quot;step ≤ 6 ?&quot;}
+    L --&gt;|&quot;예&quot;| C[&quot;gemini.call(전체 history + 도구 목록)&quot;]
+    C --&gt; A[&quot;history에 모델 응답 추가&quot;]
+    A --&gt; F{&quot;functionCall 있음?&quot;}
+    F --&gt;|&quot;없음&quot;| ANS[&quot;✅ 최종 답변 반환&lt;br/&gt;completed = true&quot;]
+    F --&gt;|&quot;있음&quot;| X[&quot;도구 실행 → 결과(or error)&quot;]
+    X --&gt; R[&quot;history에 functionResponse 추가&quot;]
+    R --&gt; L
+    L --&gt;|&quot;아니오&quot;| STOP[&quot;⛔ 중단 메시지 반환&lt;br/&gt;completed = false&quot;]</pre></div>
+<p><code>agent/StudyCoachAgent.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.agent;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
+import com.example.planner.ai.gemini.GeminiApi;
+import com.example.planner.ai.gemini.GeminiDtos.Content;
+import com.example.planner.ai.gemini.GeminiDtos.FunctionCall;
+import com.example.planner.ai.gemini.GeminiDtos.GeminiRequest;
+import com.example.planner.ai.gemini.GeminiDtos.GenerationConfig;
+import com.example.planner.ai.gemini.GeminiDtos.Part;
+import com.example.planner.ai.gemini.GeminiDtos.Tool;
+
+@Service
+public class StudyCoachAgent {
+
+    /** 멈춤 조건: 최대 반복 횟수 (무료 등급 한도와 비용을 고려) */
+    static final int MAX_STEPS = 6;
+
+    private static final String SYSTEM_PROMPT = &quot;&quot;&quot;
+            너는 대학생을 돕는 'AI 스터디 코치'다. 학생의 할 일 데이터를 도구로 조회·추가·수정하며 돕는다.
+
+            [규칙]
+            - 날짜 계산이 필요하면 반드시 get_today를 먼저 호출한다. 날짜를 추측하지 않는다.
+            - 할 일에 대해 답하기 전에 반드시 list_tasks로 실제 데이터를 확인한다. 없는 할 일을 지어내지 않는다.
+            - 할 일 추가·상태 변경은 사용자가 요청했을 때만 한다.
+            - 도구가 error를 돌려주면 원인을 고려해 인자를 고치거나, 사용자에게 필요한 정보를 묻는다.
+            - 필요한 도구 호출이 끝나면 한국어로 간결하게 최종 답변한다. 일정 제안은 목록으로 정리한다.
+            &quot;&quot;&quot;;
+
+    private final GeminiApi gemini;
+    private final Map&lt;String, AgentTool&gt; tools;
+
+    public StudyCoachAgent(GeminiApi gemini, List&lt;AgentTool&gt; toolList) {
+        this.gemini = gemini;
+        this.tools = toolList.stream().collect(Collectors.toMap(AgentTool::name, Function.identity()));
+    }
+
+    public AgentResult run(String userMessage) {
+        List&lt;Content&gt; history = new ArrayList&lt;&gt;();
+        history.add(Content.user(userMessage));
+        List&lt;AgentStep&gt; steps = new ArrayList&lt;&gt;();
+        List&lt;Tool&gt; toolSpecs = List.of(new Tool(tools.values().stream().map(AgentTool::declaration).toList()));
+
+        for (int step = 1; step &lt;= MAX_STEPS; step++) {
+            // 🧠 생각: 지금까지의 기록 전체를 보내고 다음 행동을 묻는다
+            GeminiRequest request = new GeminiRequest(
+                    Content.system(SYSTEM_PROMPT), List.copyOf(history), toolSpecs, new GenerationConfig(0.2, null));
+            Content modelTurn = gemini.call(request).firstContent();
+            history.add(modelTurn);   // thoughtSignature가 담긴 원본 그대로 보관
+
+            List&lt;FunctionCall&gt; calls = modelTurn.parts() == null ? List.of()
+                    : modelTurn.parts().stream().map(Part::functionCall).filter(Objects::nonNull).toList();
+
+            // ✅ 도구 호출이 없으면 = 최종 답변 → 루프 종료
+            if (calls.isEmpty()) {
+                String answer = modelTurn.joinedText();
+                steps.add(new AgentStep(step, &quot;ANSWER&quot;, null, answer));
+                return new AgentResult(answer, steps, true);
+            }
+
+            // 🛠 행동 + 👀 관찰: 요청된 도구를 모두 실행하고 결과를 기록에 추가
+            List&lt;Part&gt; results = new ArrayList&lt;&gt;();
+            for (FunctionCall call : calls) {
+                Map&lt;String, Object&gt; output = execute(call);
+                steps.add(new AgentStep(step, &quot;TOOL&quot;,
+                        call.name() + &quot; &quot; + (call.args() == null ? &quot;{}&quot; : call.args()), String.valueOf(output)));
+                results.add(Part.ofFunctionResponse(call.id(), call.name(), output));
+            }
+            history.add(new Content(&quot;user&quot;, results));
+        }
+
+        // ⛔ 멈춤 조건: 최대 반복 도달
+        String message = &quot;최대 반복 횟수(&quot; + MAX_STEPS + &quot;회)에 도달해 작업을 멈췄습니다. 요청을 더 작게 나눠 주세요.&quot;;
+        steps.add(new AgentStep(MAX_STEPS, &quot;STOP&quot;, null, message));
+        return new AgentResult(message, steps, false);
+    }
+
+    /** 도구 실행. 실패해도 예외를 던지지 않고 오류를 '관찰 결과'로 돌려준다 */
+    private Map&lt;String, Object&gt; execute(FunctionCall call) {
+        AgentTool tool = tools.get(call.name());
+        if (tool == null) {
+            return Map.of(&quot;error&quot;, &quot;존재하지 않는 도구입니다: &quot; + call.name());
+        }
+        try {
+            return tool.execute(call.args() == null ? Map.of() : call.args());
+        } catch (RuntimeException e) {
+            return Map.of(&quot;error&quot;, e.getClass().getSimpleName() + &quot;: &quot; + String.valueOf(e.getMessage()));
+        }
+    }
+}</code></pre></div>
+<p>코드와 루프 개념의 대응:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>루프 개념</th>
+<th>코드 위치</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>상태 <span class="math-inline">\(s_t\)</span></td>
+<td><code>history</code> (대화 기록)</td>
+</tr>
+<tr>
+<td>생각</td>
+<td><code>gemini.call(request)</code></td>
+</tr>
+<tr>
+<td>행동</td>
+<td><code>execute(call)</code></td>
+</tr>
+<tr>
+<td>관찰</td>
+<td><code>history.add(new Content(&quot;user&quot;, results))</code></td>
+</tr>
+<tr>
+<td>종료(성공)</td>
+<td><code>calls.isEmpty()</code> → 답변 반환</td>
+</tr>
+<tr>
+<td>종료(한도)</td>
+<td><code>for</code> 문 <code>MAX_STEPS</code></td>
+</tr>
+<tr>
+<td>오류 복구</td>
+<td>예외 → <code>{&quot;error&quot;: ...}</code> 관찰 결과</td>
+</tr>
+<tr>
+<td>추적 가능성</td>
+<td><code>steps</code> (화면에 표시)</td>
+</tr>
+</tbody></table></div>
+<h3 id="b-6-참고-코드-컨트롤러">B-6. 📄 참고 코드 — 컨트롤러<a class="anchor" href="#b-6-참고-코드-컨트롤러" aria-label="이 절의 링크">#</a></h3>
+<p><code>agent/AgentController.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.agent;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+@RestController
+@RequestMapping(&quot;/api/ai&quot;)
+public class AgentController {
+
+    private final StudyCoachAgent agent;
+
+    public AgentController(StudyCoachAgent agent) {
+        this.agent = agent;
+    }
+
+    public record CoachRequest(@NotBlank @Size(max = 500) String message) {
+    }
+
+    @PostMapping(&quot;/coach&quot;)
+    public AgentResult coach(@Valid @RequestBody CoachRequest request) {
+        return agent.run(request.message());
+    }
+}</code></pre></div>
+<h3 id="b-7-참고-코드-루프-테스트-각본대로-움직이는-가짜-gemini">B-7. 📄 참고 코드 — 루프 테스트: 각본대로 움직이는 가짜 Gemini<a class="anchor" href="#b-7-참고-코드-루프-테스트-각본대로-움직이는-가짜-gemini" aria-label="이 절의 링크">#</a></h3>
+<p>진짜 모델 없이도 <strong>루프의 논리</strong>(도구 실행, 기록 전달, 멈춤 조건)를 검증할 수 있습니다.</p>
+<p><code>backend/src/test/java/com/example/planner/agent/StudyCoachAgentTest.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.agent;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+
+import com.example.planner.ai.gemini.GeminiApi;
+import com.example.planner.ai.gemini.GeminiDtos.Candidate;
+import com.example.planner.ai.gemini.GeminiDtos.Content;
+import com.example.planner.ai.gemini.GeminiDtos.FunctionCall;
+import com.example.planner.ai.gemini.GeminiDtos.GeminiRequest;
+import com.example.planner.ai.gemini.GeminiDtos.GeminiResponse;
+import com.example.planner.ai.gemini.GeminiDtos.Part;
+
+class StudyCoachAgentTest {
+
+    /** 정해진 응답을 순서대로 돌려주는 가짜 Gemini */
+    static class ScriptedGemini implements GeminiApi {
+        final Deque&lt;GeminiResponse&gt; script = new ArrayDeque&lt;&gt;();
+        final List&lt;GeminiRequest&gt; received = new ArrayList&lt;&gt;();
+
+        @Override
+        public GeminiResponse call(GeminiRequest request) {
+            received.add(request);
+            return script.poll();
+        }
+    }
+
+    /** 호출 횟수를 세는 가짜 도구 */
+    static class FakeTodayTool implements AgentTool {
+        int calls;
+        public String name() { return &quot;get_today&quot;; }
+        public String description() { return &quot;오늘 날짜&quot;; }
+        public Map&lt;String, Object&gt; parameters() { return null; }
+        public Map&lt;String, Object&gt; execute(Map&lt;String, Object&gt; args) {
+            calls++;
+            return Map.of(&quot;today&quot;, &quot;2026-11-25&quot;);
+        }
+    }
+
+    static GeminiResponse text(String text) {
+        return new GeminiResponse(List.of(new Candidate(new Content(&quot;model&quot;, List.of(Part.ofText(text))), &quot;STOP&quot;)));
+    }
+
+    static GeminiResponse toolCall(String name) {
+        Part part = new Part(null, null, new FunctionCall(null, name, Map.of()), null, null);
+        return new GeminiResponse(List.of(new Candidate(new Content(&quot;model&quot;, List.of(part)), &quot;STOP&quot;)));
+    }
+
+    @Test
+    void 도구를_호출하고_결과를_전달한_뒤_최종답변으로_끝난다() {
+        ScriptedGemini gemini = new ScriptedGemini();
+        gemini.script.add(toolCall(&quot;get_today&quot;));
+        gemini.script.add(text(&quot;오늘은 2026-11-25입니다.&quot;));
+        FakeTodayTool tool = new FakeTodayTool();
+
+        AgentResult result = new StudyCoachAgent(gemini, List.of(tool)).run(&quot;오늘 며칠이야?&quot;);
+
+        assertThat(result.completed()).isTrue();
+        assertThat(result.answer()).contains(&quot;2026-11-25&quot;);
+        assertThat(tool.calls).isEqualTo(1);
+        assertThat(gemini.received).hasSize(2);
+        // 두 번째 요청의 세 번째 메시지 = 도구 실행 결과(functionResponse)
+        Part observation = gemini.received.get(1).contents().get(2).parts().get(0);
+        assertThat(observation.functionResponse().name()).isEqualTo(&quot;get_today&quot;);
+        assertThat(observation.functionResponse().response()).containsEntry(&quot;today&quot;, &quot;2026-11-25&quot;);
+    }
+
+    @Test
+    void 모델이_도구만_계속_호출하면_최대반복에서_멈춘다() {
+        GeminiApi alwaysTool = request -&gt; toolCall(&quot;get_today&quot;);
+        FakeTodayTool tool = new FakeTodayTool();
+
+        AgentResult result = new StudyCoachAgent(alwaysTool, List.of(tool)).run(&quot;무한 루프 유도&quot;);
+
+        assertThat(result.completed()).isFalse();
+        assertThat(tool.calls).isEqualTo(StudyCoachAgent.MAX_STEPS);
+        assertThat(result.steps().get(result.steps().size() - 1).type()).isEqualTo(&quot;STOP&quot;);
+    }
+
+    @Test
+    void 없는_도구를_부르면_오류를_관찰결과로_돌려주고_루프는_계속된다() {
+        ScriptedGemini gemini = new ScriptedGemini();
+        gemini.script.add(toolCall(&quot;delete_everything&quot;));
+        gemini.script.add(text(&quot;그 작업은 할 수 없습니다.&quot;));
+
+        AgentResult result = new StudyCoachAgent(gemini, List.of(new FakeTodayTool())).run(&quot;다 지워&quot;);
+
+        assertThat(result.completed()).isTrue();
+        assertThat(result.steps().get(0).observation()).contains(&quot;존재하지 않는 도구&quot;);
+    }
+}</code></pre></div>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">cd backend &amp;&amp; ./gradlew test</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">StudyCoachAgentTest &gt; 도구를_호출하고_결과를_전달한_뒤_최종답변으로_끝난다() PASSED
+StudyCoachAgentTest &gt; 모델이_도구만_계속_호출하면_최대반복에서_멈춘다() PASSED
+StudyCoachAgentTest &gt; 없는_도구를_부르면_오류를_관찰결과로_돌려주고_루프는_계속된다() PASSED
+BUILD SUCCESSFUL</code></pre></div>
+<p>진짜 Gemini를 한 번도 부르지 않고 <strong>루프의 논리</strong>(도구 실행, 기록 전달, 멈춤 조건, 오류 복구)를 검증했습니다.</p>
+<h3 id="b-8-결과-확인-실제-모델로-실행">B-8. ✅ 결과 확인 — 실제 모델로 실행<a class="anchor" href="#b-8-결과-확인-실제-모델로-실행" aria-label="이 절의 링크">#</a></h3>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">curl -s -X POST localhost:8080/api/ai/coach -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;message&quot;:&quot;오늘 기준으로 마감이 가장 가까운 할 일 3개와 남은 일수를 알려 줘&quot;}'</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 응답 예 (모델에 따라 다름)</span></h4>
+<div class="code-block"><div class="code-head"><span>json</span><button class="copy" type="button">복사</button></div><pre><code class="language-json">{
+  &quot;answer&quot;: &quot;마감이 가까운 할 일입니다.\n1. 운영체제 과제 — 12/04 (9일 남음)\n...&quot;,
+  &quot;steps&quot;: [
+    { &quot;step&quot;: 1, &quot;type&quot;: &quot;TOOL&quot;, &quot;action&quot;: &quot;get_today {}&quot;, &quot;observation&quot;: &quot;{today=2026-11-25, dayOfWeek=수요일}&quot; },
+    { &quot;step&quot;: 2, &quot;type&quot;: &quot;TOOL&quot;, &quot;action&quot;: &quot;list_tasks {status=TODO}&quot;, &quot;observation&quot;: &quot;{count=3, tasks=[...]}&quot; },
+    { &quot;step&quot;: 3, &quot;type&quot;: &quot;ANSWER&quot;, &quot;action&quot;: null, &quot;observation&quot;: &quot;마감이 가까운 할 일입니다. ...&quot; }
+  ],
+  &quot;completed&quot;: true
+}</code></pre></div>
+<hr>
+<h2 id="6-실습-c-프론트엔드-코치-화면">6. 실습 C. 프론트엔드: 코치 화면<a class="anchor" href="#6-실습-c-프론트엔드-코치-화면" aria-label="이 절의 링크">#</a></h2>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 코치 화면</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">&quot;🤖 AI 코치&quot; 탭을 추가해 줘.
+- src/api.ts에 AgentStep, AgentResult 타입과 aiApi.coach(message)
+- pages/CoachPage.tsx: 입력창 + 보내기, 예시 질문 버튼 3개, 답변(ai-box),
+  &quot;🔁 에이전트 루프 기록&quot; (trace 클래스, 단계마다 🛠 도구 이름+인자 → 결과 앞 120자 / ✅ 답변 / ⛔ 중단)
+- completed가 false면 제목을 &quot;⚠️ 중단됨&quot;으로</code></pre></div>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — api.ts 추가분</span></h4>
+<p><code>src/api.ts</code>에 <strong>추가</strong>:</p>
+<div class="code-block"><div class="code-head"><span>ts</span><button class="copy" type="button">복사</button></div><pre><code class="language-typescript">export interface AgentStep {
+  step: number;
+  type: 'TOOL' | 'ANSWER' | 'STOP';
+  action: string | null;
+  observation: string | null;
+}
+
+export interface AgentResult {
+  answer: string;
+  steps: AgentStep[];
+  completed: boolean;
+}</code></pre></div>
+<p><code>aiApi</code>에 한 줄 추가:</p>
+<div class="code-block"><div class="code-head"><span>ts</span><button class="copy" type="button">복사</button></div><pre><code class="language-typescript">  coach: (message: string) =&gt; post&lt;AgentResult&gt;('/api/ai/coach', { message }),</code></pre></div>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — CoachPage.tsx / App.tsx</span></h4>
+<p><code>src/pages/CoachPage.tsx</code></p>
+<div class="code-block"><div class="code-head"><span>tsx</span><button class="copy" type="button">복사</button></div><pre><code class="language-typescript">import { useState } from 'react';
+import { aiApi } from '../api';
+import type { AgentResult } from '../api';
+
+const EXAMPLES = [
+  '오늘 기준으로 마감이 가장 가까운 할 일 3개와 남은 일수를 알려 줘',
+  '다음 주 수요일까지 네트워크 과제(90분)를 추가해 줘',
+  '진행 중인 할 일을 보여 주고, 오늘 끝낼 순서를 추천해 줘',
+];
+
+const short = (text: string | null, max = 120) =&gt;
+  !text ? '' : text.length &gt; max ? `${text.slice(0, max)}…` : text;
+
+export default function CoachPage() {
+  const [message, setMessage] = useState('');
+  const [result, setResult] = useState&lt;AgentResult | null&gt;(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState&lt;string | null&gt;(null);
+
+  async function run(text: string) {
+    if (!text.trim()) return;
+    setMessage(text);
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      setResult(await aiApi.coach(text));
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    &lt;&gt;
+      &lt;section className=&quot;card&quot;&gt;
+        &lt;h2&gt;🤖 AI 스터디 코치&lt;/h2&gt;
+        &lt;p className=&quot;muted&quot;&gt;코치는 할 일 데이터를 도구로 조회·추가·수정하며 답합니다. (최대 6단계)&lt;/p&gt;
+        &lt;form
+          className=&quot;row&quot;
+          onSubmit={(e) =&gt; {
+            e.preventDefault();
+            void run(message);
+          }}
+        &gt;
+          &lt;input style={{ flex: 1 }} value={message} onChange={(e) =&gt; setMessage(e.target.value)} placeholder=&quot;코치에게 부탁하기&quot; /&gt;
+          &lt;button className=&quot;primary&quot; disabled={loading}&gt;{loading ? '생각하는 중...' : '보내기'}&lt;/button&gt;
+        &lt;/form&gt;
+        &lt;div className=&quot;row&quot; style={{ marginTop: 8 }}&gt;
+          {EXAMPLES.map((ex) =&gt; (
+            &lt;button key={ex} className=&quot;ghost&quot; disabled={loading} onClick={() =&gt; void run(ex)}&gt;{ex}&lt;/button&gt;
+          ))}
+        &lt;/div&gt;
+        {error &amp;&amp; &lt;p className=&quot;error&quot;&gt;{error}&lt;/p&gt;}
+      &lt;/section&gt;
+
+      {result &amp;&amp; (
+        &lt;section className=&quot;card&quot;&gt;
+          &lt;h2&gt;{result.completed ? '💬 답변' : '⚠️ 중단됨'}&lt;/h2&gt;
+          &lt;div className=&quot;ai-box&quot;&gt;{result.answer}&lt;/div&gt;
+          &lt;h3&gt;🔁 에이전트 루프 기록 ({result.steps.length}단계)&lt;/h3&gt;
+          &lt;div className=&quot;trace&quot;&gt;
+            {result.steps.map((s, i) =&gt; (
+              &lt;div key={i}&gt;
+                [{s.step}] {s.type === 'TOOL' ? '🛠' : s.type === 'ANSWER' ? '✅' : '⛔'} {s.action ?? s.type}
+                {s.type === 'TOOL' &amp;&amp; &lt;&gt; → {short(s.observation)}&lt;/&gt;}
+              &lt;/div&gt;
+            ))}
+          &lt;/div&gt;
+        &lt;/section&gt;
+      )}
+    &lt;/&gt;
+  );
+}</code></pre></div>
+<p><code>src/App.tsx</code>의 탭에 코치를 추가합니다.</p>
+<div class="code-block"><div class="code-head"><span>tsx</span><button class="copy" type="button">복사</button></div><pre><code class="language-typescript">import CoachPage from './pages/CoachPage';
+
+type Tab = 'tasks' | 'notes' | 'coach';
+
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'tasks', label: '✅ 할 일' },
+  { key: 'notes', label: '📝 노트' },
+  { key: 'coach', label: '🤖 AI 코치' },
+];
+// ... main 안에
+        {tab === 'coach' &amp;&amp; &lt;CoachPage /&gt;}</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 코치 화면</span></h4>
+<p><img src="https://raw.githubusercontent.com/timeleverage-kim/SpecialLecture-2026-AI-Engineering/main/docs/images/week06-coach.png" alt="6주차 결과 화면: AI 스터디 코치와 루프 기록"></p>
+<ul>
+<li><strong>루프 기록</strong>에서 AI가 <code>get_today</code> → <code>list_tasks</code> 순으로 <strong>스스로 도구를 골라</strong> 쓴 것을 확인하세요.</li>
+<li>&quot;다음 주 수요일까지 네트워크 과제 추가해 줘&quot;를 실행한 뒤 <strong>✅ 할 일 탭</strong>에 실제로 추가되었는지 확인하세요. (AI가 말로만 &quot;추가했습니다&quot;라고 한 것이 아니라 <strong>진짜 도구가 실행</strong>되었는지 검증)</li>
+</ul>
+<h3 id="커밋">커밋<a class="anchor" href="#커밋" aria-label="이 절의 링크">#</a></h3>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">git add .
+git commit -m &quot;feat: 도구 호출 루프 기반 AI 스터디 코치 에이전트와 Stop Hook 검증 루프 추가&quot;
+git tag week-06 &amp;&amp; git push &amp;&amp; git push origin week-06</code></pre></div>
+<hr>
+<h2 id="7-관찰-활동-루프를-읽는-연습">7. 관찰 활동: 루프를 &quot;읽는&quot; 연습<a class="anchor" href="#7-관찰-활동-루프를-읽는-연습" aria-label="이 절의 링크">#</a></h2>
+<p>예시 요청 3개를 실행하고 루프 기록을 분석하세요.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>요청</th>
+<th>단계 수</th>
+<th>사용한 도구 순서</th>
+<th>불필요한 호출이 있었나?</th>
+<th>결과가 정확했나?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>마감 가까운 할 일 3개</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>네트워크 과제 추가</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>진행 중 일 순서 추천</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table></div>
+<p><strong>토론</strong>: 시스템 프롬프트의 &quot;날짜 계산이 필요하면 반드시 get_today를 먼저 호출한다&quot;를 지우면 어떻게 될까요? (직접 실험해 보세요 → 프롬프트 + 도구 설계 + 멈춤 조건이 <strong>함께</strong> 루프의 품질을 결정합니다.)</p>
+<hr>
+<h2 id="8-정리">8. 정리<a class="anchor" href="#8-정리" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>질문</th>
+<th>답</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>루프의 세 박자는?</td>
+<td>생각(LLM) → 행동(도구) → 관찰(결과를 기록에 추가)</td>
+</tr>
+<tr>
+<td>루프 설계 4질문은?</td>
+<td>무엇을 재시도 / 무엇으로 검증 / 언제 멈춤 / 언제 사람에게</td>
+</tr>
+<tr>
+<td>왜 최대 반복이 필수인가?</td>
+<td>무한 루프 방지 + 비용이 반복 횟수보다 빠르게(제곱으로) 증가</td>
+</tr>
+<tr>
+<td>LLM이 도구를 직접 실행하나?</td>
+<td>아니다. 호출 요청 JSON을 출력할 뿐, 실행은 우리 코드</td>
+</tr>
+<tr>
+<td>루프 로직은 어떻게 테스트하나?</td>
+<td>각본대로 응답하는 가짜 모델로 결정적으로</td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p>루프는 강력하지만 <strong>AI가 다음 행동을 전부 결정</strong>합니다. &quot;분석 → 초안 → 검증 → 수정&quot;처럼 <strong>순서가 정해진 업무</strong>라면, 흐름을 사람이 설계하는 편이 더 안전합니다. → 다음 주 <strong>그래프 엔지니어링</strong>.</p>
+</blockquote>
+<h2 id="9-과제">9. 과제<a class="anchor" href="#9-과제" aria-label="이 절의 링크">#</a></h2>
+<ol>
+<li><strong>필수</strong>: <code>week-06</code> 태그 push, 코치 화면의 루프 기록 캡처 2장 (도구 2개 이상 사용한 사례)</li>
+<li><strong>필수</strong>: 관찰 활동표(7절) 작성</li>
+<li><strong>도전 ①</strong>: 같은 도구를 같은 인자로 2번 연속 호출하면 루프를 멈추는 <strong>반복 감지기</strong>를 <code>StudyCoachAgent</code>에 추가하고 테스트를 작성하세요.</li>
+<li><strong>도전 ②</strong>: <code>fix-loop.sh</code> 실행 중에는 <code>src/test</code> 파일 수정을 막는 PreToolUse Hook을 만들어 <strong>보상 해킹</strong>을 차단해 보세요. (힌트: 환경 변수 <code>LOOP_MODE=1</code>일 때만 차단)</li>
+</ol>
+<hr>
+<h2 id="10-지금까지의-진행-상황-다음-주-예고">10. 지금까지의 진행 상황 &amp; 다음 주 예고<a class="anchor" href="#10-지금까지의-진행-상황-다음-주-예고" aria-label="이 절의 링크">#</a></h2>
+<h3 id="101-6주차까지-진행-상황">10.1 6주차까지 진행 상황<a class="anchor" href="#101-6주차까지-진행-상황" aria-label="이 절의 링크">#</a></h3>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    W1[&quot;✅ 1주&quot;]:::done --&gt; W2[&quot;✅ 2주&quot;]:::done --&gt; W3[&quot;✅ 3주&quot;]:::done --&gt; W4[&quot;✅ 4주&quot;]:::done --&gt; W5[&quot;✅ 5주&quot;]:::done --&gt; W6[&quot;✅ 6주&lt;br/&gt;루프&quot;]:::done --&gt; W7[&quot;7주&lt;br/&gt;그래프&quot;] --&gt; W8[&quot;8주&quot;] --&gt; W9[&quot;9주&quot;]
+    classDef done fill:#dcfce7,stroke:#16a34a</pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>구분</th>
+<th>완료한 것</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>개념</td>
+<td>에이전트 루프(ReAct), 4가지 루프, 설계 4질문, 루프 비용(제곱 증가), 실패 패턴(보상 해킹 등), Function Calling</td>
+</tr>
+<tr>
+<td>개발 루프</td>
+<td>Stop Hook 검증기(최대 3라운드), 헤드리스 <code>fix-loop.sh</code>(<code>claude -p</code>)</td>
+</tr>
+<tr>
+<td>백엔드</td>
+<td><code>GeminiApi</code>, <code>AgentTool</code> + 도구 4개, <code>StudyCoachAgent</code>(최대 6단계), <code>POST /api/ai/coach</code>, 루프 테스트</td>
+</tr>
+<tr>
+<td>프론트엔드</td>
+<td>AI 코치 탭(루프 기록 표시)</td>
+</tr>
+<tr>
+<td>Git</td>
+<td><code>week-06</code> 태그</td>
+</tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>AI 기능</th>
+<th>사용한 엔지니어링</th>
+<th>엔드포인트</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>노트 요약</td>
+<td>프롬프트</td>
+<td><code>POST /api/ai/summary</code></td>
+</tr>
+<tr>
+<td>노트 Q&amp;A</td>
+<td>컨텍스트(RAG)</td>
+<td><code>POST /api/ai/ask</code></td>
+</tr>
+<tr>
+<td>AI 코치</td>
+<td><strong>루프(Function Calling)</strong></td>
+<td><code>POST /api/ai/coach</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="102-다음-주7주차-예고-그래프-엔지니어링">10.2 다음 주(7주차) 예고 — 그래프 엔지니어링<a class="anchor" href="#102-다음-주7주차-예고-그래프-엔지니어링" aria-label="이 절의 링크">#</a></h3>
+<ul>
+<li><strong>배울 것</strong>: 루프는 AI가 다음 행동을 <strong>모두 스스로</strong> 정해서 유연하지만 예측이 어렵습니다. 업무 흐름을 <strong>노드·엣지·상태로 된 그래프</strong>로 미리 설계하고, AI는 정해진 노드 안에서만 일하게 만듭니다. 라이브러리 없이 <strong>그래프 엔진을 직접 만들고</strong>, &quot;분석 → 초안 → 코드 검증 → 수정&quot; 학습계획 워크플로우를 구현합니다.</li>
+<li><strong>왜 배우나</strong>: 실무 AI 서비스는 &quot;AI가 알아서&quot;보다 <strong>&quot;정해진 절차 + 검증&quot;</strong> 을 더 많이 씁니다. 비용·품질·디버깅이 모두 예측 가능해지기 때문입니다.</li>
+<li><strong>미리 준비</strong>: 실제로 준비 중인 시험(또는 과목) 하나를 정해 두세요 — 그 시험의 학습계획을 AI로 만들어 봅니다.</li>
+</ul>
+<hr>
+<h2 id="11-일본-취업-대비-it-용어-6주차">11. 🇯🇵 일본 취업 대비 IT 용어 (6주차)<a class="anchor" href="#11-일본-취업-대비-it-용어-6주차" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>한국어</th>
+<th>日本語</th>
+<th>읽는 법</th>
+<th>예문 (日本語)</th>
+<th>예문 해석</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>루프 / 반복 처리</td>
+<td>ループ / 繰り返し処理</td>
+<td>くりかえししょり</td>
+<td>テストが通るまで修正を繰り返すループを設計しました。</td>
+<td>테스트가 통과할 때까지 수정을 반복하는 루프를 설계했습니다.</td>
+</tr>
+<tr>
+<td>도구 호출</td>
+<td>ツール呼び出し（Function Calling）</td>
+<td>ツールよびだし</td>
+<td>ツール呼び出しで実際のタスクデータを参照させました。</td>
+<td>도구 호출로 실제 할 일 데이터를 참조하게 했습니다.</td>
+</tr>
+<tr>
+<td>자율적</td>
+<td>自律的</td>
+<td>じりつてき</td>
+<td>エージェントが自律的に次の行動を決めます。</td>
+<td>에이전트가 자율적으로 다음 행동을 정합니다.</td>
+</tr>
+<tr>
+<td>종료 조건</td>
+<td>終了条件</td>
+<td>しゅうりょうじょうけん</td>
+<td>無限ループを防ぐため終了条件を明確にしました。</td>
+<td>무한 루프를 막기 위해 종료 조건을 명확히 했습니다.</td>
+</tr>
+<tr>
+<td>최대 반복 횟수</td>
+<td>最大反復回数</td>
+<td>さいだいはんぷくかいすう</td>
+<td>最大反復回数を6回に制限しています。</td>
+<td>최대 반복 횟수를 6회로 제한하고 있습니다.</td>
+</tr>
+<tr>
+<td>무한 루프</td>
+<td>無限ループ</td>
+<td>むげんループ</td>
+<td>無限ループに陥った場合は人に報告します。</td>
+<td>무한 루프에 빠지면 사람에게 보고합니다.</td>
+</tr>
+<tr>
+<td>재시도</td>
+<td>リトライ / 再試行</td>
+<td>さいしこう</td>
+<td>失敗時は原因を渡してリトライさせました。</td>
+<td>실패 시 원인을 넘겨 재시도하게 했습니다.</td>
+</tr>
+<tr>
+<td>검증</td>
+<td>検証</td>
+<td>けんしょう</td>
+<td>AIの「完了しました」ではなくテストで検証しました。</td>
+<td>AI의 &quot;완료했습니다&quot;가 아니라 테스트로 검증했습니다.</td>
+</tr>
+<tr>
+<td>실행 이력 / 로그</td>
+<td>実行履歴 / ログ</td>
+<td>じっこうりれき</td>
+<td>エージェントの実行履歴を画面に表示しました。</td>
+<td>에이전트의 실행 이력을 화면에 표시했습니다.</td>
+</tr>
+<tr>
+<td>비용</td>
+<td>コスト / 費用</td>
+<td>ひよう</td>
+<td>反復回数が増えるとコストが急増することを確認しました。</td>
+<td>반복 횟수가 늘면 비용이 급증하는 것을 확인했습니다.</td>
+</tr>
+<tr>
+<td>사람의 개입</td>
+<td>人の介入（ヒューマン・イン・ザ・ループ）</td>
+<td>ひとのかいにゅう</td>
+<td>一定回数失敗したら人の介入を求める設計です。</td>
+<td>일정 횟수 실패하면 사람의 개입을 요청하는 설계입니다.</td>
+</tr>
+<tr>
+<td>헤드리스 실행</td>
+<td>ヘッドレス実行</td>
+<td>헷도레스 짓코-</td>
+<td>スクリプトからヘッドレス実行でAIを呼び出しました。</td>
+<td>스크립트에서 헤드리스 실행으로 AI를 호출했습니다.</td>
+</tr>
+</tbody></table></div>
+<blockquote class="speak"><p>💬 <strong>면접에서 이렇게 말해 보세요</strong></p>
+<p>「エージェントには最大反復回数と検証の仕組みを入れ、暴走しないように設計しました。」</p>
+<p>(에이전트에는 최대 반복 횟수와 검증 장치를 넣어 폭주하지 않도록 설계했습니다.)</p>
+</blockquote>
+<p><a href="week05-harness-engineering.html">← 5주차</a> · <a href="week07-graph-engineering.html">7주차: 그래프 엔지니어링 →</a></p>
+
+</article>
+<nav class="pager">
+  <a href="week05-harness-engineering.html"><small>← 이전</small>5주차 · 하네스</a>
+  <a class="next" href="week07-graph-engineering.html"><small>다음 →</small>7주차 · 그래프</a>
+</nav>
+</main>
+<aside class="toc"><h4>이 페이지에서</h4>
+<a class="h2" href="#0-수업-진행표-3시간">0. 수업 진행표 (3시간)</a>
+<a class="h2" href="#1-학습-목표">1. 학습 목표</a>
+<a class="h2" href="#2-개념-①-루프란-무엇인가">2. 개념 ① 루프란 무엇인가</a>
+<a class="h3" href="#21-정의">2.1 정의</a>
+<a class="h3" href="#22-비유-자율주행-로봇-청소기">2.2 비유: 자율주행 로봇 청소기</a>
+<a class="h3" href="#23-에이전트-루프-react-reasoning-acting">2.3 에이전트 루프 (ReAct: Reasoning + Acting)</a>
+<a class="h3" href="#24-네-가지-루프-안쪽부터-바깥쪽으로">2.4 네 가지 루프 (안쪽부터 바깥쪽으로)</a>
+<a class="h3" href="#25-루프-설계의-4가지-질문">2.5 루프 설계의 4가지 질문</a>
+<a class="h3" href="#26-비용은-반복-횟수보다-빠르게-늘어난다">2.6 비용은 반복 횟수보다 빠르게 늘어난다</a>
+<a class="h3" href="#27-루프의-실패-패턴">2.7 루프의 실패 패턴</a>
+<a class="h2" href="#3-실습-a-개발-루프-테스트가-통과할-때까지">3. 실습 A. 개발 루프 — &quot;테스트가 통과할 때까지&quot;</a>
+<a class="h3" href="#a-1-stop-hook-검증기">A-1. Stop Hook 검증기</a>
+<a class="h3" href="#a-2-버그-심기-실험">A-2. 버그 심기 실험</a>
+<a class="h3" href="#a-3-헤드리스-수정-루프-claude--p">A-3. 헤드리스 수정 루프 (claude -p)</a>
+<a class="h2" href="#4-개념-②-function-calling-llm이-도구를-쓰는-원리">4. 개념 ② Function Calling — LLM이 &quot;도구&quot;를 쓰는 원리</a>
+<a class="h3" href="#41-오해와-진실">4.1 오해와 진실</a>
+<a class="h3" href="#42-json으로-따라가기">4.2 JSON으로 따라가기</a>
+<a class="h3" href="#43-좋은-도구-설계-원칙">4.3 좋은 도구 설계 원칙</a>
+<a class="h2" href="#5-실습-b-ai-스터디-코치-에이전트-구현">5. 실습 B. AI 스터디 코치 에이전트 구현</a>
+<a class="h3" href="#b-1-참고-파일-구성">B-1. 📄 참고 — 파일 구성</a>
+<a class="h3" href="#b-1-파일-구성">B-1. 파일 구성</a>
+<a class="h3" href="#b-2-참고-코드-geminiapi-인터페이스-테스트-가능하게-만들기">B-2. 📄 참고 코드 — GeminiApi 인터페이스 (테스트 가능하게 만들기)</a>
+<a class="h3" href="#b-3-참고-코드-도구-정의">B-3. 📄 참고 코드 — 도구 정의</a>
+<a class="h3" href="#b-4-참고-코드-루프-기록과-결과">B-4. 📄 참고 코드 — 루프 기록과 결과</a>
+<a class="h3" href="#b-5-참고-코드-에이전트-루프">B-5. 📄 참고 코드 — ★ 에이전트 루프</a>
+<a class="h3" href="#b-6-참고-코드-컨트롤러">B-6. 📄 참고 코드 — 컨트롤러</a>
+<a class="h3" href="#b-7-참고-코드-루프-테스트-각본대로-움직이는-가짜-gemini">B-7. 📄 참고 코드 — 루프 테스트: 각본대로 움직이는 가짜 Gemini</a>
+<a class="h3" href="#b-8-결과-확인-실제-모델로-실행">B-8. ✅ 결과 확인 — 실제 모델로 실행</a>
+<a class="h2" href="#6-실습-c-프론트엔드-코치-화면">6. 실습 C. 프론트엔드: 코치 화면</a>
+<a class="h3" href="#커밋">커밋</a>
+<a class="h2" href="#7-관찰-활동-루프를-읽는-연습">7. 관찰 활동: 루프를 &quot;읽는&quot; 연습</a>
+<a class="h2" href="#8-정리">8. 정리</a>
+<a class="h2" href="#9-과제">9. 과제</a>
+<a class="h2" href="#10-지금까지의-진행-상황-다음-주-예고">10. 지금까지의 진행 상황 &amp; 다음 주 예고</a>
+<a class="h3" href="#101-6주차까지-진행-상황">10.1 6주차까지 진행 상황</a>
+<a class="h3" href="#102-다음-주7주차-예고-그래프-엔지니어링">10.2 다음 주(7주차) 예고 — 그래프 엔지니어링</a>
+<a class="h2" href="#11-일본-취업-대비-it-용어-6주차">11. 🇯🇵 일본 취업 대비 IT 용어 (6주차)</a>
+</aside>
+</div>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/dockerfile.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/nginx.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/powershell.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/groovy.min.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', function () {
+// AI 엔지니어링 특강 — 강의 자료 공통 스크립트
+(function () {
+  // 1) 코드 복사 버튼
+  document.querySelectorAll('.code-block .copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var code = btn.closest('.code-block').querySelector('pre code');
+      var text = code ? code.innerText : '';
+      var done = function () {
+        btn.textContent = '복사됨 ✓';
+        setTimeout(function () { btn.textContent = '복사'; }, 1500);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done);
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); done(); } finally { document.body.removeChild(ta); }
+      }
+    });
+  });
+
+  // 2) 모바일 메뉴
+  var menu = document.querySelector('.menu-btn');
+  if (menu) {
+    menu.addEventListener('click', function () { document.body.classList.toggle('nav-open'); });
+    document.querySelectorAll('.sidebar a').forEach(function (a) {
+      a.addEventListener('click', function () { document.body.classList.remove('nav-open'); });
+    });
+  }
+
+  // 3) 현재 읽는 절을 목차에 표시
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  if (links.length && 'IntersectionObserver' in window) {
+    var map = {};
+    links.forEach(function (a) { map[decodeURIComponent(a.getAttribute('href').slice(1))] = a; });
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting && map[e.target.id]) {
+          links.forEach(function (l) { l.classList.remove('active'); });
+          map[e.target.id].classList.add('active');
+        }
+      });
+    }, { rootMargin: '-60px 0px -70% 0px' });
+    document.querySelectorAll('.paper h2[id], .paper h3[id]').forEach(function (h) { observer.observe(h); });
+  }
+
+  // 4) 코드 하이라이트 (highlight.js가 로드된 경우)
+  if (window.hljs) {
+    document.querySelectorAll('.code-block pre code').forEach(function (el) {
+      if (!el.classList.contains('language-plaintext')) {
+        window.hljs.highlightElement(el);
+      }
+    });
+  }
+
+  // 5) 수식 (KaTeX auto-render가 로드된 경우)
+  if (window.renderMathInElement) {
+    window.renderMathInElement(document.querySelector('.paper') || document.body, {
+      delimiters: [
+        { left: '\\[', right: '\\]', display: true },
+        { left: '\\(', right: '\\)', display: false },
+      ],
+      ignoredClasses: ['code-block', 'mermaid'],
+      throwOnError: false,
+      strict: false,
+    });
+  }
+})();
+
+});
+</script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose', fontFamily: 'Pretendard, sans-serif' });
+  await mermaid.run({ querySelector: 'pre.mermaid' });
+</script>
+</body>
+</html>

@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7주차 · 그래프 엔지니어링 | AI와 함께하는 풀스택 개발 — 바이브코딩에서 그래프 엔지니어링까지</title>
+<meta name="description" content="노드·엣지·상태로 StateGraph 엔진을 직접 만들고, LLM 노드와 코드 검증 노드가 섞인 학습계획 워크플로우를 구현합니다.">
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css">
+<style>
+/* AI 엔지니어링 특강 — 강의 자료 공통 스타일 */
+:root {
+  --bg: #f7f8fb;
+  --paper: #ffffff;
+  --ink: #1d2433;
+  --ink-soft: #5b6476;
+  --line: #e4e7ee;
+  --brand: #4338ca;
+  --brand-soft: #eef0ff;
+  --code-bg: #0f172a;
+  --code-ink: #e2e8f0;
+  --tip: #0e7490;   --tip-bg: #ecfeff;
+  --warn: #b45309;  --warn-bg: #fffbeb;
+  --key: #4338ca;   --key-bg: #eef2ff;
+  --sec: #be123c;   --sec-bg: #fff1f2;
+  --sidebar-w: 260px;
+  --toc-w: 240px;
+  font-family: 'Pretendard', 'Noto Sans KR', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: var(--brand); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── 상단 바 ── */
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 12px;
+  height: 56px; padding: 0 20px;
+  background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar .brand { font-weight: 800; color: var(--ink); letter-spacing: -0.01em; }
+.topbar .brand span { color: var(--brand); }
+.topbar .spacer { flex: 1; }
+.topbar .md-link { font-size: 0.85rem; color: var(--ink-soft); border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; }
+.menu-btn { display: none; background: none; border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; font-size: 1.1rem; cursor: pointer; }
+
+/* ── 3단 레이아웃 ── */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr) var(--toc-w);
+  max-width: 1480px; margin: 0 auto;
+}
+.sidebar, .toc {
+  position: sticky; top: 56px; align-self: start;
+  height: calc(100vh - 56px); overflow-y: auto;
+  padding: 24px 16px; font-size: 0.9rem;
+}
+.sidebar { border-right: 1px solid var(--line); }
+.sidebar h4, .toc h4 { margin: 0 0 10px; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.sidebar ol { list-style: none; padding: 0; margin: 0; }
+.sidebar li a { display: block; padding: 7px 10px; border-radius: 8px; color: var(--ink); line-height: 1.35; }
+.sidebar li a small { display: block; color: var(--ink-soft); font-size: 0.75rem; }
+.sidebar li a:hover { background: var(--brand-soft); text-decoration: none; }
+.sidebar li a.active { background: var(--brand); color: #fff; }
+.sidebar li a.active small { color: #c7d2fe; }
+.toc { border-left: 1px solid var(--line); }
+.toc a { display: block; padding: 3px 0; color: var(--ink-soft); line-height: 1.4; }
+.toc a.h3 { padding-left: 12px; font-size: 0.82rem; }
+.toc a.active { color: var(--brand); font-weight: 700; }
+
+/* ── 본문 ── */
+main.content { padding: 32px 48px 80px; min-width: 0; }
+.paper { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 40px 48px; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04); }
+.paper h1 { font-size: 2rem; line-height: 1.3; margin: 0 0 16px; letter-spacing: -0.02em; }
+.paper h2 { font-size: 1.45rem; margin: 2.4em 0 0.8em; padding-top: 0.6em; border-top: 1px solid var(--line); letter-spacing: -0.01em; }
+.paper h3 { font-size: 1.15rem; margin: 1.8em 0 0.6em; }
+.paper h4 { font-size: 1rem; margin: 1.4em 0 0.4em; }
+.paper h2, .paper h3 { scroll-margin-top: 72px; }
+.paper hr { border: none; border-top: 1px dashed var(--line); margin: 2em 0; }
+.paper img { max-width: 100%; }
+.anchor { margin-left: 6px; color: var(--line); font-weight: 400; visibility: hidden; }
+h2:hover .anchor, h3:hover .anchor { visibility: visible; }
+
+/* 표 */
+.table-wrap { overflow-x: auto; margin: 1em 0 1.4em; border: 1px solid var(--line); border-radius: 12px; }
+.table-wrap table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+.table-wrap th { background: #f3f4f8; text-align: left; font-weight: 700; }
+.table-wrap th, .table-wrap td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.table-wrap tr:last-child td { border-bottom: none; }
+
+/* 인라인 코드 */
+:not(pre) > code { background: #f1f3f9; border: 1px solid #e6e9f2; border-radius: 6px; padding: 0.1em 0.4em; font-size: 0.88em; font-family: 'JetBrains Mono', 'D2Coding', ui-monospace, Consolas, monospace; }
+
+/* 코드 블록 */
+.code-block { position: relative; margin: 1em 0 1.4em; border-radius: 12px; overflow: hidden; background: var(--code-bg); }
+.code-block .code-head { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; font-size: 0.75rem; color: #94a3b8; background: #1e293b; font-family: ui-monospace, monospace; }
+.code-block .copy { background: none; border: 1px solid #334155; color: #cbd5e1; border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer; }
+.code-block .copy:hover { background: #334155; }
+.code-block pre { margin: 0; padding: 14px 16px; overflow-x: auto; }
+.code-block pre code { font-family: 'JetBrains Mono', 'D2Coding', ui-monospace, Consolas, monospace; font-size: 0.85rem; line-height: 1.6; color: var(--code-ink); background: none; }
+.code-block pre code.hljs { padding: 0; background: none; }
+
+/* Mermaid */
+.diagram { margin: 1.2em 0 1.6em; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: #fcfcfe; text-align: center; overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; background: none; font-size: 0.85rem; white-space: pre; text-align: left; }
+.diagram pre.mermaid[data-processed] { text-align: center; }
+
+/* 수식 */
+.math-block { overflow-x: auto; padding: 14px 8px; margin: 1em 0; background: #fafbff; border: 1px solid #eceffa; border-radius: 12px; text-align: center; }
+
+/* 콜아웃 */
+blockquote { margin: 1.2em 0; padding: 12px 18px; border-left: 4px solid var(--line); background: #f8f9fc; border-radius: 0 12px 12px 0; color: var(--ink); }
+blockquote p { margin: 0.4em 0; }
+blockquote.tip { border-color: var(--tip); background: var(--tip-bg); }
+blockquote.warn { border-color: var(--warn); background: var(--warn-bg); }
+blockquote.key { border-color: var(--key); background: var(--key-bg); }
+blockquote.sec { border-color: var(--sec); background: var(--sec-bg); }
+
+/* 주차 머리 배지 */
+.week-hero { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.week-hero .pill { font-size: 0.78rem; padding: 3px 10px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+
+/* 이전/다음 */
+.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 28px; }
+.pager a { display: block; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
+.pager a:hover { border-color: var(--brand); text-decoration: none; }
+.pager a small { display: block; color: var(--ink-soft); font-size: 0.78rem; }
+.pager a.next { text-align: right; }
+
+/* ── 첫 화면(index) ── */
+.hero { padding: 64px 24px 40px; text-align: center; background: radial-gradient(1200px 400px at 50% -10%, #e0e7ff 0%, transparent 70%); }
+.hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin: 0 0 12px; letter-spacing: -0.03em; }
+.hero p { color: var(--ink-soft); max-width: 760px; margin: 0 auto; font-size: 1.05rem; }
+.ladder { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 28px auto 0; max-width: 980px; }
+.ladder span { padding: 8px 14px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); font-weight: 600; font-size: 0.9rem; }
+.ladder i { align-self: center; color: var(--ink-soft); font-style: normal; }
+.section { max-width: 1180px; margin: 0 auto; padding: 24px; }
+.section h2 { font-size: 1.35rem; margin: 24px 0 14px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.card { display: flex; flex-direction: column; gap: 6px; padding: 20px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; color: var(--ink); transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(67, 56, 202, 0.08); border-color: #c7d2fe; text-decoration: none; }
+.card .num { font-size: 0.78rem; font-weight: 700; color: var(--brand); letter-spacing: 0.06em; }
+.card h3 { margin: 0; font-size: 1.1rem; }
+.card p { margin: 0; color: var(--ink-soft); font-size: 0.92rem; }
+.card .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 8px; }
+.card .tags span { font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; background: #f1f3f9; color: var(--ink-soft); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.box { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; }
+.box h3 { margin-top: 0; }
+footer.site { text-align: center; color: var(--ink-soft); font-size: 0.85rem; padding: 40px 16px; }
+
+/* ── 반응형 ── */
+@media (max-width: 1200px) {
+  .layout { grid-template-columns: var(--sidebar-w) minmax(0, 1fr); }
+  .toc { display: none; }
+}
+@media (max-width: 860px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .menu-btn { display: inline-block; }
+  .sidebar { position: fixed; left: 0; top: 56px; width: 280px; background: var(--paper); z-index: 30; transform: translateX(-100%); transition: transform 0.2s; box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08); }
+  body.nav-open .sidebar { transform: none; }
+  main.content { padding: 16px 10px 60px; }
+  .paper { padding: 24px 18px; border-radius: 12px; }
+}
+
+/* ── 인쇄 ── */
+@media print {
+  .topbar, .sidebar, .toc, .pager, .copy { display: none !important; }
+  .layout { display: block; }
+  main.content { padding: 0; }
+  .paper { border: none; box-shadow: none; padding: 0; }
+  .code-block { background: #f6f8fa; }
+  .code-block pre code { color: #111; }
+  h2, h3 { break-after: avoid; }
+  .code-block, .diagram, .table-wrap { break-inside: avoid; }
+}
+
+/* ── 실습 단계 머리표 (🤖 ⌨️ ✅ 📄) ── */
+.paper h4.step { display: flex; align-items: center; gap: 10px; margin: 1.8em 0 0.7em; padding: 9px 14px; border-radius: 10px; border-left: 5px solid; font-size: 1rem; line-height: 1.4; }
+.paper h4.step .step-icon { font-size: 1.15rem; }
+.paper h4.step-ai { background: #eef2ff; border-color: #4338ca; color: #312e81; }
+.paper h4.step-cmd { background: #f1f5f9; border-color: #475569; color: #1e293b; }
+.paper h4.step-result { background: #ecfdf5; border-color: #059669; color: #064e3b; }
+.paper h4.step-ref { background: #fff7ed; border-color: #ea580c; color: #7c2d12; }
+.code-block.prompt { background: #1e1b4b; box-shadow: 0 0 0 2px #6366f1 inset; }
+.code-block.prompt .code-head { background: #312e81; color: #c7d2fe; }
+.code-block.prompt pre code { color: #e0e7ff; white-space: pre-wrap; }
+blockquote.term { border-color: #7c3aed; background: #f5f3ff; }
+blockquote.speak { border-color: #db2777; background: #fdf2f8; }
+.paper img { display: block; margin: 0.8em auto 1.4em; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px; }
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <button class="menu-btn" type="button" aria-label="메뉴">☰</button>
+  <a class="brand" href="index.html">AI <span>Engineering</span> Lab</a>
+  <div class="spacer"></div>
+  <a class="md-link" href="../docs/week07-graph-engineering.md">📄 Markdown 원본</a>
+</header>
+<div class="layout">
+<aside class="sidebar"><h4>강의 목차</h4><ol>
+<li><a href="index.html">🏠 과정 소개<small>개요 · 로드맵</small></a></li>
+<li><a href="week01-overview.html">1주차 · 전체 지도<small>개요</small></a></li>
+<li><a href="week02-vibe-coding.html">2주차 · 바이브코딩<small>① 바이브</small></a></li>
+<li><a href="week03-prompt-engineering.html">3주차 · 프롬프트<small>② 프롬프트</small></a></li>
+<li><a href="week04-context-engineering.html">4주차 · 컨텍스트<small>③ 컨텍스트</small></a></li>
+<li><a href="week05-harness-engineering.html">5주차 · 하네스<small>④ 하네스</small></a></li>
+<li><a href="week06-loop-engineering.html">6주차 · 루프<small>⑤ 루프</small></a></li>
+<li><a href="week07-graph-engineering.html" class="active">7주차 · 그래프<small>⑥ 그래프</small></a></li>
+<li><a href="week08-cicd-aws.html">8주차 · CI/CD·AWS<small>배포</small></a></li>
+<li><a href="week09-portfolio-readme.html">9주차 · 포트폴리오<small>정리</small></a></li>
+</ol></aside>
+<main class="content">
+<article class="paper">
+<h1>7주차 · 그래프 엔지니어링 (Graph Engineering)</h1>
+<div class="week-hero"><span class="pill">7주차</span><span class="pill">3시간 (설명 + 실습)</span><span class="pill">⑥ 그래프</span></div>
+<blockquote>
+<p><strong>&quot;AI에게 길을 맡기지 말고, 길을 설계하라.&quot;</strong></p>
+<p>지난주 루프 에이전트는 <strong>다음 행동을 AI가 모두 결정</strong>했습니다. 유연하지만 예측하기 어렵습니다. 오늘은 업무 흐름을 <strong>노드·엣지·상태로 이루어진 그래프</strong>로 설계하고, AI는 <strong>정해진 노드 안에서만</strong> 일하게 만듭니다.</p>
+</blockquote>
+<hr>
+<h2 id="0-수업-진행표-3시간">0. 수업 진행표 (3시간)<a class="anchor" href="#0-수업-진행표-3시간" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>시간</th>
+<th>내용</th>
+<th>형태</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0:00 ~ 0:45</td>
+<td>루프 vs 그래프 · 노드/엣지/상태 · 5가지 워크플로우 패턴</td>
+<td>설명</td>
+</tr>
+<tr>
+<td>0:45 ~ 1:25</td>
+<td>실습 ① 그래프 엔진(StateGraph) 직접 만들기 + 테스트</td>
+<td>실습</td>
+</tr>
+<tr>
+<td>1:25 ~ 1:35</td>
+<td>휴식</td>
+<td></td>
+</tr>
+<tr>
+<td>1:35 ~ 2:35</td>
+<td>실습 ② 학습계획 생성 워크플로우 (분석→초안→검증→수정→확정→저장)</td>
+<td>실습</td>
+</tr>
+<tr>
+<td>2:35 ~ 2:55</td>
+<td>실습 ③ 프론트엔드 계획 화면</td>
+<td>실습</td>
+</tr>
+<tr>
+<td>2:55 ~ 3:00</td>
+<td>정리 · 과제</td>
+<td>정리</td>
+</tr>
+</tbody></table></div>
+<h2 id="1-학습-목표">1. 학습 목표<a class="anchor" href="#1-학습-목표" aria-label="이 절의 링크">#</a></h2>
+<ol>
+<li>루프와 그래프의 차이를 <strong>자율성 vs 예측 가능성</strong> 관점에서 설명할 수 있다.</li>
+<li>그래프의 세 요소(<strong>노드·엣지·상태</strong>)와 조건부 엣지, 순환, 최대 단계를 설명할 수 있다.</li>
+<li>대표 워크플로우 패턴 5가지(체이닝·라우팅·병렬화·오케스트레이터·평가-최적화)를 그림으로 구분할 수 있다.</li>
+<li>라이브러리 없이 Java로 <strong>StateGraph 엔진</strong>을 만들고, 이를 이용해 <strong>&quot;LLM 판단 + 코드 검증&quot;이 섞인 워크플로우</strong>를 구현할 수 있다.</li>
+</ol>
+<hr>
+<h2 id="2-개념-①-왜-그래프인가">2. 개념 ① 왜 그래프인가?<a class="anchor" href="#2-개념-①-왜-그래프인가" aria-label="이 절의 링크">#</a></h2>
+<h3 id="21-비유-자유여행-vs-패키지여행">2.1 비유: 자유여행 vs 패키지여행<a class="anchor" href="#21-비유-자유여행-vs-패키지여행" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>루프 에이전트 (자유여행)</th>
+<th>그래프 워크플로우 (패키지여행)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>다음 일정은 누가?</td>
+<td>여행자(AI)가 그때그때</td>
+<td><strong>여행사(설계자)가 미리</strong></td>
+</tr>
+<tr>
+<td>장점</td>
+<td>예상 못 한 상황에 유연</td>
+<td>일정·비용·품질이 <strong>예측 가능</strong></td>
+</tr>
+<tr>
+<td>단점</td>
+<td>엉뚱한 곳에서 시간 낭비</td>
+<td>계획에 없는 상황에 약함</td>
+</tr>
+<tr>
+<td>잘 맞는 일</td>
+<td>탐색, 질의응답, 열린 문제</td>
+<td><strong>절차가 정해진 업무</strong>, 승인·검증이 필요한 일</td>
+</tr>
+</tbody></table></div>
+<h3 id="22-같은-일을-두-방식으로">2.2 같은 일을 두 방식으로<a class="anchor" href="#22-같은-일을-두-방식으로" aria-label="이 절의 링크">#</a></h3>
+<p><strong>루프 방식</strong>: &quot;학습 계획을 세워 줘&quot; → AI가 알아서 도구를 부르고, 알아서 검토하고, 알아서 끝낸다(고 믿는다).</p>
+<p><strong>그래프 방식</strong>:</p>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    S((시작)) --&gt; A[&quot;analyze&lt;br/&gt;🧠 주제 분석 (LLM)&quot;]
+    A --&gt; D[&quot;draft&lt;br/&gt;🧠 일정 초안 (LLM)&quot;]
+    D --&gt; V{&quot;validate&lt;br/&gt;⚙️ 규칙 검사 (코드)&quot;}
+    V -.-&gt;|&quot;문제 있음, 수정 2회 미만&quot;| R[&quot;revise&lt;br/&gt;⚙️ 피드백 정리 (코드)&quot;]
+    R --&gt; D
+    V -.-&gt;|&quot;통과 또는 수정 2회 소진&quot;| F[&quot;finalize&lt;br/&gt;⚙️ 정리·요약 (코드)&quot;]
+    F -.-&gt;|&quot;저장 선택&quot;| SV[&quot;save&lt;br/&gt;⚙️ 할 일 등록 (코드)&quot;]
+    F -.-&gt;|&quot;저장 안 함&quot;| E((끝))
+    SV --&gt; E</pre></div>
+<blockquote class="key"><p>📌 <strong>핵심 원칙: 판단은 LLM에게, 확인은 코드에게.</strong></p>
+<p>&quot;하루 공부 시간이 한도를 넘는가?&quot; 같은 질문은 LLM에게 물을 필요가 없습니다. <strong>코드로 100% 정확하게</strong> 검사할 수 있습니다.</p>
+</blockquote>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 그래프 (Graph)와 워크플로우 (Workflow)</strong></p>
+<p><strong>그래프</strong>: 수학·컴퓨터에서 <strong>점(노드)과 선(엣지)으로 관계를 나타낸 구조</strong>. 지하철 노선도가 대표적인 그래프입니다(역 = 노드, 선로 = 엣지).</p>
+<p><strong>워크플로우</strong>: 일이 처리되는 <strong>순서와 흐름</strong>. &quot;기안 → 팀장 검토 → 반려 시 수정 → 승인&quot;처럼요.</p>
+<p><strong>그래프 엔지니어링</strong>: 워크플로우를 그래프로 그려서 <strong>그대로 실행되는 코드</strong>로 만드는 것. 그림(설계도)과 코드가 1:1로 대응하므로 <strong>설명·디버깅·변경</strong>이 쉬워집니다.</p>
+</blockquote>
+<h3 id="23-그래프의-세-요소">2.3 그래프의 세 요소<a class="anchor" href="#23-그래프의-세-요소" aria-label="이 절의 링크">#</a></h3>
+<div class="math-block">\[G = (V,\ E,\ S)\]</div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>요소</th>
+<th>의미</th>
+<th>비유 (회사 결재)</th>
+<th>우리 코드</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>노드 V</strong></td>
+<td>일을 하는 단위 (LLM 호출 또는 일반 코드)</td>
+<td>담당자</td>
+<td><code>addNode(&quot;draft&quot;, this::draft)</code></td>
+</tr>
+<tr>
+<td><strong>엣지 E</strong></td>
+<td>다음에 어디로 갈지</td>
+<td>결재 라인 화살표</td>
+<td><code>addEdge(&quot;analyze&quot;, &quot;draft&quot;)</code></td>
+</tr>
+<tr>
+<td><strong>조건부 엣지</strong></td>
+<td>상태를 보고 갈 곳을 고름</td>
+<td>&quot;반려되면 기안자에게&quot;</td>
+<td><code>addConditionalEdges(&quot;validate&quot;, router, ...)</code></td>
+</tr>
+<tr>
+<td><strong>상태 S</strong></td>
+<td>노드들이 함께 읽고 쓰는 데이터</td>
+<td>결재 서류철</td>
+<td><code>PlanState</code></td>
+</tr>
+</tbody></table></div>
+<p>실행 규칙을 식으로 쓰면:</p>
+<div class="math-block">\[S_{k+1} = f_{v_k}(S_k), \qquad v_{k+1} = \text{route}_{v_k}(S_{k+1}), \qquad \text{종료: } v_{k+1} = \text{END} \ \lor\ k \ge k_{\max}\]</div>
+<p><strong>수식 읽는 법</strong>: &quot;<span class="math-inline">\(k\)</span>번째에 노드 <span class="math-inline">\(v_k\)</span>에 있으면, 그 노드의 함수 <span class="math-inline">\(f\)</span>가 상태 <span class="math-inline">\(S\)</span>를 고쳐 <span class="math-inline">\(S_{k+1}\)</span>을 만든다. 그다음 라우터가 새 상태를 보고 다음 노드 <span class="math-inline">\(v_{k+1}\)</span>을 고른다. END에 도착하거나 최대 단계를 넘으면 멈춘다.&quot;</p>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    S0[&quot;상태 S0&lt;br/&gt;{goal}&quot;] --&gt;|&quot;analyze&quot;| S1[&quot;상태 S1&lt;br/&gt;{goal, topics}&quot;]
+    S1 --&gt;|&quot;draft&quot;| S2[&quot;상태 S2&lt;br/&gt;{..., items}&quot;]
+    S2 --&gt;|&quot;validate&quot;| S3[&quot;상태 S3&lt;br/&gt;{..., problems}&quot;]</pre></div>
+<p>상태는 <strong>노드를 지날 때마다 정보가 쌓이는 서류철</strong>입니다. 각 노드는 서류철을 받아서 <strong>자기 칸만 채우고</strong> 다음 노드로 넘깁니다.</p>
+<h3 id="24-순환cycle과-안전장치">2.4 순환(cycle)과 안전장치<a class="anchor" href="#24-순환cycle과-안전장치" aria-label="이 절의 링크">#</a></h3>
+<p><code>validate → revise → draft → validate</code> 처럼 <strong>되돌아가는 엣지</strong>가 있으면 그래프에 순환이 생깁니다. 순환은 &quot;다시 하기&quot;를 표현하는 강력한 도구지만, 루프와 마찬가지로 <strong>멈춤 장치</strong>가 필요합니다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>안전장치</th>
+<th>위치</th>
+<th>우리 구현</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>업무 수준 한도</td>
+<td>라우터</td>
+<td>수정은 최대 2회 (<code>MAX_REVISIONS</code>)</td>
+</tr>
+<tr>
+<td>엔진 수준 한도</td>
+<td>실행기</td>
+<td>최대 20단계 넘으면 예외 (<code>maxSteps</code>)</td>
+</tr>
+<tr>
+<td>구조 검사</td>
+<td>컴파일 시</td>
+<td>나가는 엣지가 없는 노드, 없는 노드로 가는 엣지 → 오류</td>
+</tr>
+<tr>
+<td>경로 검사</td>
+<td>실행 시</td>
+<td>라우터가 <strong>선언하지 않은 노드</strong>로 보내면 예외</td>
+</tr>
+</tbody></table></div>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 결정적 (Deterministic) vs 비결정적</strong></p>
+<p><strong>결정적</strong>: 같은 입력이면 <strong>항상 같은 결과</strong>. 일반 코드(<code>if 합계 &gt; 120</code>)가 그렇습니다.</p>
+<p><strong>비결정적</strong>: 같은 입력이어도 <strong>결과가 달라질 수 있음</strong>. LLM 응답이 그렇습니다.</p>
+<p><strong>그래프 설계 원칙</strong>: 비결정적인 LLM 노드 뒤에 <strong>결정적인 코드 검증 노드</strong>를 두어 품질을 보장합니다. &quot;창의적인 일은 AI, 확인은 코드&quot;.</p>
+</blockquote>
+<h3 id="25-대표-워크플로우-패턴-5가지">2.5 대표 워크플로우 패턴 5가지<a class="anchor" href="#25-대표-워크플로우-패턴-5가지" aria-label="이 절의 링크">#</a></h3>
+<p><strong>① 프롬프트 체이닝 (Chaining)</strong> — 앞 단계 결과가 다음 단계 입력</p>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    I[&quot;입력&quot;] --&gt; A[&quot;LLM 1&lt;br/&gt;개요&quot;] --&gt; G{&quot;코드 검사&quot;} --&gt; B[&quot;LLM 2&lt;br/&gt;본문&quot;] --&gt; O[&quot;출력&quot;]</pre></div>
+<p><strong>② 라우팅 (Routing)</strong> — 입력을 분류해 전문 경로로</p>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    I[&quot;질문&quot;] --&gt; C{&quot;분류기&quot;}
+    C --&gt;|&quot;일정&quot;| A[&quot;코치 에이전트&quot;]
+    C --&gt;|&quot;개념&quot;| B[&quot;노트 RAG&quot;]
+    C --&gt;|&quot;기타&quot;| D[&quot;일반 답변&quot;]</pre></div>
+<p><strong>③ 병렬화 (Parallelization)</strong> — 독립적인 일을 동시에, 결과 취합</p>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    I[&quot;노트&quot;] --&gt; A[&quot;요약&quot;]
+    I --&gt; B[&quot;퀴즈 생성&quot;]
+    I --&gt; C[&quot;키워드 추출&quot;]
+    A --&gt; M[&quot;취합&quot;]
+    B --&gt; M
+    C --&gt; M</pre></div>
+<p><strong>④ 오케스트레이터-워커 (Orchestrator-Workers)</strong> — 관리자 LLM이 일을 쪼개 나눠 줌</p>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    O[&quot;오케스트레이터&lt;br/&gt;과목별로 분할&quot;] --&gt; W1[&quot;워커: DB&quot;]
+    O --&gt; W2[&quot;워커: OS&quot;]
+    O --&gt; W3[&quot;워커: 네트워크&quot;]
+    W1 --&gt; S[&quot;종합&quot;]
+    W2 --&gt; S
+    W3 --&gt; S</pre></div>
+<p><strong>⑤ 평가-최적화 (Evaluator-Optimizer)</strong> — 생성 → 평가 → 피드백 → 재생성</p>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    G[&quot;생성기 (LLM)&quot;] --&gt; E{&quot;평가기&lt;br/&gt;(코드 또는 LLM)&quot;}
+    E --&gt;|&quot;피드백&quot;| G
+    E --&gt;|&quot;합격&quot;| O[&quot;출력&quot;]</pre></div>
+<blockquote>
+<p>오늘 만들 학습계획 그래프 = <strong>① 체이닝 + ⑤ 평가-최적화(코드 평가기) + 조건부 라우팅</strong>의 조합입니다.</p>
+</blockquote>
+<h3 id="26-루프-그래프-비교-정리">2.6 루프 · 그래프 비교 정리<a class="anchor" href="#26-루프-그래프-비교-정리" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>기준</th>
+<th>루프 (6주차 코치)</th>
+<th>그래프 (7주차 계획)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>흐름 결정</td>
+<td>LLM</td>
+<td>설계자(코드)</td>
+</tr>
+<tr>
+<td>LLM 호출 횟수</td>
+<td>1 ~ 6회 (예측 어려움)</td>
+<td>2 ~ 4회 (상한이 명확)</td>
+</tr>
+<tr>
+<td>검증</td>
+<td>모델의 자기 판단 + 도구 결과</td>
+<td><strong>노드 단위 코드 검증</strong></td>
+</tr>
+<tr>
+<td>디버깅</td>
+<td>대화 기록을 읽어야 함</td>
+<td><strong>어느 노드에서</strong> 문제인지 바로 보임</td>
+</tr>
+<tr>
+<td>테스트</td>
+<td>시나리오 각본</td>
+<td>노드별 단위 테스트 + 경로 테스트</td>
+</tr>
+<tr>
+<td>섞어 쓰기</td>
+<td>그래프의 노드 하나 안에 루프 에이전트를 넣을 수 있다</td>
+<td></td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="3-실습-①-그래프-엔진-직접-만들기">3. 실습 ① 그래프 엔진 직접 만들기<a class="anchor" href="#3-실습-①-그래프-엔진-직접-만들기" aria-label="이 절의 링크">#</a></h2>
+<p>업계에서는 LangGraph 같은 라이브러리를 많이 쓰지만, 원리는 <strong>100줄 남짓</strong>입니다. 직접 만들어 보면 어떤 라이브러리든 읽을 수 있게 됩니다.</p>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 제네릭 <code>StateGraph&lt;S&gt;</code>와 함수형 인터페이스</strong></p>
+<p><strong><code>&lt;S&gt;</code> (제네릭)</strong>: &quot;상태의 타입은 쓰는 쪽에서 정한다&quot;는 뜻. 학습계획에는 <code>StateGraph&lt;PlanState&gt;</code>, 테스트에는 <code>StateGraph&lt;Counter&gt;</code>처럼 <strong>엔진 하나를 여러 곳에</strong> 씁니다.</p>
+<p><strong><code>UnaryOperator&lt;S&gt;</code></strong>: &quot;S를 받아 S를 돌려주는 함수&quot; — 노드 하나. <strong><code>Function&lt;S, String&gt;</code></strong>: &quot;S를 받아 다음 노드 이름을 돌려주는 함수&quot; — 라우터.</p>
+<p><strong><code>c -&gt; { c.value++; return c; }</code></strong>: 이름 없는 함수(<strong>람다</strong>). 노드 내용을 짧게 쓸 수 있습니다.</p>
+</blockquote>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 그래프 엔진 (계획 모드 권장)</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">com.example.planner.graph 패키지에 라이브러리 없이 작은 상태 그래프 엔진 StateGraph&lt;S&gt;를 만들어 줘. (Spring 의존 없이 순수 Java)
+- addNode(name, UnaryOperator&lt;S&gt;), addEdge(from, to), addConditionalEdges(from, router, 가능한 대상들...), setEntryPoint(name)
+- END 상수, compile(): 시작 노드 확인, 나가는 엣지 없는 노드·존재하지 않는 대상 노드를 오류로
+- invoke(state, maxSteps, trace): END까지 실행, 방문 노드를 trace에 기록, maxSteps 초과 시 예외,
+  조건부 엣지가 선언하지 않은 노드로 가면 예외
+- toMermaid(): 구조를 Mermaid flowchart 문자열로 (조건부 엣지는 점선)
+그리고 StateGraphTest(직선, 조건부 순환, 최대 단계 초과, 고아 노드, 허용 안 된 경로)를 작성하고 실행해 줘.</code></pre></div>
+<h3 id="31-참고-코드-엔진-코드">3.1 📄 참고 코드 — 엔진 코드<a class="anchor" href="#31-참고-코드-엔진-코드" aria-label="이 절의 링크">#</a></h3>
+<p><code>backend/src/main/java/com/example/planner/graph/StateGraph.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.graph;
+
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
+
+/**
+ * 아주 작은 상태 그래프 엔진.
+ * 노드 = 상태를 받아 상태를 돌려주는 함수, 엣지 = 다음 노드를 고르는 함수.
+ */
+public class StateGraph&lt;S&gt; {
+
+    public static final String END = &quot;END&quot;;
+
+    private final Map&lt;String, UnaryOperator&lt;S&gt;&gt; nodes = new LinkedHashMap&lt;&gt;();
+    private final Map&lt;String, Function&lt;S, String&gt;&gt; routers = new LinkedHashMap&lt;&gt;();
+    private final Map&lt;String, List&lt;String&gt;&gt; edgeTargets = new LinkedHashMap&lt;&gt;();
+    private final Set&lt;String&gt; conditional = new HashSet&lt;&gt;();
+    private String entryPoint;
+
+    public StateGraph&lt;S&gt; addNode(String name, UnaryOperator&lt;S&gt; action) {
+        if (END.equals(name) || nodes.containsKey(name)) {
+            throw new IllegalArgumentException(&quot;사용할 수 없는 노드 이름: &quot; + name);
+        }
+        nodes.put(name, action);
+        return this;
+    }
+
+    /** 항상 같은 곳으로 가는 엣지 */
+    public StateGraph&lt;S&gt; addEdge(String from, String to) {
+        routers.put(from, state -&gt; to);
+        edgeTargets.put(from, List.of(to));
+        return this;
+    }
+
+    /** 상태를 보고 갈 곳을 고르는 엣지. 갈 수 있는 곳을 미리 선언한다. */
+    public StateGraph&lt;S&gt; addConditionalEdges(String from, Function&lt;S, String&gt; router, String... possibleTargets) {
+        routers.put(from, router);
+        edgeTargets.put(from, List.of(possibleTargets));
+        conditional.add(from);
+        return this;
+    }
+
+    public StateGraph&lt;S&gt; setEntryPoint(String name) {
+        this.entryPoint = name;
+        return this;
+    }
+
+    /** 구조 검사: 실행 전에 설계 오류를 찾아낸다 */
+    public StateGraph&lt;S&gt; compile() {
+        if (entryPoint == null || !nodes.containsKey(entryPoint)) {
+            throw new IllegalStateException(&quot;시작 노드가 올바르지 않습니다: &quot; + entryPoint);
+        }
+        for (String node : nodes.keySet()) {
+            if (!routers.containsKey(node)) {
+                throw new IllegalStateException(&quot;나가는 엣지가 없는 노드: &quot; + node);
+            }
+            for (String target : edgeTargets.get(node)) {
+                if (!END.equals(target) &amp;&amp; !nodes.containsKey(target)) {
+                    throw new IllegalStateException(&quot;존재하지 않는 노드로 가는 엣지: &quot; + node + &quot; → &quot; + target);
+                }
+            }
+        }
+        return this;
+    }
+
+    /** 그래프 실행. trace에 방문한 노드 이름을 순서대로 기록한다. */
+    public S invoke(S state, int maxSteps, List&lt;String&gt; trace) {
+        String current = entryPoint;
+        int steps = 0;
+        while (!END.equals(current)) {
+            if (++steps &gt; maxSteps) {
+                throw new IllegalStateException(&quot;최대 단계(&quot; + maxSteps + &quot;)를 넘었습니다. 순환이 끝나지 않습니다.&quot;);
+            }
+            trace.add(current);
+            state = nodes.get(current).apply(state);            // 노드 실행
+            String next = routers.get(current).apply(state);    // 엣지 선택
+            if (conditional.contains(current) &amp;&amp; !edgeTargets.get(current).contains(next)) {
+                throw new IllegalStateException(&quot;허용되지 않은 경로: &quot; + current + &quot; → &quot; + next);
+            }
+            current = next;
+        }
+        return state;
+    }
+
+    /** 그래프 구조를 Mermaid 문법으로 출력 (문서·화면 표시용) */
+    public String toMermaid() {
+        StringBuilder sb = new StringBuilder(&quot;flowchart TD\n&quot;);
+        sb.append(&quot;    START((시작)) --&gt; &quot;).append(entryPoint).append('\n');
+        edgeTargets.forEach((from, targets) -&gt; {
+            for (String to : targets) {
+                sb.append(&quot;    &quot;).append(from)
+                        .append(conditional.contains(from) ? &quot; -.-&gt; &quot; : &quot; --&gt; &quot;)
+                        .append(END.equals(to) ? &quot;FINISH((끝))&quot; : to)
+                        .append('\n');
+            }
+        });
+        return sb.toString();
+    }
+}</code></pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>엔진의 부분</th>
+<th>그래프 개념</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>nodes</code></td>
+<td>V (노드)</td>
+</tr>
+<tr>
+<td><code>routers</code>, <code>edgeTargets</code></td>
+<td>E (엣지)</td>
+</tr>
+<tr>
+<td><code>S state</code></td>
+<td>S (상태)</td>
+</tr>
+<tr>
+<td><code>compile()</code></td>
+<td>설계 오류 검사</td>
+</tr>
+<tr>
+<td><code>maxSteps</code></td>
+<td>순환 안전장치</td>
+</tr>
+<tr>
+<td><code>trace</code></td>
+<td>실행 경로 추적 (디버깅·화면 표시)</td>
+</tr>
+</tbody></table></div>
+<h3 id="32-참고-코드-엔진-테스트-llm-없이">3.2 📄 참고 코드 — 엔진 테스트 (LLM 없이)<a class="anchor" href="#32-참고-코드-엔진-테스트-llm-없이" aria-label="이 절의 링크">#</a></h3>
+<p><code>backend/src/test/java/com/example/planner/graph/StateGraphTest.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.graph;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+
+class StateGraphTest {
+
+    /** 테스트용 상태: 숫자 하나 */
+    static class Counter {
+        int value;
+    }
+
+    @Test
+    void 직선_그래프는_순서대로_실행된다() {
+        StateGraph&lt;Counter&gt; graph = new StateGraph&lt;Counter&gt;()
+                .addNode(&quot;plus1&quot;, c -&gt; { c.value += 1; return c; })
+                .addNode(&quot;times10&quot;, c -&gt; { c.value *= 10; return c; })
+                .setEntryPoint(&quot;plus1&quot;)
+                .addEdge(&quot;plus1&quot;, &quot;times10&quot;)
+                .addEdge(&quot;times10&quot;, StateGraph.END)
+                .compile();
+        List&lt;String&gt; trace = new ArrayList&lt;&gt;();
+
+        Counter result = graph.invoke(new Counter(), 10, trace);
+
+        assertThat(result.value).isEqualTo(10);
+        assertThat(trace).containsExactly(&quot;plus1&quot;, &quot;times10&quot;);
+    }
+
+    @Test
+    void 조건부_엣지로_순환하다가_조건을_만족하면_끝난다() {
+        StateGraph&lt;Counter&gt; graph = new StateGraph&lt;Counter&gt;()
+                .addNode(&quot;inc&quot;, c -&gt; { c.value++; return c; })
+                .setEntryPoint(&quot;inc&quot;)
+                .addConditionalEdges(&quot;inc&quot;, c -&gt; c.value &lt; 3 ? &quot;inc&quot; : StateGraph.END, &quot;inc&quot;, StateGraph.END)
+                .compile();
+        List&lt;String&gt; trace = new ArrayList&lt;&gt;();
+
+        graph.invoke(new Counter(), 10, trace);
+
+        assertThat(trace).containsExactly(&quot;inc&quot;, &quot;inc&quot;, &quot;inc&quot;);
+    }
+
+    @Test
+    void 끝나지_않는_순환은_최대단계에서_예외가_발생한다() {
+        StateGraph&lt;Counter&gt; graph = new StateGraph&lt;Counter&gt;()
+                .addNode(&quot;forever&quot;, c -&gt; c)
+                .setEntryPoint(&quot;forever&quot;)
+                .addEdge(&quot;forever&quot;, &quot;forever&quot;)
+                .compile();
+
+        assertThatThrownBy(() -&gt; graph.invoke(new Counter(), 5, new ArrayList&lt;&gt;()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining(&quot;최대 단계&quot;);
+    }
+
+    @Test
+    void 나가는_엣지가_없는_노드는_compile에서_잡힌다() {
+        StateGraph&lt;Counter&gt; graph = new StateGraph&lt;Counter&gt;()
+                .addNode(&quot;a&quot;, c -&gt; c)
+                .addNode(&quot;orphan&quot;, c -&gt; c)
+                .setEntryPoint(&quot;a&quot;)
+                .addEdge(&quot;a&quot;, StateGraph.END);
+
+        assertThatThrownBy(graph::compile).hasMessageContaining(&quot;orphan&quot;);
+    }
+
+    @Test
+    void 선언하지_않은_경로로_라우팅하면_예외() {
+        StateGraph&lt;Counter&gt; graph = new StateGraph&lt;Counter&gt;()
+                .addNode(&quot;a&quot;, c -&gt; c)
+                .addNode(&quot;b&quot;, c -&gt; c)
+                .setEntryPoint(&quot;a&quot;)
+                .addConditionalEdges(&quot;a&quot;, c -&gt; &quot;b&quot;, StateGraph.END)   // b로 간다고 선언하지 않음
+                .addEdge(&quot;b&quot;, StateGraph.END)
+                .compile();
+
+        assertThatThrownBy(() -&gt; graph.invoke(new Counter(), 10, new ArrayList&lt;&gt;()))
+                .hasMessageContaining(&quot;허용되지 않은 경로&quot;);
+    }
+}</code></pre></div>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">cd backend &amp;&amp; ./gradlew test --tests &quot;*StateGraphTest&quot;</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">StateGraphTest &gt; 직선_그래프는_순서대로_실행된다() PASSED
+StateGraphTest &gt; 조건부_엣지로_순환하다가_조건을_만족하면_끝난다() PASSED
+StateGraphTest &gt; 끝나지_않는_순환은_최대단계에서_예외가_발생한다() PASSED
+StateGraphTest &gt; 나가는_엣지가_없는_노드는_compile에서_잡힌다() PASSED
+StateGraphTest &gt; 선언하지_않은_경로로_라우팅하면_예외() PASSED
+BUILD SUCCESSFUL</code></pre></div>
+<p>LLM 없이도 <strong>그래프의 흐름 규칙</strong>이 맞는지 확인했습니다. 엔진이 믿을 만해야 그 위에 올린 AI 워크플로우도 믿을 수 있습니다.</p>
+<hr>
+<h2 id="4-실습-②-학습계획-생성-워크플로우">4. 실습 ② 학습계획 생성 워크플로우<a class="anchor" href="#4-실습-②-학습계획-생성-워크플로우" aria-label="이 절의 링크">#</a></h2>
+<h3 id="41-노드-설계표">4.1 노드 설계표<a class="anchor" href="#41-노드-설계표" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>노드</th>
+<th>종류</th>
+<th>읽는 상태</th>
+<th>쓰는 상태</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>analyze</code></td>
+<td>🧠 LLM</td>
+<td>goal</td>
+<td>topics</td>
+<td>목표를 학습 주제 3~8개로 분해</td>
+</tr>
+<tr>
+<td><code>draft</code></td>
+<td>🧠 LLM</td>
+<td>topics, 기간, 하루 한도, problems</td>
+<td>items</td>
+<td>날짜별 일정 초안(JSON). problems가 있으면 반영</td>
+</tr>
+<tr>
+<td><code>validate</code></td>
+<td>⚙️ 코드</td>
+<td>items, topics, 기간, 한도</td>
+<td>problems</td>
+<td>기간·하루 한도·주제 누락 검사</td>
+</tr>
+<tr>
+<td><code>revise</code></td>
+<td>⚙️ 코드</td>
+<td>revision</td>
+<td>revision</td>
+<td>수정 횟수 +1 (피드백은 problems에 이미 있음)</td>
+</tr>
+<tr>
+<td><code>finalize</code></td>
+<td>⚙️ 코드</td>
+<td>items, problems</td>
+<td>items(정렬), summary</td>
+<td>정렬·요약</td>
+</tr>
+<tr>
+<td><code>save</code></td>
+<td>⚙️ 코드(부작용)</td>
+<td>items</td>
+<td>savedCount</td>
+<td>할 일로 등록 — <strong>사용자가 선택했을 때만</strong></td>
+</tr>
+</tbody></table></div>
+<blockquote class="tip"><p>💡 <code>save</code>처럼 <strong>DB를 바꾸는(되돌리기 어려운) 노드</strong>는 사용자의 명시적 선택(<code>saveAsTasks</code>)이 있을 때만 지나가도록 조건부 엣지로 막습니다. 이것이 그래프에서의 <strong>사람 승인(Human-in-the-loop)</strong> 의 가장 단순한 형태입니다.</p>
+</blockquote>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 학습계획 그래프 (위 노드 설계표를 그대로 전달)</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">StateGraph로 학습계획 생성 워크플로우를 만들어 줘. 노드 설계는 아래 표와 같아.
+analyze(LLM): goal → topics(3~8개, JSON {&quot;topics&quot;: [...]})
+draft(LLM): topics, 시작일(오늘, Asia/Seoul), 마지막 공부일(시험 전날), 하루 한도, 이전 problems → items(JSON {&quot;items&quot;:[{date, topic, minutes}]})
+validate(코드): 기간 밖 날짜, 0분 이하, 날짜별 합계가 하루 한도 초과, 빠진 주제를 problems에 기록
+route: problems 없으면 finalize, 있으면 revision &lt; 2일 때 revise, 아니면 finalize
+revise(코드): revision++ 후 draft로
+finalize(코드): 날짜순 정렬 + 요약 문장, saveAsTasks면 save로, 아니면 END
+save(코드): 각 항목을 &quot;[계획] 주제&quot; 할 일로 등록
+- PlanState(public 필드), PlanItem/PlanRequest(@Future examDate, 30~720분)/PlanResult(trace, mermaid 포함) record
+- 프롬프트는 PromptTemplates에 PLAN_ANALYZE_SYSTEM, PLAN_DRAFT_SYSTEM으로. LLM은 JSON 모드(generate(..., true))
+- JSON 파싱은 Spring이 주입하는 Jackson 3 JsonMapper 사용, 파싱 실패는 draft에서 빈 items로 처리
+- 시험일이 30일 넘게 남으면 IllegalArgumentException → 400
+- POST /api/ai/plan, FakeLlmClient로 경로 테스트(수정 1회 후 통과 / 최대 수정 후 확정 / 저장 경로)</code></pre></div>
+<h3 id="42-참고-코드-상태와-dto">4.2 📄 참고 코드 — 상태와 DTO<a class="anchor" href="#42-참고-코드-상태와-dto" aria-label="이 절의 링크">#</a></h3>
+<p><code>graph/PlanItem.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.graph;
+
+import java.time.LocalDate;
+
+public record PlanItem(LocalDate date, String topic, int minutes) {
+}</code></pre></div>
+<p><code>graph/PlanState.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.graph;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+/** 그래프의 노드들이 함께 읽고 쓰는 상태 (학습용으로 public 필드 사용) */
+public class PlanState {
+
+    // ── 입력 ──
+    public String goal;
+    public LocalDate startDate;
+    public LocalDate lastStudyDate;   // 시험 전날
+    public int dailyMinutes;
+    public boolean saveAsTasks;
+
+    // ── 노드들이 채우는 값 ──
+    public List&lt;String&gt; topics = new ArrayList&lt;&gt;();
+    public List&lt;PlanItem&gt; items = new ArrayList&lt;&gt;();
+    public List&lt;String&gt; problems = new ArrayList&lt;&gt;();
+    public int revision;
+    public int savedCount;
+    public String summary;
+}</code></pre></div>
+<p><code>graph/PlanRequest.java</code>, <code>graph/PlanResult.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.graph;
+
+import java.time.LocalDate;
+
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+public record PlanRequest(
+        @NotBlank @Size(max = 300) String goal,
+        @NotNull @Future LocalDate examDate,
+        @Min(30) @Max(720) int dailyMinutes,
+        boolean saveAsTasks) {
+}</code></pre></div>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.graph;
+
+import java.util.List;
+
+public record PlanResult(
+        List&lt;String&gt; topics,
+        List&lt;PlanItem&gt; items,
+        List&lt;String&gt; problems,
+        int revisions,
+        int savedCount,
+        String summary,
+        List&lt;String&gt; trace,
+        String mermaid) {
+}</code></pre></div>
+<h3 id="43-참고-코드-프롬프트-각-llm-노드는-자기-일만-안다">4.3 📄 참고 코드 — 프롬프트 (각 LLM 노드는 &quot;자기 일만&quot; 안다)<a class="anchor" href="#43-참고-코드-프롬프트-각-llm-노드는-자기-일만-안다" aria-label="이 절의 링크">#</a></h3>
+<p>컨텍스트 전략 <strong>나누기(Isolate)</strong> 를 떠올려 보세요. <code>analyze</code> 노드는 일정 규칙을 몰라도 되고, <code>draft</code> 노드는 원래 목표 문장을 몰라도 됩니다. <strong>노드별로 꼭 필요한 정보만</strong> 줍니다.</p>
+<p><code>ai/PromptTemplates.java</code>에 <strong>추가</strong>:</p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">    // ── 학습계획 그래프: analyze 노드 ─────────────────────────
+    public static final String PLAN_ANALYZE_SYSTEM = &quot;&quot;&quot;
+            너는 대학 시험 대비 학습 설계 전문가다.
+            학생의 목표를 공부해야 할 주제 3~8개로 나눈다.
+            - 주제는 짧은 명사구로 쓴다. 예: &quot;SQL 조인&quot;, &quot;정규화&quot;
+            - 배우는 순서대로 나열한다.
+            - 반드시 JSON만 출력한다: {&quot;topics&quot;: [&quot;주제1&quot;, &quot;주제2&quot;]}
+            &quot;&quot;&quot;;
+
+    public static String planAnalyzeUser(String goal) {
+        return &quot;&lt;goal&gt;%s&lt;/goal&gt;&quot;.formatted(goal);
+    }
+
+    // ── 학습계획 그래프: draft 노드 ───────────────────────────
+    public static final String PLAN_DRAFT_SYSTEM = &quot;&quot;&quot;
+            너는 학습 일정 플래너다. 주어진 주제로 날짜별 공부 일정을 만든다.
+            [규칙]
+            - 날짜는 시작일부터 마지막 공부일까지(포함)만 사용한다.
+            - 같은 날짜의 minutes 합계는 하루 한도를 넘지 않는다.
+            - 모든 주제를 최소 한 번 배치하고, 주제 이름은 주어진 것을 그대로 쓴다.
+            - 남는 날은 &quot;총복습&quot;으로 채워도 된다.
+            - 반드시 JSON만 출력한다:
+              {&quot;items&quot;: [{&quot;date&quot;: &quot;YYYY-MM-DD&quot;, &quot;topic&quot;: &quot;주제&quot;, &quot;minutes&quot;: 60}]}
+            &quot;&quot;&quot;;
+
+    public static String planDraftUser(java.util.List&lt;String&gt; topics, java.time.LocalDate start,
+                                       java.time.LocalDate last, int dailyMinutes,
+                                       java.util.List&lt;String&gt; problems) {
+        String feedback = problems.isEmpty() ? &quot;&quot;
+                : &quot;\n[이전 초안의 문제점 — 반드시 고칠 것]\n- &quot; + String.join(&quot;\n- &quot;, problems);
+        return &quot;&quot;&quot;
+                주제: %s
+                시작일: %s
+                마지막 공부일: %s
+                하루 한도: %d분%s
+                &quot;&quot;&quot;.formatted(topics, start, last, dailyMinutes, feedback);
+    }</code></pre></div>
+<blockquote class="tip"><p>💡 <code>draft</code> 노드가 다시 실행될 때는 <code>validate</code>가 찾은 <strong>문제점 목록이 피드백으로</strong> 들어갑니다. 이것이 평가-최적화 패턴의 핵심입니다. 그리고 그 평가는 <strong>LLM이 아니라 코드</strong>가 했기 때문에 정확합니다.</p>
+</blockquote>
+<h3 id="44-참고-코드-그래프-조립">4.4 📄 참고 코드 — ★ 그래프 조립<a class="anchor" href="#44-참고-코드-그래프-조립" aria-label="이 절의 링크">#</a></h3>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 메서드 참조 <code>this::analyze</code></strong></p>
+<p><code>this::analyze</code>는 &quot;이 객체의 <code>analyze</code> 메서드를 함수로 넘긴다&quot;는 뜻입니다. 그래서 그래프 조립 부분(생성자)만 읽으면 <strong>설계도(노드·엣지)</strong> 가 보이고, 각 노드의 실제 일은 아래 메서드에서 따로 읽을 수 있습니다. <strong>설계와 구현이 분리</strong>되는 것이 그래프 코드의 장점입니다.</p>
+</blockquote>
+<p><code>graph/StudyPlanGraph.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.graph;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.springframework.stereotype.Component;
+
+import com.example.planner.ai.LlmClient;
+import com.example.planner.ai.PromptTemplates;
+import com.example.planner.task.TaskRequest;
+import com.example.planner.task.TaskService;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
+
+@Component
+public class StudyPlanGraph {
+
+    static final int MAX_REVISIONS = 2;   // 업무 수준 안전장치
+    static final int MAX_STEPS = 20;      // 엔진 수준 안전장치
+    static final int MAX_DAYS = 30;
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record TopicsJson(List&lt;String&gt; topics) {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record DraftJson(List&lt;DraftItem&gt; items) {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record DraftItem(LocalDate date, String topic, int minutes) {
+    }
+
+    private final LlmClient llm;
+    private final JsonMapper json;
+    private final TaskService taskService;
+    private final StateGraph&lt;PlanState&gt; graph;
+
+    public StudyPlanGraph(LlmClient llm, JsonMapper json, TaskService taskService) {
+        this.llm = llm;
+        this.json = json;
+        this.taskService = taskService;
+        this.graph = new StateGraph&lt;PlanState&gt;()
+                .addNode(&quot;analyze&quot;, this::analyze)
+                .addNode(&quot;draft&quot;, this::draft)
+                .addNode(&quot;validate&quot;, this::validate)
+                .addNode(&quot;revise&quot;, this::revise)
+                .addNode(&quot;finalize&quot;, this::finalizePlan)
+                .addNode(&quot;save&quot;, this::save)
+                .setEntryPoint(&quot;analyze&quot;)
+                .addEdge(&quot;analyze&quot;, &quot;draft&quot;)
+                .addEdge(&quot;draft&quot;, &quot;validate&quot;)
+                .addConditionalEdges(&quot;validate&quot;, this::routeAfterValidate, &quot;revise&quot;, &quot;finalize&quot;)
+                .addEdge(&quot;revise&quot;, &quot;draft&quot;)
+                .addConditionalEdges(&quot;finalize&quot;, s -&gt; s.saveAsTasks ? &quot;save&quot; : StateGraph.END, &quot;save&quot;, StateGraph.END)
+                .addEdge(&quot;save&quot;, StateGraph.END)
+                .compile();
+    }
+
+    public PlanResult run(PlanRequest request) {
+        LocalDate today = LocalDate.now(ZoneId.of(&quot;Asia/Seoul&quot;));
+        long days = ChronoUnit.DAYS.between(today, request.examDate());
+        if (days &gt; MAX_DAYS) {
+            throw new IllegalArgumentException(&quot;시험일은 오늘부터 &quot; + MAX_DAYS + &quot;일 이내로 입력하세요.&quot;);
+        }
+
+        PlanState state = new PlanState();
+        state.goal = request.goal();
+        state.startDate = today;
+        state.lastStudyDate = request.examDate().minusDays(1);
+        state.dailyMinutes = request.dailyMinutes();
+        state.saveAsTasks = request.saveAsTasks();
+
+        List&lt;String&gt; trace = new ArrayList&lt;&gt;();
+        graph.invoke(state, MAX_STEPS, trace);
+
+        return new PlanResult(state.topics, state.items, state.problems, state.revision,
+                state.savedCount, state.summary, trace, graph.toMermaid());
+    }
+
+    // ───────────── 노드들 ─────────────
+
+    /** 🧠 LLM: 목표 → 주제 목록 */
+    PlanState analyze(PlanState s) {
+        String out = llm.generate(PromptTemplates.PLAN_ANALYZE_SYSTEM, PromptTemplates.planAnalyzeUser(s.goal), true);
+        TopicsJson parsed = parse(out, TopicsJson.class);
+        s.topics = parsed.topics() == null ? List.of()
+                : parsed.topics().stream().map(String::trim).filter(t -&gt; !t.isBlank()).limit(8).toList();
+        if (s.topics.isEmpty()) {
+            throw new IllegalStateException(&quot;목표에서 학습 주제를 찾지 못했습니다. 목표를 더 구체적으로 적어 주세요.&quot;);
+        }
+        return s;
+    }
+
+    /** 🧠 LLM: 주제 + 제약 (+ 이전 문제점) → 일정 초안 */
+    PlanState draft(PlanState s) {
+        String out = llm.generate(PromptTemplates.PLAN_DRAFT_SYSTEM,
+                PromptTemplates.planDraftUser(s.topics, s.startDate, s.lastStudyDate, s.dailyMinutes, s.problems), true);
+        try {
+            DraftJson parsed = parse(out, DraftJson.class);
+            s.items = parsed.items() == null ? List.of()
+                    : parsed.items().stream()
+                            .filter(i -&gt; i.date() != null &amp;&amp; i.topic() != null)
+                            .map(i -&gt; new PlanItem(i.date(), i.topic().trim(), i.minutes()))
+                            .toList();
+        } catch (IllegalStateException e) {
+            s.items = List.of();   // 형식이 깨진 초안 → validate가 문제로 보고하고 revise로 보낸다
+        }
+        return s;
+    }
+
+    /** ⚙️ 코드: 규칙 검사 (LLM보다 정확하고, 공짜다) */
+    PlanState validate(PlanState s) {
+        List&lt;String&gt; problems = new ArrayList&lt;&gt;();
+        if (s.items.isEmpty()) {
+            problems.add(&quot;일정 항목이 비어 있거나 JSON 형식이 잘못되었다&quot;);
+        }
+        Map&lt;LocalDate, Integer&gt; perDay = new TreeMap&lt;&gt;();
+        for (PlanItem item : s.items) {
+            if (item.date().isBefore(s.startDate) || item.date().isAfter(s.lastStudyDate)) {
+                problems.add(item.date() + &quot;은(는) 공부 기간(&quot; + s.startDate + &quot; ~ &quot; + s.lastStudyDate + &quot;) 밖이다&quot;);
+            }
+            if (item.minutes() &lt;= 0) {
+                problems.add(item.date() + &quot; '&quot; + item.topic() + &quot;'의 시간이 0분 이하다&quot;);
+            }
+            perDay.merge(item.date(), item.minutes(), Integer::sum);
+        }
+        perDay.forEach((date, minutes) -&gt; {
+            if (minutes &gt; s.dailyMinutes) {
+                problems.add(date + &quot; 합계 &quot; + minutes + &quot;분이 하루 한도 &quot; + s.dailyMinutes + &quot;분을 넘는다&quot;);
+            }
+        });
+        for (String topic : s.topics) {
+            boolean covered = s.items.stream().anyMatch(i -&gt; i.topic().contains(topic) || topic.contains(i.topic()));
+            if (!covered) {
+                problems.add(&quot;주제 '&quot; + topic + &quot;'이(가) 일정에 없다&quot;);
+            }
+        }
+        s.problems = problems;
+        return s;
+    }
+
+    /** 🔀 라우터: 통과면 확정, 아니면 수정 (단, 최대 2회) */
+    String routeAfterValidate(PlanState s) {
+        if (s.problems.isEmpty()) {
+            return &quot;finalize&quot;;
+        }
+        return s.revision &lt; MAX_REVISIONS ? &quot;revise&quot; : &quot;finalize&quot;;
+    }
+
+    /** ⚙️ 코드: 수정 횟수 기록 (문제점은 이미 state.problems에 있어 draft에 전달된다) */
+    PlanState revise(PlanState s) {
+        s.revision++;
+        return s;
+    }
+
+    /** ⚙️ 코드: 정렬 + 요약 */
+    PlanState finalizePlan(PlanState s) {
+        s.items = s.items.stream()
+                .sorted(Comparator.comparing(PlanItem::date).thenComparing(PlanItem::topic))
+                .toList();
+        int total = s.items.stream().mapToInt(PlanItem::minutes).sum();
+        long studyDays = s.items.stream().map(PlanItem::date).distinct().count();
+        s.summary = &quot;%d일 동안 %d개 세션, 총 %d시간 %d분 (수정 %d회)%s&quot;.formatted(
+                studyDays, s.items.size(), total / 60, total % 60, s.revision,
+                s.problems.isEmpty() ? &quot;&quot; : &quot; ⚠️ 해결되지 않은 문제 &quot; + s.problems.size() + &quot;건&quot;);
+        return s;
+    }
+
+    /** ⚙️ 코드(부작용): 할 일로 등록 — saveAsTasks가 true일 때만 도달 */
+    PlanState save(PlanState s) {
+        for (PlanItem item : s.items) {
+            String title = &quot;[계획] &quot; + (item.topic().length() &gt; 90 ? item.topic().substring(0, 90) : item.topic());
+            taskService.create(new TaskRequest(title, &quot;학습계획&quot;, item.date(), Math.min(item.minutes(), 600)));
+        }
+        s.savedCount = s.items.size();
+        return s;
+    }
+
+    private &lt;T&gt; T parse(String text, Class&lt;T&gt; type) {
+        String cleaned = text.strip();
+        if (cleaned.startsWith(&quot;```&quot;)) {   // 혹시 코드 블록으로 감싸 오면 벗겨 낸다
+            cleaned = cleaned.replaceFirst(&quot;^```(json)?&quot;, &quot;&quot;).replaceFirst(&quot;```$&quot;, &quot;&quot;).strip();
+        }
+        try {
+            return json.readValue(cleaned, type);
+        } catch (JacksonException e) {
+            throw new IllegalStateException(&quot;AI 응답 JSON을 해석하지 못했습니다: &quot; + e.getOriginalMessage());
+        }
+    }
+}</code></pre></div>
+<blockquote class="tip"><p>💡 Spring Boot 4는 Jackson 3의 <code>JsonMapper</code>(<code>tools.jackson.databind.json.JsonMapper</code>)를 빈으로 등록해 두므로 생성자로 주입받아 쓰면 됩니다. Jackson 3의 예외(<code>JacksonException</code>)는 <strong>언체크 예외</strong>라서 <code>throws</code>를 쓰지 않아도 됩니다.</p>
+</blockquote>
+<h3 id="45-참고-코드-컨트롤러와-예외-처리">4.5 📄 참고 코드 — 컨트롤러와 예외 처리<a class="anchor" href="#45-참고-코드-컨트롤러와-예외-처리" aria-label="이 절의 링크">#</a></h3>
+<p><code>graph/GraphController.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.graph;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping(&quot;/api/ai&quot;)
+public class GraphController {
+
+    private final StudyPlanGraph studyPlanGraph;
+
+    public GraphController(StudyPlanGraph studyPlanGraph) {
+        this.studyPlanGraph = studyPlanGraph;
+    }
+
+    @PostMapping(&quot;/plan&quot;)
+    public PlanResult plan(@Valid @RequestBody PlanRequest request) {
+        return studyPlanGraph.run(request);
+    }
+}</code></pre></div>
+<p><code>common/GlobalExceptionHandler.java</code>에 <strong>추가</strong> (잘못된 입력 → 400):</p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">    @ExceptionHandler(IllegalArgumentException.class)
+    public ProblemDetail handleIllegalArgument(IllegalArgumentException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    }</code></pre></div>
+<h3 id="46-참고-코드-워크플로우-테스트-가짜-llm으로-경로-검증">4.6 📄 참고 코드 — 워크플로우 테스트 (가짜 LLM으로 경로 검증)<a class="anchor" href="#46-참고-코드-워크플로우-테스트-가짜-llm으로-경로-검증" aria-label="이 절의 링크">#</a></h3>
+<p>5주차의 <code>FakeLlmClient</code>를 재사용합니다. <strong>LLM 응답 순서를 각본으로</strong> 정해 두고, 그래프가 <strong>어떤 경로로 지나갔는지</strong>를 검증합니다.</p>
+<p><code>backend/src/test/java/com/example/planner/graph/StudyPlanGraphTest.java</code></p>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner.graph;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.planner.ai.FakeLlmClient;
+import com.example.planner.task.TaskService;
+
+@SpringBootTest
+@Transactional
+class StudyPlanGraphTest {
+
+    @TestConfiguration
+    static class FakeLlmConfig {
+        @Bean
+        @Primary
+        FakeLlmClient fakeLlmClient() {
+            return new FakeLlmClient();
+        }
+    }
+
+    @Autowired StudyPlanGraph planGraph;
+    @Autowired FakeLlmClient fakeLlm;
+    @Autowired TaskService taskService;
+
+    final LocalDate today = LocalDate.now(ZoneId.of(&quot;Asia/Seoul&quot;));
+
+    @BeforeEach
+    void setUp() {
+        fakeLlm.reset();
+    }
+
+    private String item(int plusDays, String topic, int minutes) {
+        return &quot;{\&quot;date\&quot;:\&quot;%s\&quot;,\&quot;topic\&quot;:\&quot;%s\&quot;,\&quot;minutes\&quot;:%d}&quot;.formatted(today.plusDays(plusDays), topic, minutes);
+    }
+
+    @Test
+    void 첫_초안이_한도를_넘으면_수정_경로를_거쳐_통과한다() {
+        fakeLlm.willReturn(
+                &quot;{\&quot;topics\&quot;:[\&quot;SQL\&quot;,\&quot;정규화\&quot;]}&quot;,                                         // analyze
+                &quot;{\&quot;items\&quot;:[&quot; + item(0, &quot;SQL&quot;, 100) + &quot;,&quot; + item(0, &quot;정규화&quot;, 60) + &quot;]}&quot;,   // draft 1: 160분 &gt; 120분
+                &quot;{\&quot;items\&quot;:[&quot; + item(0, &quot;SQL&quot;, 100) + &quot;,&quot; + item(1, &quot;정규화&quot;, 90) + &quot;]}&quot;);  // draft 2: 통과
+
+        PlanResult result = planGraph.run(new PlanRequest(&quot;DB 기말고사 대비&quot;, today.plusDays(5), 120, false));
+
+        assertThat(result.trace()).containsExactly(
+                &quot;analyze&quot;, &quot;draft&quot;, &quot;validate&quot;, &quot;revise&quot;, &quot;draft&quot;, &quot;validate&quot;, &quot;finalize&quot;);
+        assertThat(result.revisions()).isEqualTo(1);
+        assertThat(result.problems()).isEmpty();
+        assertThat(result.items()).hasSize(2);
+        // 두 번째 draft 프롬프트에 validate의 피드백이 들어갔는가?
+        assertThat(fakeLlm.lastUserPrompt()).contains(&quot;이전 초안의 문제점&quot;).contains(&quot;하루 한도&quot;);
+    }
+
+    @Test
+    void 계속_실패하면_최대_수정_횟수_후_문제를_안고_확정한다() {
+        String bad = &quot;{\&quot;items\&quot;:[&quot; + item(0, &quot;SQL&quot;, 500) + &quot;]}&quot;;   // 한도 초과 + 정규화 누락
+        fakeLlm.willReturn(&quot;{\&quot;topics\&quot;:[\&quot;SQL\&quot;,\&quot;정규화\&quot;]}&quot;, bad, bad, bad);
+
+        PlanResult result = planGraph.run(new PlanRequest(&quot;DB 기말고사 대비&quot;, today.plusDays(5), 120, false));
+
+        assertThat(result.revisions()).isEqualTo(StudyPlanGraph.MAX_REVISIONS);
+        assertThat(result.trace()).filteredOn(&quot;draft&quot;::equals).hasSize(3);
+        assertThat(result.problems()).isNotEmpty();
+        assertThat(result.summary()).contains(&quot;해결되지 않은 문제&quot;);
+        assertThat(fakeLlm.callCount()).isEqualTo(4);   // analyze 1 + draft 3 — 상한이 명확하다!
+    }
+
+    @Test
+    void 저장을_선택하면_save_노드를_지나_할일이_등록된다() {
+        fakeLlm.willReturn(
+                &quot;{\&quot;topics\&quot;:[\&quot;SQL\&quot;]}&quot;,
+                &quot;{\&quot;items\&quot;:[&quot; + item(1, &quot;SQL&quot;, 60) + &quot;]}&quot;);
+
+        PlanResult result = planGraph.run(new PlanRequest(&quot;SQL 복습&quot;, today.plusDays(3), 120, true));
+
+        assertThat(result.trace()).endsWith(&quot;finalize&quot;, &quot;save&quot;);
+        assertThat(result.savedCount()).isEqualTo(1);
+        assertThat(taskService.findAll()).anyMatch(t -&gt; t.title().equals(&quot;[계획] SQL&quot;));
+    }
+}</code></pre></div>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">cd backend &amp;&amp; ./gradlew test</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">StudyPlanGraphTest &gt; 첫_초안이_한도를_넘으면_수정_경로를_거쳐_통과한다() PASSED
+StudyPlanGraphTest &gt; 계속_실패하면_최대_수정_횟수_후_문제를_안고_확정한다() PASSED
+StudyPlanGraphTest &gt; 저장을_선택하면_save_노드를_지나_할일이_등록된다() PASSED
+BUILD SUCCESSFUL</code></pre></div>
+<p>세 테스트는 각각 <strong>그래프의 세 가지 경로</strong>(수정 후 통과 / 수정 한도 도달 / 저장)를 검증합니다. &quot;LLM 호출이 최대 4번&quot;이라는 <strong>비용 상한</strong>도 테스트로 보장했습니다.</p>
+<h3 id="47-결과-확인-실제-모델로-실행">4.7 ✅ 결과 확인 — 실제 모델로 실행<a class="anchor" href="#47-결과-확인-실제-모델로-실행" aria-label="이 절의 링크">#</a></h3>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">curl -s -X POST localhost:8080/api/ai/plan -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;goal&quot;:&quot;데이터베이스 기말고사: SQL 조인, 서브쿼리, 정규화, 트랜잭션, 인덱스&quot;,&quot;examDate&quot;:&quot;2026-12-05&quot;,&quot;dailyMinutes&quot;:120,&quot;saveAsTasks&quot;:false}'</code></pre></div>
+<blockquote class="warn"><p>⚠️ <code>examDate</code>는 <strong>오늘 이후 30일 이내</strong>의 날짜로 바꿔서 실행하세요.</p>
+</blockquote>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 응답 예 (모델에 따라 다름)</span></h4>
+<div class="code-block"><div class="code-head"><span>json</span><button class="copy" type="button">복사</button></div><pre><code class="language-json">{
+  &quot;topics&quot;: [&quot;SQL 조인&quot;, &quot;서브쿼리&quot;, &quot;정규화&quot;, &quot;트랜잭션&quot;],
+  &quot;items&quot;: [
+    { &quot;date&quot;: &quot;2026-11-25&quot;, &quot;topic&quot;: &quot;SQL 조인&quot;, &quot;minutes&quot;: 120 },
+    { &quot;date&quot;: &quot;2026-11-26&quot;, &quot;topic&quot;: &quot;서브쿼리&quot;, &quot;minutes&quot;: 90 }
+  ],
+  &quot;problems&quot;: [],
+  &quot;revisions&quot;: 1,
+  &quot;savedCount&quot;: 0,
+  &quot;summary&quot;: &quot;5일 동안 6개 세션, 총 9시간 30분 (수정 1회)&quot;,
+  &quot;trace&quot;: [&quot;analyze&quot;, &quot;draft&quot;, &quot;validate&quot;, &quot;revise&quot;, &quot;draft&quot;, &quot;validate&quot;, &quot;finalize&quot;],
+  &quot;mermaid&quot;: &quot;flowchart TD\n    START((시작)) --&gt; analyze\n ...&quot;
+}</code></pre></div>
+<p>응답의 <code>trace</code>로 그래프가 실제로 지나간 경로를, <code>mermaid</code>로 그래프 구조를 확인할 수 있습니다. <code>mermaid</code> 값을 <a href="https://mermaid.live">mermaid.live</a>에 붙여 넣으면 그림으로 볼 수 있습니다.</p>
+<hr>
+<h2 id="5-실습-③-프론트엔드-계획-화면">5. 실습 ③ 프론트엔드: 계획 화면<a class="anchor" href="#5-실습-③-프론트엔드-계획-화면" aria-label="이 절의 링크">#</a></h2>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 계획 화면</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">&quot;🗺️ AI 계획&quot; 탭을 추가해 줘.
+- src/api.ts에 PlanItem, PlanResult, PlanInput 타입과 aiApi.plan(input)
+- pages/PlanPage.tsx: 목표(textarea), 시험일, 하루 분, &quot;할 일로 저장&quot; 체크박스, 계획 만들기 버튼
+- 결과: 실행 경로를 노드 아이콘(🧠 analyze/draft, ⚙️ validate, 🔁 revise, 📦 finalize, 💾 save) 배지로 순서대로,
+  요약, 남은 문제(있으면 error 스타일), 일정 표(날짜·주제·시간), Mermaid 원문(trace 클래스)
+- App.tsx에 네 번째 탭으로 추가</code></pre></div>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — api.ts 추가분</span></h4>
+<p><code>src/api.ts</code>에 <strong>추가</strong>:</p>
+<div class="code-block"><div class="code-head"><span>ts</span><button class="copy" type="button">복사</button></div><pre><code class="language-typescript">export interface PlanItem {
+  date: string;
+  topic: string;
+  minutes: number;
+}
+
+export interface PlanResult {
+  topics: string[];
+  items: PlanItem[];
+  problems: string[];
+  revisions: number;
+  savedCount: number;
+  summary: string;
+  trace: string[];
+  mermaid: string;
+}
+
+export interface PlanInput {
+  goal: string;
+  examDate: string;
+  dailyMinutes: number;
+  saveAsTasks: boolean;
+}</code></pre></div>
+<p><code>aiApi</code>에 한 줄 추가:</p>
+<div class="code-block"><div class="code-head"><span>ts</span><button class="copy" type="button">복사</button></div><pre><code class="language-typescript">  plan: (input: PlanInput) =&gt; post&lt;PlanResult&gt;('/api/ai/plan', input),</code></pre></div>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — PlanPage.tsx / App.tsx (최종)</span></h4>
+<p><code>src/pages/PlanPage.tsx</code></p>
+<div class="code-block"><div class="code-head"><span>tsx</span><button class="copy" type="button">복사</button></div><pre><code class="language-typescript">import { useState } from 'react';
+import { aiApi } from '../api';
+import type { PlanResult } from '../api';
+
+const NODE_ICON: Record&lt;string, string&gt; = {
+  analyze: '🧠', draft: '🧠', validate: '⚙️', revise: '🔁', finalize: '📦', save: '💾',
+};
+
+export default function PlanPage() {
+  const [goal, setGoal] = useState('데이터베이스 기말고사: SQL 조인, 서브쿼리, 정규화, 트랜잭션');
+  const [examDate, setExamDate] = useState('');
+  const [dailyMinutes, setDailyMinutes] = useState(120);
+  const [saveAsTasks, setSaveAsTasks] = useState(false);
+  const [result, setResult] = useState&lt;PlanResult | null&gt;(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState&lt;string | null&gt;(null);
+
+  async function run() {
+    if (!goal.trim() || !examDate) return;
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      setResult(await aiApi.plan({ goal, examDate, dailyMinutes, saveAsTasks }));
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    &lt;&gt;
+      &lt;section className=&quot;card&quot;&gt;
+        &lt;h2&gt;🗺️ AI 학습계획 (그래프 워크플로우)&lt;/h2&gt;
+        &lt;textarea style={{ minHeight: 70 }} value={goal} onChange={(e) =&gt; setGoal(e.target.value)} /&gt;
+        &lt;div className=&quot;row&quot;&gt;
+          &lt;label&gt;시험일 &lt;input type=&quot;date&quot; value={examDate} onChange={(e) =&gt; setExamDate(e.target.value)} /&gt;&lt;/label&gt;
+          &lt;label&gt;
+            하루 &lt;input type=&quot;number&quot; min={30} max={720} step={30} style={{ width: 90 }}
+              value={dailyMinutes} onChange={(e) =&gt; setDailyMinutes(Number(e.target.value))} /&gt;분
+          &lt;/label&gt;
+          &lt;label&gt;
+            &lt;input type=&quot;checkbox&quot; checked={saveAsTasks} onChange={(e) =&gt; setSaveAsTasks(e.target.checked)} /&gt; 할 일로 저장
+          &lt;/label&gt;
+          &lt;button className=&quot;primary&quot; disabled={loading} onClick={() =&gt; void run()}&gt;
+            {loading ? '그래프 실행 중...' : '계획 만들기'}
+          &lt;/button&gt;
+        &lt;/div&gt;
+        {error &amp;&amp; &lt;p className=&quot;error&quot;&gt;{error}&lt;/p&gt;}
+      &lt;/section&gt;
+
+      {result &amp;&amp; (
+        &lt;&gt;
+          &lt;section className=&quot;card&quot;&gt;
+            &lt;h2&gt;🧭 실행 경로&lt;/h2&gt;
+            &lt;div className=&quot;row&quot;&gt;
+              {result.trace.map((node, i) =&gt; (
+                &lt;span key={i} className=&quot;badge&quot;&gt;
+                  {i + 1}. {NODE_ICON[node] ?? '•'} {node}
+                &lt;/span&gt;
+              ))}
+            &lt;/div&gt;
+            &lt;p className=&quot;muted&quot;&gt;{result.summary}&lt;/p&gt;
+            {result.savedCount &gt; 0 &amp;&amp; &lt;p&gt;💾 할 일 {result.savedCount}개가 등록되었습니다.&lt;/p&gt;}
+            {result.problems.length &gt; 0 &amp;&amp; (
+              &lt;div className=&quot;error&quot;&gt;
+                ⚠️ 남은 문제
+                &lt;ul&gt;{result.problems.map((p) =&gt; &lt;li key={p}&gt;{p}&lt;/li&gt;)}&lt;/ul&gt;
+              &lt;/div&gt;
+            )}
+          &lt;/section&gt;
+
+          &lt;section className=&quot;card&quot;&gt;
+            &lt;h2&gt;📅 학습 일정 — 주제: {result.topics.join(', ')}&lt;/h2&gt;
+            &lt;table&gt;
+              &lt;thead&gt;
+                &lt;tr&gt;&lt;th&gt;날짜&lt;/th&gt;&lt;th&gt;주제&lt;/th&gt;&lt;th&gt;시간&lt;/th&gt;&lt;/tr&gt;
+              &lt;/thead&gt;
+              &lt;tbody&gt;
+                {result.items.map((it, i) =&gt; (
+                  &lt;tr key={i}&gt;&lt;td&gt;{it.date}&lt;/td&gt;&lt;td&gt;{it.topic}&lt;/td&gt;&lt;td&gt;{it.minutes}분&lt;/td&gt;&lt;/tr&gt;
+                ))}
+              &lt;/tbody&gt;
+            &lt;/table&gt;
+          &lt;/section&gt;
+
+          &lt;section className=&quot;card&quot;&gt;
+            &lt;h2&gt;🕸️ 그래프 구조 (Mermaid)&lt;/h2&gt;
+            &lt;pre className=&quot;trace&quot;&gt;{result.mermaid}&lt;/pre&gt;
+          &lt;/section&gt;
+        &lt;/&gt;
+      )}
+    &lt;/&gt;
+  );
+}</code></pre></div>
+<p><code>src/App.tsx</code>에 탭 추가 (최종 형태):</p>
+<div class="code-block"><div class="code-head"><span>tsx</span><button class="copy" type="button">복사</button></div><pre><code class="language-typescript">import { useState } from 'react';
+import './App.css';
+import TaskPage from './pages/TaskPage';
+import NotePage from './pages/NotePage';
+import CoachPage from './pages/CoachPage';
+import PlanPage from './pages/PlanPage';
+
+type Tab = 'tasks' | 'notes' | 'coach' | 'plan';
+
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'tasks', label: '✅ 할 일' },
+  { key: 'notes', label: '📝 노트' },
+  { key: 'coach', label: '🤖 AI 코치' },
+  { key: 'plan', label: '🗺️ AI 계획' },
+];
+
+export default function App() {
+  const [tab, setTab] = useState&lt;Tab&gt;('tasks');
+
+  return (
+    &lt;div className=&quot;app&quot;&gt;
+      &lt;header&gt;
+        &lt;h1&gt;📚 AI 스터디 플래너&lt;/h1&gt;
+        &lt;nav&gt;
+          {TABS.map((t) =&gt; (
+            &lt;button key={t.key} className={tab === t.key ? 'active' : ''} onClick={() =&gt; setTab(t.key)}&gt;
+              {t.label}
+            &lt;/button&gt;
+          ))}
+        &lt;/nav&gt;
+      &lt;/header&gt;
+      &lt;main&gt;
+        {tab === 'tasks' &amp;&amp; &lt;TaskPage /&gt;}
+        {tab === 'notes' &amp;&amp; &lt;NotePage /&gt;}
+        {tab === 'coach' &amp;&amp; &lt;CoachPage /&gt;}
+        {tab === 'plan' &amp;&amp; &lt;PlanPage /&gt;}
+      &lt;/main&gt;
+    &lt;/div&gt;
+  );
+}</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 계획 화면</span></h4>
+<p><img src="https://raw.githubusercontent.com/timeleverage-kim/SpecialLecture-2026-AI-Engineering/main/docs/images/week07-plan.png" alt="7주차 결과 화면: AI 학습계획 그래프 실행 결과"></p>
+<ul>
+<li><strong>실행 경로</strong>에 <code>revise</code>가 보이면, 첫 초안이 코드 검증에서 떨어졌다가 <strong>피드백을 받아 고쳐진</strong> 것입니다.</li>
+<li>&quot;할 일로 저장&quot;을 체크하고 실행한 뒤 <strong>✅ 할 일 탭</strong>에 <code>[계획] ...</code> 항목이 생겼는지 확인하세요.</li>
+<li>하루 분을 30분처럼 아주 작게 주면 검증이 계속 실패해 <strong>수정 2회 후 &quot;해결되지 않은 문제&quot;와 함께 확정</strong>되는 경로도 볼 수 있습니다.</li>
+</ul>
+<h3 id="커밋">커밋<a class="anchor" href="#커밋" aria-label="이 절의 링크">#</a></h3>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">git add .
+git commit -m &quot;feat: StateGraph 엔진과 학습계획 생성 그래프 워크플로우 추가&quot;
+git tag week-07 &amp;&amp; git push &amp;&amp; git push origin week-07</code></pre></div>
+<hr>
+<h2 id="6-참고-같은-그래프를-langgraph로-쓰면">6. 참고: 같은 그래프를 LangGraph로 쓰면?<a class="anchor" href="#6-참고-같은-그래프를-langgraph로-쓰면" aria-label="이 절의 링크">#</a></h2>
+<p>업계 표준 라이브러리인 LangGraph(TypeScript 버전)로 같은 구조를 쓰면 아래와 같습니다. <strong>우리 엔진과 1:1로 대응</strong>하는 것을 확인하세요. (실행 실습은 하지 않습니다.)</p>
+<div class="code-block"><div class="code-head"><span>ts</span><button class="copy" type="button">복사</button></div><pre><code class="language-typescript">import { Annotation, StateGraph, START, END } from '@langchain/langgraph';
+
+const PlanState = Annotation.Root({
+  goal: Annotation&lt;string&gt;(),
+  topics: Annotation&lt;string[]&gt;(),
+  items: Annotation&lt;{ date: string; topic: string; minutes: number }[]&gt;(),
+  problems: Annotation&lt;string[]&gt;(),
+  revision: Annotation&lt;number&gt;(),
+  saveAsTasks: Annotation&lt;boolean&gt;(),
+});
+
+const graph = new StateGraph(PlanState)
+  .addNode('analyze', analyze)          // 노드 = (state) =&gt; 부분 상태 업데이트
+  .addNode('draft', draft)
+  .addNode('validate', validate)
+  .addNode('revise', revise)
+  .addNode('finalize', finalize)
+  .addNode('save', save)
+  .addEdge(START, 'analyze')
+  .addEdge('analyze', 'draft')
+  .addEdge('draft', 'validate')
+  .addConditionalEdges('validate', routeAfterValidate, ['revise', 'finalize'])
+  .addEdge('revise', 'draft')
+  .addConditionalEdges('finalize', (s) =&gt; (s.saveAsTasks ? 'save' : END), ['save', END])
+  .addEdge('save', END)
+  .compile();</code></pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>우리 엔진</th>
+<th>LangGraph</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>PlanState</code> 클래스</td>
+<td><code>Annotation.Root</code></td>
+<td>LangGraph는 노드가 <strong>바뀐 부분만</strong> 반환하고 <strong>리듀서</strong>가 합침</td>
+</tr>
+<tr>
+<td><code>setEntryPoint</code></td>
+<td><code>addEdge(START, ...)</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>maxSteps</code></td>
+<td><code>recursionLimit</code> 설정</td>
+<td></td>
+</tr>
+<tr>
+<td><code>trace</code></td>
+<td>스트리밍·LangSmith 추적</td>
+<td></td>
+</tr>
+<tr>
+<td>(없음)</td>
+<td><strong>체크포인터</strong></td>
+<td>중간 상태 저장 → 사람 승인 후 재개, 장애 복구</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="7-6단계-총정리-오늘까지-만든-것">7. 6단계 총정리: 오늘까지 만든 것<a class="anchor" href="#7-6단계-총정리-오늘까지-만든-것" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>프로젝트에서 어디에?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>바이브코딩</td>
+<td>프로젝트 뼈대, D-Day 카운터</td>
+</tr>
+<tr>
+<td>프롬프트</td>
+<td><code>PromptTemplates</code> (요약·질의응답·분석·초안)</td>
+</tr>
+<tr>
+<td>컨텍스트</td>
+<td><code>CLAUDE.md</code>, <code>docs/</code>, RAG(<code>NoteRetriever</code>), 노드별 최소 컨텍스트</td>
+</tr>
+<tr>
+<td>하네스</td>
+<td><code>.claude/</code> 권한·Hooks·Skill·Subagent, 테스트, CI</td>
+</tr>
+<tr>
+<td>루프</td>
+<td><code>StudyCoachAgent</code>(도구 루프), Stop Hook·<code>fix-loop.sh</code>(검증 루프)</td>
+</tr>
+<tr>
+<td>그래프</td>
+<td><code>StateGraph</code> + <code>StudyPlanGraph</code>(LLM 노드 + 코드 검증 노드 + 조건부 순환)</td>
+</tr>
+</tbody></table></div>
+<div class="diagram"><pre class="mermaid">flowchart TB
+    subgraph APP[&quot;AI 스터디 플래너 안의 AI 기능&quot;]
+        SUM[&quot;노트 요약&lt;br/&gt;(프롬프트)&quot;]
+        ASK[&quot;노트 Q&amp;A&lt;br/&gt;(컨텍스트·RAG)&quot;]
+        COACH[&quot;AI 코치&lt;br/&gt;(루프)&quot;]
+        PLAN[&quot;AI 계획&lt;br/&gt;(그래프)&quot;]
+    end
+    subgraph DEV[&quot;개발 환경 (Claude Code)&quot;]
+        CM[&quot;CLAUDE.md·docs&lt;br/&gt;(컨텍스트)&quot;]
+        HN[&quot;권한·Hooks·Skill·Subagent·테스트·CI&lt;br/&gt;(하네스)&quot;]
+        LP[&quot;Stop Hook·fix-loop&lt;br/&gt;(루프)&quot;]
+    end
+    DEV --&gt;|&quot;만든다&quot;| APP</pre></div>
+<h2 id="8-과제">8. 과제<a class="anchor" href="#8-과제" aria-label="이 절의 링크">#</a></h2>
+<ol>
+<li><strong>필수</strong>: <code>week-07</code> 태그 push, 계획 화면 캡처 (실행 경로에 <code>revise</code>가 포함된 사례가 있으면 더 좋음)</li>
+<li><strong>필수</strong>: 내 그래프를 노드 설계표(4.1) 형식으로 다시 설명하는 짧은 글 작성 (README에 쓸 재료!)</li>
+<li><strong>도전 ①</strong>: <code>validate</code> 다음에 <strong>LLM 평가 노드</strong>(<code>review</code>: &quot;학습 순서가 자연스러운가?&quot;)를 추가해 <strong>코드 평가 + LLM 평가</strong>를 함께 쓰는 그래프로 확장해 보세요.</li>
+<li><strong>도전 ②</strong>: 라우팅 패턴으로 <strong>&quot;질문 분류 그래프&quot;</strong> 를 만들어 보세요. 질문을 <code>PLAN/COACH/NOTE</code>로 분류해 각각 계획 그래프·코치 에이전트·RAG로 보내는 하나의 <code>/api/ai/chat</code> 엔드포인트.</li>
+</ol>
+<hr>
+<h2 id="9-지금까지의-진행-상황-다음-주-예고">9. 지금까지의 진행 상황 &amp; 다음 주 예고<a class="anchor" href="#9-지금까지의-진행-상황-다음-주-예고" aria-label="이 절의 링크">#</a></h2>
+<h3 id="91-7주차까지-진행-상황-6단계-엔지니어링-완주">9.1 7주차까지 진행 상황 — 6단계 엔지니어링 완주!<a class="anchor" href="#91-7주차까지-진행-상황-6단계-엔지니어링-완주" aria-label="이 절의 링크">#</a></h3>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    W1[&quot;✅ 1주&quot;]:::done --&gt; W2[&quot;✅ 2주&quot;]:::done --&gt; W3[&quot;✅ 3주&quot;]:::done --&gt; W4[&quot;✅ 4주&quot;]:::done --&gt; W5[&quot;✅ 5주&quot;]:::done --&gt; W6[&quot;✅ 6주&quot;]:::done --&gt; W7[&quot;✅ 7주&lt;br/&gt;그래프&quot;]:::done --&gt; W8[&quot;8주&lt;br/&gt;CI/CD&quot;] --&gt; W9[&quot;9주&quot;]
+    classDef done fill:#dcfce7,stroke:#16a34a</pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>구분</th>
+<th>완료한 것</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>개념</td>
+<td>루프 vs 그래프, 노드·엣지·상태, 조건부 엣지·순환·안전장치, 5가지 워크플로우 패턴, 결정적 검증</td>
+</tr>
+<tr>
+<td>백엔드</td>
+<td><code>StateGraph</code> 엔진(+테스트), <code>StudyPlanGraph</code>(LLM 2노드 + 코드 4노드), <code>POST /api/ai/plan</code>, 경로 테스트</td>
+</tr>
+<tr>
+<td>프론트엔드</td>
+<td>AI 계획 탭(실행 경로·일정표·Mermaid) — <strong>앱 기능 완성</strong></td>
+</tr>
+<tr>
+<td>Git</td>
+<td><code>week-07</code> 태그</td>
+</tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>AI 기능</th>
+<th>사용한 엔지니어링</th>
+<th>엔드포인트</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>노트 요약</td>
+<td>프롬프트</td>
+<td><code>POST /api/ai/summary</code></td>
+</tr>
+<tr>
+<td>노트 Q&amp;A</td>
+<td>컨텍스트(RAG)</td>
+<td><code>POST /api/ai/ask</code></td>
+</tr>
+<tr>
+<td>AI 코치</td>
+<td>루프</td>
+<td><code>POST /api/ai/coach</code></td>
+</tr>
+<tr>
+<td>AI 계획</td>
+<td><strong>그래프</strong></td>
+<td><code>POST /api/ai/plan</code></td>
+</tr>
+<tr>
+<td>(개발 전체)</td>
+<td>바이브·프롬프트·컨텍스트·하네스·루프</td>
+<td>Claude Code + <code>.claude/</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="92-다음-주8주차-예고-cicd-완성과-aws-배포">9.2 다음 주(8주차) 예고 — CI/CD 완성과 AWS 배포<a class="anchor" href="#92-다음-주8주차-예고-cicd-완성과-aws-배포" aria-label="이 절의 링크">#</a></h3>
+<ul>
+<li><strong>배울 것</strong>: 지금 앱은 <strong>내 PC에서만</strong> 동작합니다. main에 push하면 <strong>테스트 → Docker 이미지 빌드 → GHCR 업로드 → AWS EC2 자동 배포 → 헬스 체크</strong>까지 이어지는 파이프라인을 만들어, 누구나 인터넷 주소로 접속할 수 있게 합니다.</li>
+<li><strong>왜 배우나</strong>: 포트폴리오는 <strong>&quot;실제로 동작하는 주소&quot;</strong> 가 있을 때 설득력이 훨씬 큽니다. 그리고 자동 배포는 AI 시대에 &quot;많이, 자주 바뀌는 코드&quot;를 안전하게 내보내는 필수 기술입니다.</li>
+<li><strong>미리 준비 (중요!)</strong>: ① <strong>AWS 계정 생성</strong>(결제 수단 필요할 수 있음) ② 계정 상태·크레딧 확인 ③ GitHub CLI(<code>gh</code>) 설치 권장</li>
+</ul>
+<hr>
+<h2 id="10-일본-취업-대비-it-용어-7주차">10. 🇯🇵 일본 취업 대비 IT 용어 (7주차)<a class="anchor" href="#10-일본-취업-대비-it-용어-7주차" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>한국어</th>
+<th>日本語</th>
+<th>읽는 법</th>
+<th>예문 (日本語)</th>
+<th>예문 해석</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>워크플로우</td>
+<td>ワークフロー</td>
+<td>와-쿠후로-</td>
+<td>学習計画の作成をワークフローとして設計しました。</td>
+<td>학습계획 작성을 워크플로우로 설계했습니다.</td>
+</tr>
+<tr>
+<td>노드 / 엣지</td>
+<td>ノード / エッジ</td>
+<td>노-도 / 엣지</td>
+<td>各ノードの役割を一つに絞りました。</td>
+<td>각 노드의 역할을 하나로 좁혔습니다.</td>
+</tr>
+<tr>
+<td>상태</td>
+<td>状態（ステート）</td>
+<td>じょうたい</td>
+<td>ノード間で共有する状態を一つのクラスにまとめました。</td>
+<td>노드 간에 공유하는 상태를 하나의 클래스로 정리했습니다.</td>
+</tr>
+<tr>
+<td>분기</td>
+<td>分岐</td>
+<td>ぶんき</td>
+<td>検証結果によって処理を分岐させています。</td>
+<td>검증 결과에 따라 처리를 분기시키고 있습니다.</td>
+</tr>
+<tr>
+<td>조건 분기</td>
+<td>条件分岐</td>
+<td>じょうけんぶんき</td>
+<td>条件分岐で修正か確定かを判断します。</td>
+<td>조건 분기로 수정할지 확정할지 판단합니다.</td>
+</tr>
+<tr>
+<td>상태 전이</td>
+<td>状態遷移</td>
+<td>じょうたいせんい</td>
+<td>状態遷移図をもとに実装しました。</td>
+<td>상태 전이도를 바탕으로 구현했습니다.</td>
+</tr>
+<tr>
+<td>순환</td>
+<td>循環（サイクル）</td>
+<td>じゅんかん</td>
+<td>修正の循環は最大2回までに制限しました。</td>
+<td>수정 순환은 최대 2회로 제한했습니다.</td>
+</tr>
+<tr>
+<td>병렬 처리</td>
+<td>並列処理</td>
+<td>へいれつしょり</td>
+<td>独立したタスクは並列処理できる構成です。</td>
+<td>독립적인 작업은 병렬 처리할 수 있는 구성입니다.</td>
+</tr>
+<tr>
+<td>오케스트레이션</td>
+<td>オーケストレーション</td>
+<td>오-케스토레-숀</td>
+<td>複数のAI処理のオーケストレーションを担当しました。</td>
+<td>여러 AI 처리의 오케스트레이션을 담당했습니다.</td>
+</tr>
+<tr>
+<td>결정적</td>
+<td>決定論的</td>
+<td>けっていろんてき</td>
+<td>LLMの出力を決定論的なコードで検証しました。</td>
+<td>LLM의 출력을 결정적인 코드로 검증했습니다.</td>
+</tr>
+<tr>
+<td>승인</td>
+<td>承認</td>
+<td>しょうにん</td>
+<td>データを登録する前にユーザーの承認を必要としました。</td>
+<td>데이터를 등록하기 전에 사용자의 승인을 필요로 했습니다.</td>
+</tr>
+<tr>
+<td>가시화</td>
+<td>可視化</td>
+<td>かしか</td>
+<td>実行経路を画面に可視化しました。</td>
+<td>실행 경로를 화면에 가시화했습니다.</td>
+</tr>
+</tbody></table></div>
+<blockquote class="speak"><p>💬 <strong>면접에서 이렇게 말해 보세요</strong></p>
+<p>「判断はLLMに任せ、確認はコードで行うというルールでワークフローを設計しました。」</p>
+<p>(판단은 LLM에게 맡기고 확인은 코드로 한다는 규칙으로 워크플로우를 설계했습니다.)</p>
+</blockquote>
+<p><a href="week06-loop-engineering.html">← 6주차</a> · <a href="week08-cicd-aws.html">8주차: CI/CD와 AWS 배포 →</a></p>
+
+</article>
+<nav class="pager">
+  <a href="week06-loop-engineering.html"><small>← 이전</small>6주차 · 루프</a>
+  <a class="next" href="week08-cicd-aws.html"><small>다음 →</small>8주차 · CI/CD·AWS</a>
+</nav>
+</main>
+<aside class="toc"><h4>이 페이지에서</h4>
+<a class="h2" href="#0-수업-진행표-3시간">0. 수업 진행표 (3시간)</a>
+<a class="h2" href="#1-학습-목표">1. 학습 목표</a>
+<a class="h2" href="#2-개념-①-왜-그래프인가">2. 개념 ① 왜 그래프인가?</a>
+<a class="h3" href="#21-비유-자유여행-vs-패키지여행">2.1 비유: 자유여행 vs 패키지여행</a>
+<a class="h3" href="#22-같은-일을-두-방식으로">2.2 같은 일을 두 방식으로</a>
+<a class="h3" href="#23-그래프의-세-요소">2.3 그래프의 세 요소</a>
+<a class="h3" href="#24-순환cycle과-안전장치">2.4 순환(cycle)과 안전장치</a>
+<a class="h3" href="#25-대표-워크플로우-패턴-5가지">2.5 대표 워크플로우 패턴 5가지</a>
+<a class="h3" href="#26-루프-그래프-비교-정리">2.6 루프 · 그래프 비교 정리</a>
+<a class="h2" href="#3-실습-①-그래프-엔진-직접-만들기">3. 실습 ① 그래프 엔진 직접 만들기</a>
+<a class="h3" href="#31-참고-코드-엔진-코드">3.1 📄 참고 코드 — 엔진 코드</a>
+<a class="h3" href="#32-참고-코드-엔진-테스트-llm-없이">3.2 📄 참고 코드 — 엔진 테스트 (LLM 없이)</a>
+<a class="h2" href="#4-실습-②-학습계획-생성-워크플로우">4. 실습 ② 학습계획 생성 워크플로우</a>
+<a class="h3" href="#41-노드-설계표">4.1 노드 설계표</a>
+<a class="h3" href="#42-참고-코드-상태와-dto">4.2 📄 참고 코드 — 상태와 DTO</a>
+<a class="h3" href="#43-참고-코드-프롬프트-각-llm-노드는-자기-일만-안다">4.3 📄 참고 코드 — 프롬프트 (각 LLM 노드는 &quot;자기 일만&quot; 안다)</a>
+<a class="h3" href="#44-참고-코드-그래프-조립">4.4 📄 참고 코드 — ★ 그래프 조립</a>
+<a class="h3" href="#45-참고-코드-컨트롤러와-예외-처리">4.5 📄 참고 코드 — 컨트롤러와 예외 처리</a>
+<a class="h3" href="#46-참고-코드-워크플로우-테스트-가짜-llm으로-경로-검증">4.6 📄 참고 코드 — 워크플로우 테스트 (가짜 LLM으로 경로 검증)</a>
+<a class="h3" href="#47-결과-확인-실제-모델로-실행">4.7 ✅ 결과 확인 — 실제 모델로 실행</a>
+<a class="h2" href="#5-실습-③-프론트엔드-계획-화면">5. 실습 ③ 프론트엔드: 계획 화면</a>
+<a class="h3" href="#커밋">커밋</a>
+<a class="h2" href="#6-참고-같은-그래프를-langgraph로-쓰면">6. 참고: 같은 그래프를 LangGraph로 쓰면?</a>
+<a class="h2" href="#7-6단계-총정리-오늘까지-만든-것">7. 6단계 총정리: 오늘까지 만든 것</a>
+<a class="h2" href="#8-과제">8. 과제</a>
+<a class="h2" href="#9-지금까지의-진행-상황-다음-주-예고">9. 지금까지의 진행 상황 &amp; 다음 주 예고</a>
+<a class="h3" href="#91-7주차까지-진행-상황-6단계-엔지니어링-완주">9.1 7주차까지 진행 상황 — 6단계 엔지니어링 완주!</a>
+<a class="h3" href="#92-다음-주8주차-예고-cicd-완성과-aws-배포">9.2 다음 주(8주차) 예고 — CI/CD 완성과 AWS 배포</a>
+<a class="h2" href="#10-일본-취업-대비-it-용어-7주차">10. 🇯🇵 일본 취업 대비 IT 용어 (7주차)</a>
+</aside>
+</div>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/dockerfile.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/nginx.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/powershell.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/groovy.min.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', function () {
+// AI 엔지니어링 특강 — 강의 자료 공통 스크립트
+(function () {
+  // 1) 코드 복사 버튼
+  document.querySelectorAll('.code-block .copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var code = btn.closest('.code-block').querySelector('pre code');
+      var text = code ? code.innerText : '';
+      var done = function () {
+        btn.textContent = '복사됨 ✓';
+        setTimeout(function () { btn.textContent = '복사'; }, 1500);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done);
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); done(); } finally { document.body.removeChild(ta); }
+      }
+    });
+  });
+
+  // 2) 모바일 메뉴
+  var menu = document.querySelector('.menu-btn');
+  if (menu) {
+    menu.addEventListener('click', function () { document.body.classList.toggle('nav-open'); });
+    document.querySelectorAll('.sidebar a').forEach(function (a) {
+      a.addEventListener('click', function () { document.body.classList.remove('nav-open'); });
+    });
+  }
+
+  // 3) 현재 읽는 절을 목차에 표시
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  if (links.length && 'IntersectionObserver' in window) {
+    var map = {};
+    links.forEach(function (a) { map[decodeURIComponent(a.getAttribute('href').slice(1))] = a; });
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting && map[e.target.id]) {
+          links.forEach(function (l) { l.classList.remove('active'); });
+          map[e.target.id].classList.add('active');
+        }
+      });
+    }, { rootMargin: '-60px 0px -70% 0px' });
+    document.querySelectorAll('.paper h2[id], .paper h3[id]').forEach(function (h) { observer.observe(h); });
+  }
+
+  // 4) 코드 하이라이트 (highlight.js가 로드된 경우)
+  if (window.hljs) {
+    document.querySelectorAll('.code-block pre code').forEach(function (el) {
+      if (!el.classList.contains('language-plaintext')) {
+        window.hljs.highlightElement(el);
+      }
+    });
+  }
+
+  // 5) 수식 (KaTeX auto-render가 로드된 경우)
+  if (window.renderMathInElement) {
+    window.renderMathInElement(document.querySelector('.paper') || document.body, {
+      delimiters: [
+        { left: '\\[', right: '\\]', display: true },
+        { left: '\\(', right: '\\)', display: false },
+      ],
+      ignoredClasses: ['code-block', 'mermaid'],
+      throwOnError: false,
+      strict: false,
+    });
+  }
+})();
+
+});
+</script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose', fontFamily: 'Pretendard, sans-serif' });
+  await mermaid.run({ querySelector: 'pre.mermaid' });
+</script>
+</body>
+</html>

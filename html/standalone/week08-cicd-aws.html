@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>8주차 · CI/CD 완성 — GitHub Actions → GHCR → AWS EC2 | AI와 함께하는 풀스택 개발 — 바이브코딩에서 그래프 엔지니어링까지</title>
+<meta name="description" content="테스트를 통과한 코드만 이미지로 만들어 GHCR에 올리고, EC2에서 Docker Compose로 자동 배포·헬스 체크·롤백합니다.">
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css">
+<style>
+/* AI 엔지니어링 특강 — 강의 자료 공통 스타일 */
+:root {
+  --bg: #f7f8fb;
+  --paper: #ffffff;
+  --ink: #1d2433;
+  --ink-soft: #5b6476;
+  --line: #e4e7ee;
+  --brand: #4338ca;
+  --brand-soft: #eef0ff;
+  --code-bg: #0f172a;
+  --code-ink: #e2e8f0;
+  --tip: #0e7490;   --tip-bg: #ecfeff;
+  --warn: #b45309;  --warn-bg: #fffbeb;
+  --key: #4338ca;   --key-bg: #eef2ff;
+  --sec: #be123c;   --sec-bg: #fff1f2;
+  --sidebar-w: 260px;
+  --toc-w: 240px;
+  font-family: 'Pretendard', 'Noto Sans KR', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: var(--brand); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── 상단 바 ── */
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 12px;
+  height: 56px; padding: 0 20px;
+  background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar .brand { font-weight: 800; color: var(--ink); letter-spacing: -0.01em; }
+.topbar .brand span { color: var(--brand); }
+.topbar .spacer { flex: 1; }
+.topbar .md-link { font-size: 0.85rem; color: var(--ink-soft); border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; }
+.menu-btn { display: none; background: none; border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; font-size: 1.1rem; cursor: pointer; }
+
+/* ── 3단 레이아웃 ── */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr) var(--toc-w);
+  max-width: 1480px; margin: 0 auto;
+}
+.sidebar, .toc {
+  position: sticky; top: 56px; align-self: start;
+  height: calc(100vh - 56px); overflow-y: auto;
+  padding: 24px 16px; font-size: 0.9rem;
+}
+.sidebar { border-right: 1px solid var(--line); }
+.sidebar h4, .toc h4 { margin: 0 0 10px; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.sidebar ol { list-style: none; padding: 0; margin: 0; }
+.sidebar li a { display: block; padding: 7px 10px; border-radius: 8px; color: var(--ink); line-height: 1.35; }
+.sidebar li a small { display: block; color: var(--ink-soft); font-size: 0.75rem; }
+.sidebar li a:hover { background: var(--brand-soft); text-decoration: none; }
+.sidebar li a.active { background: var(--brand); color: #fff; }
+.sidebar li a.active small { color: #c7d2fe; }
+.toc { border-left: 1px solid var(--line); }
+.toc a { display: block; padding: 3px 0; color: var(--ink-soft); line-height: 1.4; }
+.toc a.h3 { padding-left: 12px; font-size: 0.82rem; }
+.toc a.active { color: var(--brand); font-weight: 700; }
+
+/* ── 본문 ── */
+main.content { padding: 32px 48px 80px; min-width: 0; }
+.paper { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 40px 48px; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04); }
+.paper h1 { font-size: 2rem; line-height: 1.3; margin: 0 0 16px; letter-spacing: -0.02em; }
+.paper h2 { font-size: 1.45rem; margin: 2.4em 0 0.8em; padding-top: 0.6em; border-top: 1px solid var(--line); letter-spacing: -0.01em; }
+.paper h3 { font-size: 1.15rem; margin: 1.8em 0 0.6em; }
+.paper h4 { font-size: 1rem; margin: 1.4em 0 0.4em; }
+.paper h2, .paper h3 { scroll-margin-top: 72px; }
+.paper hr { border: none; border-top: 1px dashed var(--line); margin: 2em 0; }
+.paper img { max-width: 100%; }
+.anchor { margin-left: 6px; color: var(--line); font-weight: 400; visibility: hidden; }
+h2:hover .anchor, h3:hover .anchor { visibility: visible; }
+
+/* 표 */
+.table-wrap { overflow-x: auto; margin: 1em 0 1.4em; border: 1px solid var(--line); border-radius: 12px; }
+.table-wrap table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+.table-wrap th { background: #f3f4f8; text-align: left; font-weight: 700; }
+.table-wrap th, .table-wrap td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.table-wrap tr:last-child td { border-bottom: none; }
+
+/* 인라인 코드 */
+:not(pre) > code { background: #f1f3f9; border: 1px solid #e6e9f2; border-radius: 6px; padding: 0.1em 0.4em; font-size: 0.88em; font-family: 'JetBrains Mono', 'D2Coding', ui-monospace, Consolas, monospace; }
+
+/* 코드 블록 */
+.code-block { position: relative; margin: 1em 0 1.4em; border-radius: 12px; overflow: hidden; background: var(--code-bg); }
+.code-block .code-head { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; font-size: 0.75rem; color: #94a3b8; background: #1e293b; font-family: ui-monospace, monospace; }
+.code-block .copy { background: none; border: 1px solid #334155; color: #cbd5e1; border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer; }
+.code-block .copy:hover { background: #334155; }
+.code-block pre { margin: 0; padding: 14px 16px; overflow-x: auto; }
+.code-block pre code { font-family: 'JetBrains Mono', 'D2Coding', ui-monospace, Consolas, monospace; font-size: 0.85rem; line-height: 1.6; color: var(--code-ink); background: none; }
+.code-block pre code.hljs { padding: 0; background: none; }
+
+/* Mermaid */
+.diagram { margin: 1.2em 0 1.6em; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: #fcfcfe; text-align: center; overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; background: none; font-size: 0.85rem; white-space: pre; text-align: left; }
+.diagram pre.mermaid[data-processed] { text-align: center; }
+
+/* 수식 */
+.math-block { overflow-x: auto; padding: 14px 8px; margin: 1em 0; background: #fafbff; border: 1px solid #eceffa; border-radius: 12px; text-align: center; }
+
+/* 콜아웃 */
+blockquote { margin: 1.2em 0; padding: 12px 18px; border-left: 4px solid var(--line); background: #f8f9fc; border-radius: 0 12px 12px 0; color: var(--ink); }
+blockquote p { margin: 0.4em 0; }
+blockquote.tip { border-color: var(--tip); background: var(--tip-bg); }
+blockquote.warn { border-color: var(--warn); background: var(--warn-bg); }
+blockquote.key { border-color: var(--key); background: var(--key-bg); }
+blockquote.sec { border-color: var(--sec); background: var(--sec-bg); }
+
+/* 주차 머리 배지 */
+.week-hero { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.week-hero .pill { font-size: 0.78rem; padding: 3px 10px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+
+/* 이전/다음 */
+.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 28px; }
+.pager a { display: block; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
+.pager a:hover { border-color: var(--brand); text-decoration: none; }
+.pager a small { display: block; color: var(--ink-soft); font-size: 0.78rem; }
+.pager a.next { text-align: right; }
+
+/* ── 첫 화면(index) ── */
+.hero { padding: 64px 24px 40px; text-align: center; background: radial-gradient(1200px 400px at 50% -10%, #e0e7ff 0%, transparent 70%); }
+.hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin: 0 0 12px; letter-spacing: -0.03em; }
+.hero p { color: var(--ink-soft); max-width: 760px; margin: 0 auto; font-size: 1.05rem; }
+.ladder { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 28px auto 0; max-width: 980px; }
+.ladder span { padding: 8px 14px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); font-weight: 600; font-size: 0.9rem; }
+.ladder i { align-self: center; color: var(--ink-soft); font-style: normal; }
+.section { max-width: 1180px; margin: 0 auto; padding: 24px; }
+.section h2 { font-size: 1.35rem; margin: 24px 0 14px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.card { display: flex; flex-direction: column; gap: 6px; padding: 20px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; color: var(--ink); transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(67, 56, 202, 0.08); border-color: #c7d2fe; text-decoration: none; }
+.card .num { font-size: 0.78rem; font-weight: 700; color: var(--brand); letter-spacing: 0.06em; }
+.card h3 { margin: 0; font-size: 1.1rem; }
+.card p { margin: 0; color: var(--ink-soft); font-size: 0.92rem; }
+.card .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 8px; }
+.card .tags span { font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; background: #f1f3f9; color: var(--ink-soft); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.box { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; }
+.box h3 { margin-top: 0; }
+footer.site { text-align: center; color: var(--ink-soft); font-size: 0.85rem; padding: 40px 16px; }
+
+/* ── 반응형 ── */
+@media (max-width: 1200px) {
+  .layout { grid-template-columns: var(--sidebar-w) minmax(0, 1fr); }
+  .toc { display: none; }
+}
+@media (max-width: 860px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .menu-btn { display: inline-block; }
+  .sidebar { position: fixed; left: 0; top: 56px; width: 280px; background: var(--paper); z-index: 30; transform: translateX(-100%); transition: transform 0.2s; box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08); }
+  body.nav-open .sidebar { transform: none; }
+  main.content { padding: 16px 10px 60px; }
+  .paper { padding: 24px 18px; border-radius: 12px; }
+}
+
+/* ── 인쇄 ── */
+@media print {
+  .topbar, .sidebar, .toc, .pager, .copy { display: none !important; }
+  .layout { display: block; }
+  main.content { padding: 0; }
+  .paper { border: none; box-shadow: none; padding: 0; }
+  .code-block { background: #f6f8fa; }
+  .code-block pre code { color: #111; }
+  h2, h3 { break-after: avoid; }
+  .code-block, .diagram, .table-wrap { break-inside: avoid; }
+}
+
+/* ── 실습 단계 머리표 (🤖 ⌨️ ✅ 📄) ── */
+.paper h4.step { display: flex; align-items: center; gap: 10px; margin: 1.8em 0 0.7em; padding: 9px 14px; border-radius: 10px; border-left: 5px solid; font-size: 1rem; line-height: 1.4; }
+.paper h4.step .step-icon { font-size: 1.15rem; }
+.paper h4.step-ai { background: #eef2ff; border-color: #4338ca; color: #312e81; }
+.paper h4.step-cmd { background: #f1f5f9; border-color: #475569; color: #1e293b; }
+.paper h4.step-result { background: #ecfdf5; border-color: #059669; color: #064e3b; }
+.paper h4.step-ref { background: #fff7ed; border-color: #ea580c; color: #7c2d12; }
+.code-block.prompt { background: #1e1b4b; box-shadow: 0 0 0 2px #6366f1 inset; }
+.code-block.prompt .code-head { background: #312e81; color: #c7d2fe; }
+.code-block.prompt pre code { color: #e0e7ff; white-space: pre-wrap; }
+blockquote.term { border-color: #7c3aed; background: #f5f3ff; }
+blockquote.speak { border-color: #db2777; background: #fdf2f8; }
+.paper img { display: block; margin: 0.8em auto 1.4em; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px; }
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <button class="menu-btn" type="button" aria-label="메뉴">☰</button>
+  <a class="brand" href="index.html">AI <span>Engineering</span> Lab</a>
+  <div class="spacer"></div>
+  <a class="md-link" href="../docs/week08-cicd-aws.md">📄 Markdown 원본</a>
+</header>
+<div class="layout">
+<aside class="sidebar"><h4>강의 목차</h4><ol>
+<li><a href="index.html">🏠 과정 소개<small>개요 · 로드맵</small></a></li>
+<li><a href="week01-overview.html">1주차 · 전체 지도<small>개요</small></a></li>
+<li><a href="week02-vibe-coding.html">2주차 · 바이브코딩<small>① 바이브</small></a></li>
+<li><a href="week03-prompt-engineering.html">3주차 · 프롬프트<small>② 프롬프트</small></a></li>
+<li><a href="week04-context-engineering.html">4주차 · 컨텍스트<small>③ 컨텍스트</small></a></li>
+<li><a href="week05-harness-engineering.html">5주차 · 하네스<small>④ 하네스</small></a></li>
+<li><a href="week06-loop-engineering.html">6주차 · 루프<small>⑤ 루프</small></a></li>
+<li><a href="week07-graph-engineering.html">7주차 · 그래프<small>⑥ 그래프</small></a></li>
+<li><a href="week08-cicd-aws.html" class="active">8주차 · CI/CD·AWS<small>배포</small></a></li>
+<li><a href="week09-portfolio-readme.html">9주차 · 포트폴리오<small>정리</small></a></li>
+</ol></aside>
+<main class="content">
+<article class="paper">
+<h1>8주차 · CI/CD 완성 — GitHub Actions → GHCR → AWS EC2 자동 배포</h1>
+<div class="week-hero"><span class="pill">8주차</span><span class="pill">3시간 (설명 + 실습)</span><span class="pill">배포</span></div>
+<blockquote>
+<p><strong>&quot;main에 push하면, 몇 분 뒤 전 세계에서 접속할 수 있다.&quot;</strong></p>
+<p>5주차에 만든 CI(자동 검사)에 <strong>CD(자동 배포)</strong> 를 이어 붙입니다. 테스트를 통과한 코드만 Docker 이미지로 만들어 저장소(GHCR)에 올리고, AWS 서버가 그 이미지를 받아 실행합니다.</p>
+</blockquote>
+<hr>
+<h2 id="0-수업-진행표-3시간">0. 수업 진행표 (3시간)<a class="anchor" href="#0-수업-진행표-3시간" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>시간</th>
+<th>내용</th>
+<th>형태</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0:00 ~ 0:30</td>
+<td>CI/CD 개념 · 배포 아키텍처 · 비밀 정보 관리 · 비용</td>
+<td>설명</td>
+</tr>
+<tr>
+<td>0:30 ~ 1:10</td>
+<td>실습 ① AWS EC2 준비 (인스턴스·보안 그룹·탄력적 IP·예산 알림)</td>
+<td>실습</td>
+</tr>
+<tr>
+<td>1:10 ~ 1:35</td>
+<td>실습 ② 서버 설정 (SSH, Docker, 스왑, .env)</td>
+<td>실습</td>
+</tr>
+<tr>
+<td>1:35 ~ 1:45</td>
+<td>휴식</td>
+<td></td>
+</tr>
+<tr>
+<td>1:45 ~ 2:35</td>
+<td>실습 ③ 운영용 Compose + ④ 배포 워크플로우</td>
+<td>실습</td>
+</tr>
+<tr>
+<td>2:35 ~ 2:55</td>
+<td>실습 ⑤ 배포 확인 · 롤백 · AI로 배포 실패 분석</td>
+<td>실습</td>
+</tr>
+<tr>
+<td>2:55 ~ 3:00</td>
+<td>정리 · 과제</td>
+<td>정리</td>
+</tr>
+</tbody></table></div>
+<h2 id="1-학습-목표">1. 학습 목표<a class="anchor" href="#1-학습-목표" aria-label="이 절의 링크">#</a></h2>
+<ol>
+<li>CI, 지속적 전달(Continuous Delivery), 지속적 배포(Continuous Deployment)를 구분할 수 있다.</li>
+<li><strong>컨테이너 레지스트리(GHCR)</strong> 와 <strong>이미지 태그(latest, 커밋 SHA)</strong> 의 역할을 설명할 수 있다.</li>
+<li>AWS EC2 인스턴스를 만들고 보안 그룹·SSH 키·탄력적 IP를 설정할 수 있다.</li>
+<li>GitHub Actions로 <strong>테스트 → 이미지 빌드·푸시 → SSH 배포 → 헬스 체크</strong> 파이프라인을 만들 수 있다.</li>
+<li>비밀 정보를 <strong>GitHub Secrets와 서버 <code>.env</code></strong> 로 분리해 관리하고, 문제가 생기면 <strong>롤백</strong>할 수 있다.</li>
+</ol>
+<hr>
+<h2 id="2-개념-①-cicd">2. 개념 ① CI/CD<a class="anchor" href="#2-개념-①-cicd" aria-label="이 절의 링크">#</a></h2>
+<h3 id="21-비유-빵-공장">2.1 비유: 빵 공장<a class="anchor" href="#21-비유-빵-공장" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>빵 공장</th>
+<th>소프트웨어</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CI</td>
+<td>반죽이 들어올 때마다 <strong>품질 검사</strong></td>
+<td>push마다 빌드·테스트</td>
+</tr>
+<tr>
+<td>지속적 <strong>전달</strong> (Delivery)</td>
+<td>검사 통과한 빵을 <strong>포장해 창고에 보관</strong> (출고는 사람이 결정)</td>
+<td>이미지를 레지스트리에 저장, 배포 버튼은 사람이</td>
+</tr>
+<tr>
+<td>지속적 <strong>배포</strong> (Deployment)</td>
+<td>포장되면 <strong>자동으로 매장에 진열</strong></td>
+<td>테스트 통과 시 운영 서버에 자동 반영</td>
+</tr>
+</tbody></table></div>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 배포 (Deploy)와 파이프라인 (Pipeline)</strong></p>
+<p><strong>배포</strong>: 내 PC에서 만든 프로그램을 <strong>사용자가 접속할 수 있는 서버에 올려 실행</strong>하는 것.</p>
+<p><strong>파이프라인</strong>: 코드가 들어가서 배포까지 <strong>자동으로 흘러가는 단계들의 연결</strong>. 공장의 컨베이어 벨트처럼 한 단계가 끝나면 다음 단계로 넘어가고, 중간 검사에서 불량이 나오면 <strong>라인이 멈춥니다</strong>(테스트 실패 → 배포 중단).</p>
+</blockquote>
+<h3 id="22-우리-파이프라인-전체-그림">2.2 우리 파이프라인 전체 그림<a class="anchor" href="#22-우리-파이프라인-전체-그림" aria-label="이 절의 링크">#</a></h3>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    DEV[&quot;👩‍💻 git push main&quot;] --&gt; GA[&quot;GitHub Actions&quot;]
+    subgraph GA[&quot;GitHub Actions (deploy.yml)&quot;]
+        direction TB
+        T[&quot;① test&lt;br/&gt;ci.yml 재사용&lt;br/&gt;(JUnit·Vitest·빌드)&quot;] --&gt; B[&quot;② build-and-push&lt;br/&gt;Docker 이미지 2개&quot;]
+        B --&gt; D[&quot;③ deploy&lt;br/&gt;SSH로 서버 명령&quot;]
+    end
+    B --&gt;|&quot;push&quot;| REG[(&quot;GHCR&lt;br/&gt;ghcr.io/아이디/planner-*&quot;)]
+    D --&gt;|&quot;compose pull / up&quot;| EC2
+    subgraph EC2[&quot;AWS EC2 (Ubuntu + Docker)&quot;]
+        F[&quot;frontend :80&quot;] --&gt; BE[&quot;backend :8080&quot;] --&gt; DB[(&quot;MariaDB&quot;)]
+    end
+    REG --&gt;|&quot;pull&quot;| EC2
+    U[&quot;🌍 사용자&quot;] --&gt;|&quot;http://탄력적IP&quot;| F</pre></div>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 컨테이너 레지스트리와 GHCR</strong></p>
+<p><strong>레지스트리</strong>: Docker 이미지를 <strong>올려 두고 내려받는 저장소</strong>. 코드의 GitHub처럼, 이미지의 GitHub입니다.</p>
+<p><strong>GHCR</strong> (GitHub Container Registry): GitHub이 제공하는 레지스트리. 주소는 <code>ghcr.io/아이디/이미지이름:태그</code>.</p>
+<p><strong>왜 쓰나</strong>: 서버에서 직접 빌드하면 느리고 메모리가 많이 듭니다. <strong>빌드는 GitHub Actions(크고 빠른 컴퓨터)</strong> 에서 하고, 서버는 <strong>완성된 이미지를 받아 실행만</strong> 하면 됩니다.</p>
+</blockquote>
+<h3 id="23-이미지-태그-전략-이름표-두-개">2.3 이미지 태그 전략: &quot;이름표 두 개&quot;<a class="anchor" href="#23-이미지-태그-전략-이름표-두-개" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>태그</th>
+<th>예</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>latest</code></td>
+<td><code>planner-backend:latest</code></td>
+<td>항상 <strong>가장 최근</strong> 버전</td>
+</tr>
+<tr>
+<td>커밋 SHA</td>
+<td><code>planner-backend:3f2a9c1...</code></td>
+<td><strong>특정 버전을 정확히 지목</strong> → 롤백 가능</td>
+</tr>
+</tbody></table></div>
+<blockquote class="tip"><p>💡 <code>latest</code>만 쓰면 &quot;어제 잘 되던 버전&quot;으로 돌아갈 방법이 없습니다. SHA 태그는 <strong>세이브 포인트</strong>입니다.</p>
+</blockquote>
+<h3 id="24-비밀-정보는-어디에">2.4 비밀 정보는 어디에?<a class="anchor" href="#24-비밀-정보는-어디에" aria-label="이 절의 링크">#</a></h3>
+<div class="diagram"><pre class="mermaid">flowchart TB
+    subgraph REPO[&quot;GitHub 저장소 (공개)&quot;]
+        C[&quot;코드, Dockerfile, compose, 워크플로우&lt;br/&gt;❌ 비밀 정보 없음&quot;]
+    end
+    subgraph SEC[&quot;GitHub Secrets (암호화)&quot;]
+        S1[&quot;EC2_HOST&quot;]
+        S2[&quot;EC2_USER&quot;]
+        S3[&quot;EC2_SSH_KEY&quot;]
+    end
+    subgraph SRV[&quot;EC2 서버 ~/app/.env (서버에만 존재)&quot;]
+        E1[&quot;DB_PASSWORD&quot;]
+        E2[&quot;GEMINI_API_KEY&quot;]
+        E3[&quot;GHCR_OWNER&quot;]
+    end
+    SEC --&gt;|&quot;배포 시 Actions가 사용&quot;| SRV</pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>비밀</th>
+<th>보관 위치</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>서버 접속 정보(SSH 키)</td>
+<td>GitHub Secrets</td>
+<td>Actions만 사용</td>
+</tr>
+<tr>
+<td>DB 비밀번호, Gemini 키</td>
+<td><strong>서버의 <code>.env</code></strong></td>
+<td>앱 실행에만 필요, 파이프라인에 노출할 필요 없음</td>
+</tr>
+<tr>
+<td>GHCR 로그인 토큰</td>
+<td>Actions가 자동 발급하는 <code>GITHUB_TOKEN</code></td>
+<td>작업이 끝나면 만료되는 <strong>일회용</strong> 토큰</td>
+</tr>
+</tbody></table></div>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — GitHub Secrets</strong></p>
+<p>저장소 설정에 <strong>암호화해서 보관하는 비밀 값</strong>. 워크플로우에서 <code>${{ secrets.이름 }}</code>으로 꺼내 쓰고, 로그에는 <code>***</code>로 가려집니다. 저장소를 공개해도 Secrets 값은 공개되지 않습니다.</p>
+</blockquote>
+<h3 id="25-자동화는-언제-이득인가-손익분기점">2.5 자동화는 언제 이득인가? (손익분기점)<a class="anchor" href="#25-자동화는-언제-이득인가-손익분기점" aria-label="이 절의 링크">#</a></h3>
+<p>수동 배포에 <span class="math-inline">\(t_m\)</span>분, 자동 배포에 <span class="math-inline">\(t_a\)</span>분, 자동화 구축에 <span class="math-inline">\(C\)</span>분이 든다면, <span class="math-inline">\(n\)</span>번 배포했을 때:</p>
+<div class="math-block">\[\text{수동 총시간} = n \cdot t_m, \qquad \text{자동 총시간} = C + n \cdot t_a, \qquad n^{*} = \frac{C}{t_m - t_a}\]</div>
+<p><span class="math-inline">\(C = 120\)</span>분, <span class="math-inline">\(t_m = 20\)</span>분, <span class="math-inline">\(t_a = 2\)</span>분이면 <span class="math-inline">\(n^{*} = 120 / 18 \approx 6.7\)</span> → <strong>7번째 배포부터 이득</strong>입니다. 게다가 자동 배포는 <strong>실수(빠뜨린 명령, 잘못된 버전)가 0</strong>에 가깝다는 보너스가 있습니다.</p>
+<h3 id="26-비용과-안전-수칙">2.6 비용과 안전 수칙<a class="anchor" href="#26-비용과-안전-수칙" aria-label="이 절의 링크">#</a></h3>
+<blockquote class="warn"><p>⚠️ <strong>AWS는 쓰는 만큼 요금이 나옵니다.</strong> 2025년 7월 15일 이후 가입한 계정은 <strong>크레딧 기반 프리 티어</strong>(가입 시 크레딧 지급, 활동 시 추가, 최대 6개월 무료 플랜)이며 <code>t3.micro</code>, <code>t3.small</code> 등이 프리 티어 대상 인스턴스입니다. 계정마다 조건이 다르므로 콘솔의 <strong>Billing → Free Tier / Credits</strong>에서 꼭 확인하세요.</p>
+</blockquote>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>✔</th>
+<th>수칙</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>☐</td>
+<td><strong>AWS Budgets로 예산 알림</strong>(예: 월 5달러)을 가장 먼저 설정한다</td>
+</tr>
+<tr>
+<td>☐</td>
+<td>루트 계정 대신 IAM 사용자로 작업하고, 루트에는 MFA를 건다</td>
+</tr>
+<tr>
+<td>☐</td>
+<td>수업이 끝나면 인스턴스를 <strong>중지(Stop)</strong> 하고, 과정이 끝나면 <strong>종료(Terminate)</strong> + 탄력적 IP <strong>해제</strong></td>
+</tr>
+<tr>
+<td>☐</td>
+<td>퍼블릭 IPv4 주소도 시간당 요금이 붙을 수 있음을 기억한다</td>
+</tr>
+<tr>
+<td>☐</td>
+<td><code>.pem</code> 키 파일은 Git에 올리지 않는다 (<code>.gitignore</code>에 <code>*.pem</code> 확인)</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="3-실습-①-aws-ec2-준비">3. 실습 ① AWS EC2 준비<a class="anchor" href="#3-실습-①-aws-ec2-준비" aria-label="이 절의 링크">#</a></h2>
+<h3 id="31-예산-알림-가장-먼저">3.1 예산 알림 (가장 먼저!)<a class="anchor" href="#31-예산-알림-가장-먼저" aria-label="이 절의 링크">#</a></h3>
+<p>AWS 콘솔 → <strong>Billing and Cost Management → Budgets → Create budget</strong> → <em>Zero spend budget</em> 또는 <em>Monthly cost budget</em>(예: 5 USD) → 알림 받을 이메일 입력.</p>
+<h3 id="32-인스턴스-만들기">3.2 인스턴스 만들기<a class="anchor" href="#32-인스턴스-만들기" aria-label="이 절의 링크">#</a></h3>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — EC2 관련 용어 한 번에 정리</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>용어</th>
+<th>뜻</th>
+<th>비유</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>EC2</strong></td>
+<td>AWS의 가상 서버 서비스</td>
+<td>렌터카 회사</td>
+</tr>
+<tr>
+<td><strong>인스턴스</strong></td>
+<td>빌린 <strong>서버 한 대</strong></td>
+<td>빌린 차 한 대</td>
+</tr>
+<tr>
+<td><strong>리전</strong></td>
+<td>서버가 있는 <strong>지역</strong> (서울 = ap-northeast-2)</td>
+<td>렌터카 지점</td>
+</tr>
+<tr>
+<td><strong>AMI</strong></td>
+<td>서버에 깔린 <strong>운영체제 이미지</strong> (Ubuntu 24.04)</td>
+<td>차종</td>
+</tr>
+<tr>
+<td><strong>인스턴스 유형</strong></td>
+<td>CPU·메모리 크기 (<code>t3.small</code> = 2 vCPU, 2GB)</td>
+<td>경차/중형차</td>
+</tr>
+<tr>
+<td><strong>키 페어</strong></td>
+<td>서버 접속용 <strong>자물쇠(공개 키)와 열쇠(개인 키 .pem)</strong></td>
+<td>차 키</td>
+</tr>
+<tr>
+<td><strong>보안 그룹</strong></td>
+<td>들어올 수 있는 <strong>포트·주소를 정하는 방화벽</strong></td>
+<td>주차장 출입 차단기</td>
+</tr>
+<tr>
+<td><strong>탄력적 IP</strong></td>
+<td>바뀌지 않는 <strong>고정 공인 IP 주소</strong></td>
+<td>고정 주차 자리 번호</td>
+</tr>
+<tr>
+<td><strong>SSH</strong></td>
+<td>원격 서버에 <strong>안전하게 접속해 명령을 내리는</strong> 방법 (포트 22)</td>
+<td>원격 운전</td>
+</tr>
+</tbody></table></div>
+</blockquote>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — AWS 콘솔에서 인스턴스 시작 (웹 화면 작업)</span></h4>
+<p>콘솔 오른쪽 위에서 리전을 <strong>아시아 태평양(서울) ap-northeast-2</strong>로 선택 → <strong>EC2 → 인스턴스 시작</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>이름</td>
+<td><code>planner-server</code></td>
+<td></td>
+</tr>
+<tr>
+<td>AMI</td>
+<td><strong>Ubuntu Server 24.04 LTS</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>인스턴스 유형</td>
+<td><code>t3.small</code> 권장 (2GB) / <code>t3.micro</code>(1GB)도 가능</td>
+<td>1GB는 <strong>스왑 설정 필수</strong></td>
+</tr>
+<tr>
+<td>키 페어</td>
+<td>새로 생성 → <code>planner-key</code> (RSA, .pem)</td>
+<td>다운로드한 파일은 <strong>한 번만</strong> 받을 수 있음</td>
+</tr>
+<tr>
+<td>네트워크 설정</td>
+<td>보안 그룹 생성 (아래 표)</td>
+<td></td>
+</tr>
+<tr>
+<td>스토리지</td>
+<td>20 GiB gp3</td>
+<td>Docker 이미지 공간</td>
+</tr>
+</tbody></table></div>
+<p><strong>보안 그룹(방화벽) 규칙</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>유형</th>
+<th>포트</th>
+<th>소스</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SSH</td>
+<td>22</td>
+<td>0.0.0.0/0 (아래 주의 참고)</td>
+<td>GitHub Actions가 접속해야 함</td>
+</tr>
+<tr>
+<td>HTTP</td>
+<td>80</td>
+<td>0.0.0.0/0</td>
+<td>사용자 접속</td>
+</tr>
+<tr>
+<td><del>MariaDB</del></td>
+<td><del>3306</del></td>
+<td><strong>열지 않음</strong></td>
+<td>DB는 외부에 노출하지 않는다</td>
+</tr>
+</tbody></table></div>
+<blockquote class="warn"><p>⚠️ <strong>SSH를 전체에 여는 이유와 위험</strong>: GitHub가 제공하는 실행기(runner)의 IP는 매번 바뀌어서 &quot;내 IP만 허용&quot;으로는 Actions가 접속할 수 없습니다. Ubuntu AMI는 <strong>비밀번호 로그인이 꺼져 있고 키로만 접속</strong>되므로 학습용으로는 허용 가능한 수준이지만, 실무에서는 <strong>AWS Systems Manager(SSM)</strong>, <strong>OIDC 기반 역할</strong>, <strong>자체 호스팅 러너</strong> 등으로 22번 포트를 닫는 방식을 씁니다.</p>
+</blockquote>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인</span></h4>
+<p>EC2 → 인스턴스 목록에서 <code>planner-server</code>의 <strong>인스턴스 상태가 &quot;실행 중&quot;</strong>, <strong>상태 검사가 &quot;2/2개 검사 통과&quot;</strong> 가 되면 준비 완료입니다(1~3분).</p>
+<h3 id="33-탄력적-ip-연결">3.3 탄력적 IP 연결<a class="anchor" href="#33-탄력적-ip-연결" aria-label="이 절의 링크">#</a></h3>
+<p>인스턴스를 재시작해도 주소가 바뀌지 않도록 고정 IP를 붙입니다.
+<strong>EC2 → 탄력적 IP → 탄력적 IP 주소 할당 → 작업: 주소 연결 → planner-server 선택</strong></p>
+<hr>
+<h2 id="4-실습-②-서버-설정">4. 실습 ② 서버 설정<a class="anchor" href="#4-실습-②-서버-설정" aria-label="이 절의 링크">#</a></h2>
+<h3 id="41-ssh-접속">4.1 SSH 접속<a class="anchor" href="#41-ssh-접속" aria-label="이 절의 링크">#</a></h3>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — 내 PC에서 서버로 접속</span></h4>
+<p><strong>macOS / Linux / WSL</strong></p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">chmod 400 ~/Downloads/planner-key.pem
+ssh -i ~/Downloads/planner-key.pem ubuntu@&lt;탄력적IP&gt;</code></pre></div>
+<p><strong>Windows PowerShell</strong></p>
+<div class="code-block"><div class="code-head"><span>powershell</span><button class="copy" type="button">복사</button></div><pre><code class="language-powershell"># 키 파일 권한을 본인만 읽을 수 있게 제한
+icacls $HOME\Downloads\planner-key.pem /inheritance:r /grant:r &quot;$($env:USERNAME):(R)&quot;
+ssh -i $HOME\Downloads\planner-key.pem ubuntu@&lt;탄력적IP&gt;</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 접속 성공 화면</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">The authenticity of host '3.38.123.45' can't be established.
+Are you sure you want to continue connecting (yes/no)? yes      ← 처음 한 번만, yes 입력
+Welcome to Ubuntu 24.04 LTS (GNU/Linux 6.8.0-1012-aws x86_64)
+ubuntu@ip-172-31-5-20:~$                                         ← 이제 서버 안입니다!</code></pre></div>
+<p>프롬프트가 <code>ubuntu@ip-...:~$</code>로 바뀌면 <strong>지금 입력하는 명령은 AWS 서버에서 실행</strong>됩니다. 내 PC로 돌아가려면 <code>exit</code>.</p>
+<h3 id="42-docker-설치-스왑-앱-폴더">4.2 Docker 설치 · 스왑 · 앱 폴더<a class="anchor" href="#42-docker-설치-스왑-앱-폴더" aria-label="이 절의 링크">#</a></h3>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 스왑 (Swap)</strong></p>
+<p>메모리(RAM)가 부족할 때 <strong>디스크 일부를 임시 메모리처럼</strong> 쓰는 공간. 느리지만, 메모리가 작은 서버에서 Java + MariaDB가 <strong>메모리 부족으로 강제 종료되는 것</strong>을 막아 줍니다.</p>
+</blockquote>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — 서버에 접속한 상태에서</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash"># 1) Docker 설치 (공식 편의 스크립트)
+curl -fsSL https://get.docker.com | sudo sh
+sudo usermod -aG docker ubuntu
+exit          # 그룹 적용을 위해 한 번 나갔다가 다시 접속</code></pre></div>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash"># 2) 다시 접속 후 확인
+docker --version &amp;&amp; docker compose version
+
+# 3) 스왑 2GB (메모리 1~2GB 서버에서 Java + MariaDB를 안정적으로 돌리기 위해)
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+free -h
+
+# 4) 시간대
+sudo timedatectl set-timezone Asia/Seoul
+
+# 5) 앱 폴더와 운영용 .env
+mkdir -p ~/app &amp;&amp; cd ~/app
+nano .env</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">Docker version 28.5.1, build e180ab8
+Docker Compose version v2.40.0
+               total        used        free      shared  buff/cache   available
+Mem:           1.9Gi       310Mi       1.2Gi       1.0Mi       520Mi       1.5Gi
+Swap:          2.0Gi          0B       2.0Gi                                     ← 스왑 2GB 확인</code></pre></div>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — 서버의 <code>~/app/.env</code></span></h4>
+<p><code>~/app/.env</code> (서버에만 존재) — <code>nano</code> 편집기에서 입력 후 <code>Ctrl+O</code>(저장) → <code>Enter</code> → <code>Ctrl+X</code>(종료)</p>
+<div class="code-block"><div class="code-head"><span>dotenv</span><button class="copy" type="button">복사</button></div><pre><code class="language-ini">GHCR_OWNER=내깃허브아이디소문자
+DB_ROOT_PASSWORD=길고-복잡한-루트-비밀번호
+DB_PASSWORD=길고-복잡한-앱-비밀번호
+GEMINI_API_KEY=발급받은_키
+GEMINI_MODEL=gemini-flash-lite-latest</code></pre></div>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">chmod 600 .env     # 소유자만 읽기·쓰기</code></pre></div>
+<blockquote class="tip"><p>💡 <code>GHCR_OWNER</code>는 이미지 주소에 쓰이므로 <strong>반드시 소문자</strong>로 적습니다. (Docker 이미지 이름은 대문자를 허용하지 않음)</p>
+</blockquote>
+<h3 id="43-배포용-ssh-키를-github-secrets에-등록">4.3 배포용 SSH 키를 GitHub Secrets에 등록<a class="anchor" href="#43-배포용-ssh-키를-github-secrets에-등록" aria-label="이 절의 링크">#</a></h3>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — 웹 화면 또는 GitHub CLI</span></h4>
+<p>GitHub 저장소 → <strong>Settings → Secrets and variables → Actions → New repository secret</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>이름</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>EC2_HOST</code></td>
+<td>탄력적 IP 주소</td>
+</tr>
+<tr>
+<td><code>EC2_USER</code></td>
+<td><code>ubuntu</code></td>
+</tr>
+<tr>
+<td><code>EC2_SSH_KEY</code></td>
+<td><code>planner-key.pem</code> 파일의 <strong>전체 내용</strong> (<code>-----BEGIN ... KEY-----</code>부터 끝까지)</td>
+</tr>
+</tbody></table></div>
+<p>또는 GitHub CLI로:</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">gh secret set EC2_HOST --body &quot;&lt;탄력적IP&gt;&quot;
+gh secret set EC2_USER --body &quot;ubuntu&quot;
+gh secret set EC2_SSH_KEY &lt; ~/Downloads/planner-key.pem</code></pre></div>
+<hr>
+<h2 id="5-실습-③-운영용-compose-파일">5. 실습 ③ 운영용 Compose 파일<a class="anchor" href="#5-실습-③-운영용-compose-파일" aria-label="이 절의 링크">#</a></h2>
+<p>개발용 <code>docker-compose.yml</code>과 달리, 운영용은 <strong>이미지를 빌드하지 않고 GHCR에서 받아</strong> 실행합니다.</p>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 운영 환경 (Production)</strong></p>
+<p>실제 사용자가 쓰는 환경. 개발 환경과 달리 <strong>보안(비밀번호 필수, DB 비공개)·안정성(자동 재시작)</strong> 이 최우선입니다. 그래서 개발용과 운영용 설정 파일을 <strong>분리</strong>합니다.</p>
+</blockquote>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 운영용 Compose</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">프로젝트 루트에 운영 서버용 docker-compose.prod.yml을 만들어 줘. 개발용 docker-compose.yml과의 차이:
+- backend, frontend는 build 대신 ghcr.io/${GHCR_OWNER}/planner-backend:${IMAGE_TAG:-latest} 형식의 이미지 사용
+- DB 포트는 외부에 공개하지 않음, 비밀번호가 .env에 없으면 실행을 거부(${VAR:?메시지})
+- 모든 서비스 restart: unless-stopped, frontend는 80:80
+- 메모리가 작은 서버를 고려해 backend에 JAVA_TOOL_OPTIONS=-Xmx400m
+완료 후 개발용과 운영용의 차이를 표로 정리해 줘.</code></pre></div>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — docker-compose.prod.yml</span></h4>
+<p>프로젝트 루트 <code>docker-compose.prod.yml</code></p>
+<div class="code-block"><div class="code-head"><span>yaml</span><button class="copy" type="button">복사</button></div><pre><code class="language-yaml">services:
+  db:
+    image: mariadb:11.8
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD를 .env에 설정하세요}
+      MARIADB_DATABASE: planner
+      MARIADB_USER: planner
+      MARIADB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD를 .env에 설정하세요}
+      TZ: Asia/Seoul
+    command: [&quot;--character-set-server=utf8mb4&quot;, &quot;--collation-server=utf8mb4_unicode_ci&quot;]
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;healthcheck.sh&quot;, &quot;--connect&quot;, &quot;--innodb_initialized&quot;]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    # ports 없음 → 외부에서 DB에 직접 접속 불가
+
+  backend:
+    image: ghcr.io/${GHCR_OWNER}/planner-backend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_PASSWORD: ${DB_PASSWORD}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-flash-lite-latest}
+      JAVA_TOOL_OPTIONS: &quot;-Xmx400m&quot;
+      TZ: Asia/Seoul
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: ghcr.io/${GHCR_OWNER}/planner-frontend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - &quot;80:80&quot;
+    depends_on:
+      - backend
+
+volumes:
+  db-data:</code></pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>개발용 <code>docker-compose.yml</code></th>
+<th>운영용 <code>docker-compose.prod.yml</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>build: ./backend</code> (내 PC에서 빌드)</td>
+<td><code>image: ghcr.io/...</code> (만들어진 이미지 사용)</td>
+</tr>
+<tr>
+<td>DB 포트 3306 공개</td>
+<td>DB 포트 <strong>비공개</strong></td>
+</tr>
+<tr>
+<td>기본 비밀번호 허용 (<code>:-root1234</code>)</td>
+<td>값이 없으면 <strong>실행 거부</strong> (<code>:?</code>)</td>
+</tr>
+<tr>
+<td>재시작 정책 없음</td>
+<td><code>restart: unless-stopped</code> (서버 재부팅 시 자동 시작)</td>
+</tr>
+<tr>
+<td>프론트 3000번</td>
+<td>프론트 <strong>80번</strong></td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="6-실습-④-배포-워크플로우">6. 실습 ④ 배포 워크플로우<a class="anchor" href="#6-실습-④-배포-워크플로우" aria-label="이 절의 링크">#</a></h2>
+<h3 id="61-작업job-흐름">6.1 작업(Job) 흐름<a class="anchor" href="#61-작업job-흐름" aria-label="이 절의 링크">#</a></h3>
+<div class="diagram"><pre class="mermaid">sequenceDiagram
+    participant GH as GitHub (push main)
+    participant T as job: test
+    participant B as job: build-and-push
+    participant R as GHCR
+    participant D as job: deploy
+    participant S as EC2
+    GH-&gt;&gt;T: ci.yml 재사용 (백엔드·프론트 테스트)
+    T--&gt;&gt;B: 통과
+    B-&gt;&gt;R: planner-backend:latest, :SHA
+    B-&gt;&gt;R: planner-frontend:latest, :SHA
+    B--&gt;&gt;D: 완료
+    D-&gt;&gt;S: scp docker-compose.prod.yml
+    D-&gt;&gt;S: ssh: docker login → compose pull → up -d
+    S-&gt;&gt;S: curl localhost/api/hello (헬스 체크, 최대 150초)
+    S--&gt;&gt;D: ✅ 성공 / ❌ 로그 출력 후 실패</pre></div>
+<h3 id="62-워크플로우-파일">6.2 워크플로우 파일<a class="anchor" href="#62-워크플로우-파일" aria-label="이 절의 링크">#</a></h3>
+<p>5주차 <code>ci.yml</code>에 <code>workflow_call:</code> 트리거가 들어 있는지 확인하세요. (다른 워크플로우에서 재사용하기 위한 설정)</p>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 배포 워크플로우</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">.github/workflows/deploy.yml을 만들어 줘. main push와 수동 실행(workflow_dispatch)에서 동작.
+1. test 잡: ./.github/workflows/ci.yml 재사용
+2. build-and-push 잡(test 성공 후): 소유자 이름을 소문자로 바꾸고, GITHUB_TOKEN으로 GHCR 로그인,
+   backend·frontend 이미지를 latest와 커밋 SHA 두 태그로 빌드·푸시 (buildx, gha 캐시)
+3. deploy 잡(build 성공 후, environment: production): appleboy/scp-action으로 docker-compose.prod.yml을 서버 ~/app에 복사,
+   appleboy/ssh-action으로 서버에서 GHCR 로그인 → IMAGE_TAG=SHA로 compose pull·up -d → 이미지 정리 →
+   localhost/api/hello를 5초 간격 최대 30회 헬스 체크, 실패하면 backend 로그 80줄 출력 후 실패
+Secrets: EC2_HOST, EC2_USER, EC2_SSH_KEY. 동시에 두 배포가 돌지 않게 concurrency 설정. 권한은 contents: read, packages: write.</code></pre></div>
+<blockquote class="warn"><p>⚠️ 배포 워크플로우는 <strong>서버에 직접 명령을 실행</strong>합니다. AI가 만든 결과를 아래 참고 코드와 <strong>한 줄씩 비교</strong>하고, 특히 <code>script:</code> 부분에 위험한 명령(<code>rm -rf</code>, <code>docker system prune -a --volumes</code> 등 <strong>DB 데이터를 지울 수 있는 명령</strong>)이 없는지 꼭 확인하세요.</p>
+</blockquote>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — deploy.yml</span></h4>
+<p><code>.github/workflows/deploy.yml</code></p>
+<div class="code-block"><div class="code-head"><span>yaml</span><button class="copy" type="button">복사</button></div><pre><code class="language-yaml">name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:          # Actions 탭에서 수동 실행 버튼
+
+concurrency:
+  group: deploy-production    # 배포가 동시에 두 개 돌지 않도록
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write             # GHCR에 이미지 push
+
+jobs:
+  test:
+    uses: ./.github/workflows/ci.yml
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: 이미지 이름용 소문자 소유자
+        run: echo &quot;OWNER=${GITHUB_REPOSITORY_OWNER,,}&quot; &gt;&gt; &quot;$GITHUB_ENV&quot;
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Backend 이미지
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ghcr.io/${{ env.OWNER }}/planner-backend:latest
+            ghcr.io/${{ env.OWNER }}/planner-backend:${{ github.sha }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      - name: Frontend 이미지
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ghcr.io/${{ env.OWNER }}/planner-frontend:latest
+            ghcr.io/${{ env.OWNER }}/planner-frontend:${{ github.sha }}
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Compose 파일 복사
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: docker-compose.prod.yml
+          target: /home/${{ secrets.EC2_USER }}/app
+
+      - name: 서버에서 배포
+        uses: appleboy/ssh-action@v1
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_TAG: ${{ github.sha }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: GHCR_USER,GHCR_TOKEN,IMAGE_TAG
+          script: |
+            set -e
+            cd ~/app
+            echo &quot;$GHCR_TOKEN&quot; | docker login ghcr.io -u &quot;$GHCR_USER&quot; --password-stdin
+            export IMAGE_TAG
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker image prune -f
+            for i in $(seq 1 30); do
+              if curl -fs http://localhost/api/hello &gt; /dev/null; then
+                echo &quot;✅ 배포 성공: $IMAGE_TAG&quot;
+                exit 0
+              fi
+              sleep 5
+            done
+            echo &quot;❌ 헬스 체크 실패&quot;
+            docker compose -f docker-compose.prod.yml logs --tail=80 backend
+            exit 1</code></pre></div>
+<p>워크플로우 핵심 문법:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>문법</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>needs: test</code></td>
+<td>앞 작업이 <strong>성공해야</strong> 실행 (테스트 실패 시 배포 안 됨 = 하네스!)</td>
+</tr>
+<tr>
+<td><code>uses: ./.github/workflows/ci.yml</code></td>
+<td>다른 워크플로우를 <strong>함수처럼 재사용</strong></td>
+</tr>
+<tr>
+<td><code>${{ secrets.X }}</code></td>
+<td>암호화된 비밀 값 (로그에 <code>***</code>로 가려짐)</td>
+</tr>
+<tr>
+<td><code>${{ github.sha }}</code></td>
+<td>이번 커밋의 고유 ID → 이미지 태그</td>
+</tr>
+<tr>
+<td><code>environment: production</code></td>
+<td>저장소 Settings → Environments에서 <strong>승인자 지정</strong> 가능 (지속적 <em>전달</em>로 전환)</td>
+</tr>
+<tr>
+<td><code>concurrency</code></td>
+<td>같은 그룹의 실행이 겹치지 않게</td>
+</tr>
+</tbody></table></div>
+<blockquote class="tip"><p>💡 <code>ci.yml</code>의 <code>push</code> 트리거 때문에 main에 push하면 CI가 <strong>두 번</strong>(단독 + 배포 안에서) 돌 수 있습니다. 신경 쓰인다면 <code>ci.yml</code>의 <code>on.push</code>를 지우고 <code>pull_request</code>와 <code>workflow_call</code>만 남기세요.</p>
+</blockquote>
+<h3 id="63-push하고-지켜보기">6.3 push하고 지켜보기<a class="anchor" href="#63-push하고-지켜보기" aria-label="이 절의 링크">#</a></h3>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">git add docker-compose.prod.yml .github/workflows/deploy.yml
+git commit -m &quot;ci: GHCR 이미지 빌드와 EC2 자동 배포 워크플로우 추가&quot;
+git push</code></pre></div>
+<p>GitHub → <strong>Actions</strong> 탭 → <strong>Deploy</strong> 실행을 클릭해 세 작업이 차례로 초록색이 되는지 확인합니다. 또는 터미널에서:</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">gh run watch</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — Actions 실행 결과 (예시)</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">✓ main Deploy · 12345678901
+Triggered via push about 6 minutes ago
+
+JOBS
+✓ test / Backend test in 1m52s
+✓ test / Frontend test &amp; build in 58s
+✓ build-and-push in 3m10s
+✓ deploy in 41s
+
+deploy › 서버에서 배포
+  ...
+  ✔ Container app-db-1        Healthy
+  ✔ Container app-backend-1   Started
+  ✔ Container app-frontend-1  Started
+  ✅ 배포 성공: 3f2a9c1e8b...</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 인터넷에서 접속</span></h4>
+<p>성공하면 브라우저에서 <code>http://&lt;탄력적IP&gt;</code> 접속! 🎉 휴대폰(데이터 통신)으로도 접속해 보세요. 이제 <strong>전 세계 어디서나</strong> 접속할 수 있습니다.</p>
+<p><img src="https://raw.githubusercontent.com/timeleverage-kim/SpecialLecture-2026-AI-Engineering/main/docs/images/week08-deployed.png" alt="8주차 결과 화면: 탄력적 IP로 접속한 배포 서비스"></p>
+<blockquote class="tip"><p>💡 처음 배포한 서버의 DB는 <strong>비어 있습니다.</strong> (내 PC의 DB와 별개) 할 일·노트를 새로 등록해 보세요.</p>
+</blockquote>
+<hr>
+<h2 id="7-실습-⑤-운영-확인-롤백-ai로-실패-분석">7. 실습 ⑤ 운영 확인 · 롤백 · AI로 실패 분석<a class="anchor" href="#7-실습-⑤-운영-확인-롤백-ai로-실패-분석" aria-label="이 절의 링크">#</a></h2>
+<h3 id="71-서버에서-상태-확인">7.1 서버에서 상태 확인<a class="anchor" href="#71-서버에서-상태-확인" aria-label="이 절의 링크">#</a></h3>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">ssh -i planner-key.pem ubuntu@&lt;탄력적IP&gt;
+cd ~/app
+docker compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml logs -f --tail=100 backend
+curl -s localhost/api/hello         # Nginx → backend 경로로 정상 응답하면 OK
+curl -s localhost/actuator/health   # Nginx는 /api/만 백엔드로 넘기므로 React HTML이 돌아오는 것이 정상</code></pre></div>
+<blockquote class="tip"><p>💡 <code>/actuator/health</code>를 외부에서 보고 싶다면 <code>nginx.conf</code>에 <code>location /actuator/health { proxy_pass http://backend:8080; }</code>를 추가하세요. (모든 actuator 경로를 여는 것은 금지)</p>
+</blockquote>
+<h3 id="72-롤백-어제-버전으로-돌아가기">7.2 롤백: &quot;어제 버전으로 돌아가기&quot;<a class="anchor" href="#72-롤백-어제-버전으로-돌아가기" aria-label="이 절의 링크">#</a></h3>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 롤백 (Rollback)과 헬스 체크 (Health Check)</strong></p>
+<p><strong>롤백</strong>: 새 버전에 문제가 있을 때 <strong>이전에 잘 되던 버전으로 되돌리는 것</strong>. 게임의 &quot;이전 세이브 불러오기&quot;.</p>
+<p><strong>헬스 체크</strong>: 서버가 <strong>정상적으로 응답하는지 확인하는 요청</strong>. 우리 배포 스크립트는 <code>/api/hello</code>가 응답할 때까지 기다렸다가 성공/실패를 판단합니다. 사람이 일일이 접속해 보지 않아도 되는 <strong>자동 센서</strong>입니다.</p>
+</blockquote>
+<p>새 버전에 문제가 생겼다면 <strong>이전 커밋 SHA 태그</strong>로 되돌립니다.</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash"># GitHub 커밋 목록이나 GHCR 패키지 페이지에서 이전 SHA 확인
+cd ~/app
+IMAGE_TAG=&lt;이전_커밋_SHA&gt; docker compose -f docker-compose.prod.yml up -d</code></pre></div>
+<p>또는 Git으로 되돌린 뒤 push하면 파이프라인이 자동으로 다시 배포합니다.</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">git revert HEAD
+git push</code></pre></div>
+<h3 id="73-ai로-배포-실패-분석하기-루프-하네스-응용">7.3 AI로 배포 실패 분석하기 (루프 + 하네스 응용)<a class="anchor" href="#73-ai로-배포-실패-분석하기-루프-하네스-응용" aria-label="이 절의 링크">#</a></h3>
+<p>배포가 실패하면 로그가 길고 어렵습니다. 실패 로그만 뽑아 Claude Code에게 넘겨 봅시다.</p>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 헤드리스 모드로 로그 분석 (터미널에서 실행)</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">gh run view --log-failed | tail -n 150 | claude -p \
+  &quot;GitHub Actions 배포 실패 로그다. 원인 후보를 가능성 순으로 3개, 각각 확인 방법과 해결 방법을 표로 정리해라. 비밀 값은 출력하지 마라.&quot;</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 분석 결과 예시</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">| 가능성 | 원인 후보 | 확인 방법 | 해결 방법 |
+|---|---|---|---|
+| 높음 | 서버 .env의 GHCR_OWNER에 대문자 포함 | 서버에서 cat ~/app/.env | 소문자로 수정 후 재실행 |
+| 중간 | EC2_SSH_KEY 줄바꿈 누락 | Secrets 재등록 | gh secret set EC2_SSH_KEY &lt; key.pem |
+| 낮음 | 보안 그룹 22번 포트 차단 | 콘솔 보안 그룹 규칙 | 인바운드 22 허용 |</code></pre></div>
+<p><strong>자주 만나는 배포 오류</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>증상</th>
+<th>원인</th>
+<th>해결</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>denied: permission_denied</code> (GHCR push)</td>
+<td>워크플로우 권한 부족</td>
+<td><code>permissions: packages: write</code> 확인, 저장소 Settings → Actions → Workflow permissions</td>
+</tr>
+<tr>
+<td><code>invalid reference format</code></td>
+<td>이미지 이름에 대문자</td>
+<td><code>OWNER</code> 소문자 변환 단계, 서버 <code>.env</code>의 <code>GHCR_OWNER</code> 소문자</td>
+</tr>
+<tr>
+<td><code>ssh: handshake failed</code> / timeout</td>
+<td>보안 그룹 22번 차단, 키 오타</td>
+<td>보안 그룹 규칙, <code>EC2_SSH_KEY</code>에 키 전체 내용이 들어갔는지</td>
+</tr>
+<tr>
+<td>헬스 체크 실패, backend 재시작 반복</td>
+<td>DB 비밀번호 불일치, 메모리 부족</td>
+<td><code>logs backend</code>, <code>free -h</code>, 스왑 확인</td>
+</tr>
+<tr>
+<td><code>DB_PASSWORD를 .env에 설정하세요</code></td>
+<td>서버 <code>.env</code> 누락</td>
+<td><code>~/app/.env</code> 확인</td>
+</tr>
+<tr>
+<td>접속은 되는데 AI 기능만 503</td>
+<td><code>GEMINI_API_KEY</code> 미설정</td>
+<td>서버 <code>.env</code> 확인 후 <code>up -d</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="74-선택-수동-승인으로-바꾸기-지속적-전달">7.4 (선택) 수동 승인으로 바꾸기 — 지속적 전달<a class="anchor" href="#74-선택-수동-승인으로-바꾸기-지속적-전달" aria-label="이 절의 링크">#</a></h3>
+<p>저장소 <strong>Settings → Environments → production → Required reviewers</strong>에 본인을 추가하면, <code>deploy</code> 작업이 <strong>승인 버튼을 누를 때까지 대기</strong>합니다. &quot;AI가 만든 변경도 사람이 마지막에 확인한다&quot;는 <strong>사람 승인(Human-in-the-loop)</strong> 장치입니다.</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">git tag week-08 &amp;&amp; git push origin week-08</code></pre></div>
+<hr>
+<h2 id="8-전체-흐름-다시-보기-6단계-엔지니어링과-cicd">8. 전체 흐름 다시 보기: 6단계 엔지니어링과 CI/CD<a class="anchor" href="#8-전체-흐름-다시-보기-6단계-엔지니어링과-cicd" aria-label="이 절의 링크">#</a></h2>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    A[&quot;Claude Code로 개발&lt;br/&gt;(프롬프트·컨텍스트)&quot;] --&gt; B[&quot;Hooks·테스트&lt;br/&gt;(하네스·검증 루프)&quot;]
+    B --&gt; C[&quot;git push&quot;]
+    C --&gt; D[&quot;CI: 테스트&lt;br/&gt;(이벤트 루프)&quot;]
+    D --&gt; E[&quot;CD: 이미지·배포&quot;]
+    E --&gt; F[&quot;운영 서버&quot;]
+    F --&gt;|&quot;오류·피드백&quot;| G[&quot;회고 → CLAUDE.md·Hook 개선&lt;br/&gt;(개선 루프)&quot;]
+    G --&gt; A</pre></div>
+<h2 id="9-정리">9. 정리<a class="anchor" href="#9-정리" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>질문</th>
+<th>답</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CI와 CD의 차이는?</td>
+<td>CI는 자동 검사, CD는 검사 통과물을 자동으로 전달/배포</td>
+</tr>
+<tr>
+<td>이미지 태그를 두 개 다는 이유는?</td>
+<td><code>latest</code>는 편의, SHA는 정확한 버전 지정과 롤백</td>
+</tr>
+<tr>
+<td>비밀 정보는 어디에?</td>
+<td>접속 정보는 GitHub Secrets, 앱 비밀은 서버 <code>.env</code>, GHCR은 일회용 토큰</td>
+</tr>
+<tr>
+<td>테스트가 실패하면?</td>
+<td><code>needs</code>로 연결되어 있어 <strong>배포가 시작되지 않는다</strong></td>
+</tr>
+<tr>
+<td>문제가 생기면?</td>
+<td>이전 SHA로 롤백 또는 <code>git revert</code> 후 push</td>
+</tr>
+</tbody></table></div>
+<h2 id="10-과제">10. 과제<a class="anchor" href="#10-과제" aria-label="이 절의 링크">#</a></h2>
+<ol>
+<li><strong>필수</strong>: <code>http://&lt;탄력적IP&gt;</code>에서 동작하는 서비스 캡처 + Actions의 Deploy 성공 화면 캡처</li>
+<li><strong>필수</strong>: 일부러 테스트를 실패시키는 커밋을 push해서 <strong>배포가 막히는 것</strong>을 확인하고 캡처 → 다시 고쳐서 배포</li>
+<li><strong>도전 ①</strong>: 무료 도메인 또는 보유 도메인을 연결하고, Caddy나 Certbot으로 <strong>HTTPS</strong>를 적용해 보세요.</li>
+<li><strong>도전 ②</strong>: 배포 성공·실패를 디스코드/슬랙 웹훅으로 알리는 단계를 워크플로우에 추가하세요.</li>
+</ol>
+<blockquote class="warn"><p>⚠️ <strong>수업 후 인스턴스를 중지(Stop)하는 것을 잊지 마세요!</strong> 9주차 발표 때 다시 시작하면 됩니다. (탄력적 IP를 연결해 두었으므로 주소는 그대로입니다.)</p>
+</blockquote>
+<hr>
+<h2 id="11-지금까지의-진행-상황-다음-주-예고">11. 지금까지의 진행 상황 &amp; 다음 주 예고<a class="anchor" href="#11-지금까지의-진행-상황-다음-주-예고" aria-label="이 절의 링크">#</a></h2>
+<h3 id="111-8주차까지-진행-상황">11.1 8주차까지 진행 상황<a class="anchor" href="#111-8주차까지-진행-상황" aria-label="이 절의 링크">#</a></h3>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    W1[&quot;✅ 1주&quot;]:::done --&gt; W2[&quot;✅ 2주&quot;]:::done --&gt; W3[&quot;✅ 3주&quot;]:::done --&gt; W4[&quot;✅ 4주&quot;]:::done --&gt; W5[&quot;✅ 5주&quot;]:::done --&gt; W6[&quot;✅ 6주&quot;]:::done --&gt; W7[&quot;✅ 7주&quot;]:::done --&gt; W8[&quot;✅ 8주&lt;br/&gt;CI/CD&quot;]:::done --&gt; W9[&quot;9주&lt;br/&gt;포트폴리오&quot;]
+    classDef done fill:#dcfce7,stroke:#16a34a</pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>구분</th>
+<th>완료한 것</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>개념</td>
+<td>CI / 지속적 전달 / 지속적 배포, 레지스트리·이미지 태그, 비밀 정보 분리, 손익분기점, 롤백·헬스 체크</td>
+</tr>
+<tr>
+<td>AWS</td>
+<td>예산 알림, EC2(Ubuntu 24.04), 보안 그룹, 탄력적 IP, SSH, Docker·스왑 설치, 서버 <code>.env</code></td>
+</tr>
+<tr>
+<td>파이프라인</td>
+<td><code>docker-compose.prod.yml</code>, <code>deploy.yml</code>(test → build-and-push → deploy → 헬스 체크)</td>
+</tr>
+<tr>
+<td>운영</td>
+<td>상태 확인, SHA 태그 롤백, AI(<code>claude -p</code>)로 실패 로그 분석, (선택) 수동 승인</td>
+</tr>
+<tr>
+<td>결과</td>
+<td><strong><code>http://&lt;탄력적IP&gt;</code>에서 누구나 접속 가능한 서비스</strong>, <code>week-08</code> 태그</td>
+</tr>
+</tbody></table></div>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    D[&quot;👩‍💻 git push&quot;] --&gt; CI[&quot;✅ 테스트&quot;] --&gt; IMG[&quot;📦 이미지 (GHCR)&quot;] --&gt; EC2[&quot;☁️ EC2 배포&quot;] --&gt; HC[&quot;❤️ 헬스 체크&quot;] --&gt; U[&quot;🌍 사용자&quot;]</pre></div>
+<h3 id="112-다음-주9주차-예고-포트폴리오-완성">11.2 다음 주(9주차) 예고 — 포트폴리오 완성<a class="anchor" href="#112-다음-주9주차-예고-포트폴리오-완성" aria-label="이 절의 링크">#</a></h3>
+<ul>
+<li><strong>배울 것</strong>: 9주 동안 만든 결과를 <strong>한국어·일본어 README</strong>로 정리해, 채용 담당자가 30초 안에 이해하는 포트폴리오로 완성합니다. 번역에도 <strong>하네스(용어집 + Skill + 검사 스크립트)</strong> 를 적용하고, <code>v1.0.0</code> 릴리스와 발표·회고로 과정을 마무리합니다.</li>
+<li><strong>왜 배우나</strong>: 아무리 잘 만들어도 <strong>설명하지 못하면</strong> 전달되지 않습니다. 특히 일본 IT 기업은 「技術選定理由（기술 선정 이유）」「工夫した点（고민한 점）」을 중요하게 봅니다.</li>
+<li><strong>미리 준비</strong>: ① 각 화면 스크린샷 5장(할 일·요약·Q&amp;A·코치·계획)과 10~20초 데모 GIF ② 9주 동안 겪은 <strong>문제와 해결 과정 2가지</strong> 메모 ③ 발표 당일 EC2 인스턴스 시작</li>
+</ul>
+<hr>
+<h2 id="12-일본-취업-대비-it-용어-8주차">12. 🇯🇵 일본 취업 대비 IT 용어 (8주차)<a class="anchor" href="#12-일본-취업-대비-it-용어-8주차" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>한국어</th>
+<th>日本語</th>
+<th>읽는 법</th>
+<th>예문 (日本語)</th>
+<th>예문 해석</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>배포</td>
+<td>デプロイ</td>
+<td>데프로이</td>
+<td>mainブランチへのプッシュで自動デプロイされます。</td>
+<td>main 브랜치에 push하면 자동 배포됩니다.</td>
+</tr>
+<tr>
+<td>지속적 배포</td>
+<td>継続的デプロイ（CD）</td>
+<td>けいぞくてきデプロイ</td>
+<td>テスト通過後に継続的デプロイを行う構成です。</td>
+<td>테스트 통과 후 지속적 배포를 하는 구성입니다.</td>
+</tr>
+<tr>
+<td>파이프라인</td>
+<td>パイプライン</td>
+<td>파이푸라인</td>
+<td>CI/CDパイプラインをGitHub Actionsで構築しました。</td>
+<td>CI/CD 파이프라인을 GitHub Actions로 구축했습니다.</td>
+</tr>
+<tr>
+<td>운영 환경</td>
+<td>本番環境</td>
+<td>ほんばんかんきょう</td>
+<td>本番環境ではデータベースを外部に公開していません。</td>
+<td>운영 환경에서는 데이터베이스를 외부에 공개하지 않습니다.</td>
+</tr>
+<tr>
+<td>개발 환경 / 검증 환경</td>
+<td>開発環境 / 検証環境</td>
+<td>けんしょうかんきょう</td>
+<td>検証環境で確認してから本番に反映します。</td>
+<td>검증 환경에서 확인한 뒤 운영에 반영합니다.</td>
+</tr>
+<tr>
+<td>인스턴스</td>
+<td>インスタンス</td>
+<td>인스탄스</td>
+<td>EC2インスタンスにDockerをインストールしました。</td>
+<td>EC2 인스턴스에 Docker를 설치했습니다.</td>
+</tr>
+<tr>
+<td>보안 그룹</td>
+<td>セキュリティグループ</td>
+<td>세큐리티 구루-푸</td>
+<td>セキュリティグループで不要なポートを閉じました。</td>
+<td>보안 그룹으로 불필요한 포트를 닫았습니다.</td>
+</tr>
+<tr>
+<td>비밀 정보</td>
+<td>シークレット / 機密情報</td>
+<td>きみつじょうほう</td>
+<td>接続情報はGitHubのシークレットで管理しました。</td>
+<td>접속 정보는 GitHub Secrets로 관리했습니다.</td>
+</tr>
+<tr>
+<td>롤백</td>
+<td>ロールバック</td>
+<td>로-루박쿠</td>
+<td>問題発生時はコミットIDのタグでロールバックできます。</td>
+<td>문제 발생 시 커밋 ID 태그로 롤백할 수 있습니다.</td>
+</tr>
+<tr>
+<td>헬스 체크</td>
+<td>ヘルスチェック</td>
+<td>헤루스 쳇쿠</td>
+<td>デプロイ後にヘルスチェックで正常性を確認します。</td>
+<td>배포 후 헬스 체크로 정상 여부를 확인합니다.</td>
+</tr>
+<tr>
+<td>장애</td>
+<td>障害</td>
+<td>しょうがい</td>
+<td>障害発生時のログ確認手順をまとめました。</td>
+<td>장애 발생 시 로그 확인 절차를 정리했습니다.</td>
+</tr>
+<tr>
+<td>운용 / 보수</td>
+<td>運用 / 保守</td>
+<td>うんよう / ほしゅ</td>
+<td>運用コストを抑えるため小さなインスタンスを選びました。</td>
+<td>운용 비용을 줄이기 위해 작은 인스턴스를 골랐습니다.</td>
+</tr>
+</tbody></table></div>
+<blockquote class="speak"><p>💬 <strong>면접에서 이렇게 말해 보세요</strong></p>
+<p>「テストに通ったコードだけが本番環境に自動デプロイされる仕組みを一人で構築しました。」</p>
+<p>(테스트를 통과한 코드만 운영 환경에 자동 배포되는 구조를 혼자서 구축했습니다.)</p>
+</blockquote>
+<p><a href="week07-graph-engineering.html">← 7주차</a> · <a href="week09-portfolio-readme.html">9주차: 포트폴리오 README →</a></p>
+
+</article>
+<nav class="pager">
+  <a href="week07-graph-engineering.html"><small>← 이전</small>7주차 · 그래프</a>
+  <a class="next" href="week09-portfolio-readme.html"><small>다음 →</small>9주차 · 포트폴리오</a>
+</nav>
+</main>
+<aside class="toc"><h4>이 페이지에서</h4>
+<a class="h2" href="#0-수업-진행표-3시간">0. 수업 진행표 (3시간)</a>
+<a class="h2" href="#1-학습-목표">1. 학습 목표</a>
+<a class="h2" href="#2-개념-①-cicd">2. 개념 ① CI/CD</a>
+<a class="h3" href="#21-비유-빵-공장">2.1 비유: 빵 공장</a>
+<a class="h3" href="#22-우리-파이프라인-전체-그림">2.2 우리 파이프라인 전체 그림</a>
+<a class="h3" href="#23-이미지-태그-전략-이름표-두-개">2.3 이미지 태그 전략: &quot;이름표 두 개&quot;</a>
+<a class="h3" href="#24-비밀-정보는-어디에">2.4 비밀 정보는 어디에?</a>
+<a class="h3" href="#25-자동화는-언제-이득인가-손익분기점">2.5 자동화는 언제 이득인가? (손익분기점)</a>
+<a class="h3" href="#26-비용과-안전-수칙">2.6 비용과 안전 수칙</a>
+<a class="h2" href="#3-실습-①-aws-ec2-준비">3. 실습 ① AWS EC2 준비</a>
+<a class="h3" href="#31-예산-알림-가장-먼저">3.1 예산 알림 (가장 먼저!)</a>
+<a class="h3" href="#32-인스턴스-만들기">3.2 인스턴스 만들기</a>
+<a class="h3" href="#33-탄력적-ip-연결">3.3 탄력적 IP 연결</a>
+<a class="h2" href="#4-실습-②-서버-설정">4. 실습 ② 서버 설정</a>
+<a class="h3" href="#41-ssh-접속">4.1 SSH 접속</a>
+<a class="h3" href="#42-docker-설치-스왑-앱-폴더">4.2 Docker 설치 · 스왑 · 앱 폴더</a>
+<a class="h3" href="#43-배포용-ssh-키를-github-secrets에-등록">4.3 배포용 SSH 키를 GitHub Secrets에 등록</a>
+<a class="h2" href="#5-실습-③-운영용-compose-파일">5. 실습 ③ 운영용 Compose 파일</a>
+<a class="h2" href="#6-실습-④-배포-워크플로우">6. 실습 ④ 배포 워크플로우</a>
+<a class="h3" href="#61-작업job-흐름">6.1 작업(Job) 흐름</a>
+<a class="h3" href="#62-워크플로우-파일">6.2 워크플로우 파일</a>
+<a class="h3" href="#63-push하고-지켜보기">6.3 push하고 지켜보기</a>
+<a class="h2" href="#7-실습-⑤-운영-확인-롤백-ai로-실패-분석">7. 실습 ⑤ 운영 확인 · 롤백 · AI로 실패 분석</a>
+<a class="h3" href="#71-서버에서-상태-확인">7.1 서버에서 상태 확인</a>
+<a class="h3" href="#72-롤백-어제-버전으로-돌아가기">7.2 롤백: &quot;어제 버전으로 돌아가기&quot;</a>
+<a class="h3" href="#73-ai로-배포-실패-분석하기-루프-하네스-응용">7.3 AI로 배포 실패 분석하기 (루프 + 하네스 응용)</a>
+<a class="h3" href="#74-선택-수동-승인으로-바꾸기-지속적-전달">7.4 (선택) 수동 승인으로 바꾸기 — 지속적 전달</a>
+<a class="h2" href="#8-전체-흐름-다시-보기-6단계-엔지니어링과-cicd">8. 전체 흐름 다시 보기: 6단계 엔지니어링과 CI/CD</a>
+<a class="h2" href="#9-정리">9. 정리</a>
+<a class="h2" href="#10-과제">10. 과제</a>
+<a class="h2" href="#11-지금까지의-진행-상황-다음-주-예고">11. 지금까지의 진행 상황 &amp; 다음 주 예고</a>
+<a class="h3" href="#111-8주차까지-진행-상황">11.1 8주차까지 진행 상황</a>
+<a class="h3" href="#112-다음-주9주차-예고-포트폴리오-완성">11.2 다음 주(9주차) 예고 — 포트폴리오 완성</a>
+<a class="h2" href="#12-일본-취업-대비-it-용어-8주차">12. 🇯🇵 일본 취업 대비 IT 용어 (8주차)</a>
+</aside>
+</div>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/dockerfile.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/nginx.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/powershell.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/groovy.min.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', function () {
+// AI 엔지니어링 특강 — 강의 자료 공통 스크립트
+(function () {
+  // 1) 코드 복사 버튼
+  document.querySelectorAll('.code-block .copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var code = btn.closest('.code-block').querySelector('pre code');
+      var text = code ? code.innerText : '';
+      var done = function () {
+        btn.textContent = '복사됨 ✓';
+        setTimeout(function () { btn.textContent = '복사'; }, 1500);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done);
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); done(); } finally { document.body.removeChild(ta); }
+      }
+    });
+  });
+
+  // 2) 모바일 메뉴
+  var menu = document.querySelector('.menu-btn');
+  if (menu) {
+    menu.addEventListener('click', function () { document.body.classList.toggle('nav-open'); });
+    document.querySelectorAll('.sidebar a').forEach(function (a) {
+      a.addEventListener('click', function () { document.body.classList.remove('nav-open'); });
+    });
+  }
+
+  // 3) 현재 읽는 절을 목차에 표시
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  if (links.length && 'IntersectionObserver' in window) {
+    var map = {};
+    links.forEach(function (a) { map[decodeURIComponent(a.getAttribute('href').slice(1))] = a; });
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting && map[e.target.id]) {
+          links.forEach(function (l) { l.classList.remove('active'); });
+          map[e.target.id].classList.add('active');
+        }
+      });
+    }, { rootMargin: '-60px 0px -70% 0px' });
+    document.querySelectorAll('.paper h2[id], .paper h3[id]').forEach(function (h) { observer.observe(h); });
+  }
+
+  // 4) 코드 하이라이트 (highlight.js가 로드된 경우)
+  if (window.hljs) {
+    document.querySelectorAll('.code-block pre code').forEach(function (el) {
+      if (!el.classList.contains('language-plaintext')) {
+        window.hljs.highlightElement(el);
+      }
+    });
+  }
+
+  // 5) 수식 (KaTeX auto-render가 로드된 경우)
+  if (window.renderMathInElement) {
+    window.renderMathInElement(document.querySelector('.paper') || document.body, {
+      delimiters: [
+        { left: '\\[', right: '\\]', display: true },
+        { left: '\\(', right: '\\)', display: false },
+      ],
+      ignoredClasses: ['code-block', 'mermaid'],
+      throwOnError: false,
+      strict: false,
+    });
+  }
+})();
+
+});
+</script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose', fontFamily: 'Pretendard, sans-serif' });
+  await mermaid.run({ querySelector: 'pre.mermaid' });
+</script>
+</body>
+</html>

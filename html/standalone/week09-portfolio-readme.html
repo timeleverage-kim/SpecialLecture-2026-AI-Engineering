@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>9주차 · 포트폴리오 완성 — 한국어 + 일본어 README | AI와 함께하는 풀스택 개발 — 바이브코딩에서 그래프 엔지니어링까지</title>
+<meta name="description" content="채용 담당자가 30초에 이해하는 README를 한국어·일본어로 작성하고, 번역 하네스·릴리스·발표·회고로 마무리합니다.">
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css">
+<style>
+/* AI 엔지니어링 특강 — 강의 자료 공통 스타일 */
+:root {
+  --bg: #f7f8fb;
+  --paper: #ffffff;
+  --ink: #1d2433;
+  --ink-soft: #5b6476;
+  --line: #e4e7ee;
+  --brand: #4338ca;
+  --brand-soft: #eef0ff;
+  --code-bg: #0f172a;
+  --code-ink: #e2e8f0;
+  --tip: #0e7490;   --tip-bg: #ecfeff;
+  --warn: #b45309;  --warn-bg: #fffbeb;
+  --key: #4338ca;   --key-bg: #eef2ff;
+  --sec: #be123c;   --sec-bg: #fff1f2;
+  --sidebar-w: 260px;
+  --toc-w: 240px;
+  font-family: 'Pretendard', 'Noto Sans KR', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: var(--brand); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── 상단 바 ── */
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 12px;
+  height: 56px; padding: 0 20px;
+  background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar .brand { font-weight: 800; color: var(--ink); letter-spacing: -0.01em; }
+.topbar .brand span { color: var(--brand); }
+.topbar .spacer { flex: 1; }
+.topbar .md-link { font-size: 0.85rem; color: var(--ink-soft); border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; }
+.menu-btn { display: none; background: none; border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; font-size: 1.1rem; cursor: pointer; }
+
+/* ── 3단 레이아웃 ── */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr) var(--toc-w);
+  max-width: 1480px; margin: 0 auto;
+}
+.sidebar, .toc {
+  position: sticky; top: 56px; align-self: start;
+  height: calc(100vh - 56px); overflow-y: auto;
+  padding: 24px 16px; font-size: 0.9rem;
+}
+.sidebar { border-right: 1px solid var(--line); }
+.sidebar h4, .toc h4 { margin: 0 0 10px; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.sidebar ol { list-style: none; padding: 0; margin: 0; }
+.sidebar li a { display: block; padding: 7px 10px; border-radius: 8px; color: var(--ink); line-height: 1.35; }
+.sidebar li a small { display: block; color: var(--ink-soft); font-size: 0.75rem; }
+.sidebar li a:hover { background: var(--brand-soft); text-decoration: none; }
+.sidebar li a.active { background: var(--brand); color: #fff; }
+.sidebar li a.active small { color: #c7d2fe; }
+.toc { border-left: 1px solid var(--line); }
+.toc a { display: block; padding: 3px 0; color: var(--ink-soft); line-height: 1.4; }
+.toc a.h3 { padding-left: 12px; font-size: 0.82rem; }
+.toc a.active { color: var(--brand); font-weight: 700; }
+
+/* ── 본문 ── */
+main.content { padding: 32px 48px 80px; min-width: 0; }
+.paper { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 40px 48px; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04); }
+.paper h1 { font-size: 2rem; line-height: 1.3; margin: 0 0 16px; letter-spacing: -0.02em; }
+.paper h2 { font-size: 1.45rem; margin: 2.4em 0 0.8em; padding-top: 0.6em; border-top: 1px solid var(--line); letter-spacing: -0.01em; }
+.paper h3 { font-size: 1.15rem; margin: 1.8em 0 0.6em; }
+.paper h4 { font-size: 1rem; margin: 1.4em 0 0.4em; }
+.paper h2, .paper h3 { scroll-margin-top: 72px; }
+.paper hr { border: none; border-top: 1px dashed var(--line); margin: 2em 0; }
+.paper img { max-width: 100%; }
+.anchor { margin-left: 6px; color: var(--line); font-weight: 400; visibility: hidden; }
+h2:hover .anchor, h3:hover .anchor { visibility: visible; }
+
+/* 표 */
+.table-wrap { overflow-x: auto; margin: 1em 0 1.4em; border: 1px solid var(--line); border-radius: 12px; }
+.table-wrap table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+.table-wrap th { background: #f3f4f8; text-align: left; font-weight: 700; }
+.table-wrap th, .table-wrap td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.table-wrap tr:last-child td { border-bottom: none; }
+
+/* 인라인 코드 */
+:not(pre) > code { background: #f1f3f9; border: 1px solid #e6e9f2; border-radius: 6px; padding: 0.1em 0.4em; font-size: 0.88em; font-family: 'JetBrains Mono', 'D2Coding', ui-monospace, Consolas, monospace; }
+
+/* 코드 블록 */
+.code-block { position: relative; margin: 1em 0 1.4em; border-radius: 12px; overflow: hidden; background: var(--code-bg); }
+.code-block .code-head { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; font-size: 0.75rem; color: #94a3b8; background: #1e293b; font-family: ui-monospace, monospace; }
+.code-block .copy { background: none; border: 1px solid #334155; color: #cbd5e1; border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer; }
+.code-block .copy:hover { background: #334155; }
+.code-block pre { margin: 0; padding: 14px 16px; overflow-x: auto; }
+.code-block pre code { font-family: 'JetBrains Mono', 'D2Coding', ui-monospace, Consolas, monospace; font-size: 0.85rem; line-height: 1.6; color: var(--code-ink); background: none; }
+.code-block pre code.hljs { padding: 0; background: none; }
+
+/* Mermaid */
+.diagram { margin: 1.2em 0 1.6em; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: #fcfcfe; text-align: center; overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; background: none; font-size: 0.85rem; white-space: pre; text-align: left; }
+.diagram pre.mermaid[data-processed] { text-align: center; }
+
+/* 수식 */
+.math-block { overflow-x: auto; padding: 14px 8px; margin: 1em 0; background: #fafbff; border: 1px solid #eceffa; border-radius: 12px; text-align: center; }
+
+/* 콜아웃 */
+blockquote { margin: 1.2em 0; padding: 12px 18px; border-left: 4px solid var(--line); background: #f8f9fc; border-radius: 0 12px 12px 0; color: var(--ink); }
+blockquote p { margin: 0.4em 0; }
+blockquote.tip { border-color: var(--tip); background: var(--tip-bg); }
+blockquote.warn { border-color: var(--warn); background: var(--warn-bg); }
+blockquote.key { border-color: var(--key); background: var(--key-bg); }
+blockquote.sec { border-color: var(--sec); background: var(--sec-bg); }
+
+/* 주차 머리 배지 */
+.week-hero { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.week-hero .pill { font-size: 0.78rem; padding: 3px 10px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+
+/* 이전/다음 */
+.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 28px; }
+.pager a { display: block; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
+.pager a:hover { border-color: var(--brand); text-decoration: none; }
+.pager a small { display: block; color: var(--ink-soft); font-size: 0.78rem; }
+.pager a.next { text-align: right; }
+
+/* ── 첫 화면(index) ── */
+.hero { padding: 64px 24px 40px; text-align: center; background: radial-gradient(1200px 400px at 50% -10%, #e0e7ff 0%, transparent 70%); }
+.hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin: 0 0 12px; letter-spacing: -0.03em; }
+.hero p { color: var(--ink-soft); max-width: 760px; margin: 0 auto; font-size: 1.05rem; }
+.ladder { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 28px auto 0; max-width: 980px; }
+.ladder span { padding: 8px 14px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); font-weight: 600; font-size: 0.9rem; }
+.ladder i { align-self: center; color: var(--ink-soft); font-style: normal; }
+.section { max-width: 1180px; margin: 0 auto; padding: 24px; }
+.section h2 { font-size: 1.35rem; margin: 24px 0 14px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.card { display: flex; flex-direction: column; gap: 6px; padding: 20px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; color: var(--ink); transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(67, 56, 202, 0.08); border-color: #c7d2fe; text-decoration: none; }
+.card .num { font-size: 0.78rem; font-weight: 700; color: var(--brand); letter-spacing: 0.06em; }
+.card h3 { margin: 0; font-size: 1.1rem; }
+.card p { margin: 0; color: var(--ink-soft); font-size: 0.92rem; }
+.card .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 8px; }
+.card .tags span { font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; background: #f1f3f9; color: var(--ink-soft); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.box { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; }
+.box h3 { margin-top: 0; }
+footer.site { text-align: center; color: var(--ink-soft); font-size: 0.85rem; padding: 40px 16px; }
+
+/* ── 반응형 ── */
+@media (max-width: 1200px) {
+  .layout { grid-template-columns: var(--sidebar-w) minmax(0, 1fr); }
+  .toc { display: none; }
+}
+@media (max-width: 860px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .menu-btn { display: inline-block; }
+  .sidebar { position: fixed; left: 0; top: 56px; width: 280px; background: var(--paper); z-index: 30; transform: translateX(-100%); transition: transform 0.2s; box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08); }
+  body.nav-open .sidebar { transform: none; }
+  main.content { padding: 16px 10px 60px; }
+  .paper { padding: 24px 18px; border-radius: 12px; }
+}
+
+/* ── 인쇄 ── */
+@media print {
+  .topbar, .sidebar, .toc, .pager, .copy { display: none !important; }
+  .layout { display: block; }
+  main.content { padding: 0; }
+  .paper { border: none; box-shadow: none; padding: 0; }
+  .code-block { background: #f6f8fa; }
+  .code-block pre code { color: #111; }
+  h2, h3 { break-after: avoid; }
+  .code-block, .diagram, .table-wrap { break-inside: avoid; }
+}
+
+/* ── 실습 단계 머리표 (🤖 ⌨️ ✅ 📄) ── */
+.paper h4.step { display: flex; align-items: center; gap: 10px; margin: 1.8em 0 0.7em; padding: 9px 14px; border-radius: 10px; border-left: 5px solid; font-size: 1rem; line-height: 1.4; }
+.paper h4.step .step-icon { font-size: 1.15rem; }
+.paper h4.step-ai { background: #eef2ff; border-color: #4338ca; color: #312e81; }
+.paper h4.step-cmd { background: #f1f5f9; border-color: #475569; color: #1e293b; }
+.paper h4.step-result { background: #ecfdf5; border-color: #059669; color: #064e3b; }
+.paper h4.step-ref { background: #fff7ed; border-color: #ea580c; color: #7c2d12; }
+.code-block.prompt { background: #1e1b4b; box-shadow: 0 0 0 2px #6366f1 inset; }
+.code-block.prompt .code-head { background: #312e81; color: #c7d2fe; }
+.code-block.prompt pre code { color: #e0e7ff; white-space: pre-wrap; }
+blockquote.term { border-color: #7c3aed; background: #f5f3ff; }
+blockquote.speak { border-color: #db2777; background: #fdf2f8; }
+.paper img { display: block; margin: 0.8em auto 1.4em; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px; }
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <button class="menu-btn" type="button" aria-label="메뉴">☰</button>
+  <a class="brand" href="index.html">AI <span>Engineering</span> Lab</a>
+  <div class="spacer"></div>
+  <a class="md-link" href="../docs/week09-portfolio-readme.md">📄 Markdown 원본</a>
+</header>
+<div class="layout">
+<aside class="sidebar"><h4>강의 목차</h4><ol>
+<li><a href="index.html">🏠 과정 소개<small>개요 · 로드맵</small></a></li>
+<li><a href="week01-overview.html">1주차 · 전체 지도<small>개요</small></a></li>
+<li><a href="week02-vibe-coding.html">2주차 · 바이브코딩<small>① 바이브</small></a></li>
+<li><a href="week03-prompt-engineering.html">3주차 · 프롬프트<small>② 프롬프트</small></a></li>
+<li><a href="week04-context-engineering.html">4주차 · 컨텍스트<small>③ 컨텍스트</small></a></li>
+<li><a href="week05-harness-engineering.html">5주차 · 하네스<small>④ 하네스</small></a></li>
+<li><a href="week06-loop-engineering.html">6주차 · 루프<small>⑤ 루프</small></a></li>
+<li><a href="week07-graph-engineering.html">7주차 · 그래프<small>⑥ 그래프</small></a></li>
+<li><a href="week08-cicd-aws.html">8주차 · CI/CD·AWS<small>배포</small></a></li>
+<li><a href="week09-portfolio-readme.html" class="active">9주차 · 포트폴리오<small>정리</small></a></li>
+</ol></aside>
+<main class="content">
+<article class="paper">
+<h1>9주차 · 포트폴리오 완성 — 한국어 + 일본어 README</h1>
+<div class="week-hero"><span class="pill">9주차</span><span class="pill">3시간 (설명 + 실습)</span><span class="pill">정리</span></div>
+<blockquote>
+<p><strong>&quot;코드는 면접관이 읽지 않을 수 있지만, README는 반드시 읽는다.&quot;</strong></p>
+<p>9주 동안 만든 AI 스터디 플래너를 <strong>한국어·일본어 README</strong>로 정리해 국내와 일본 취업에 모두 쓸 수 있는 포트폴리오로 완성합니다. 그리고 발표와 회고로 과정을 마무리합니다.</p>
+</blockquote>
+<hr>
+<h2 id="0-수업-진행표-3시간">0. 수업 진행표 (3시간)<a class="anchor" href="#0-수업-진행표-3시간" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>시간</th>
+<th>내용</th>
+<th>형태</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0:00 ~ 0:25</td>
+<td>좋은 README의 조건 · 한국/일본 채용 담당자가 보는 것</td>
+<td>설명</td>
+</tr>
+<tr>
+<td>0:25 ~ 1:20</td>
+<td>실습 ① 한국어 README 작성 (AI 초안 → 사람 편집)</td>
+<td>실습</td>
+</tr>
+<tr>
+<td>1:20 ~ 1:30</td>
+<td>휴식</td>
+<td></td>
+</tr>
+<tr>
+<td>1:30 ~ 2:10</td>
+<td>실습 ② 일본어 README (번역 Skill + 용어집 + 검사 스크립트)</td>
+<td>실습</td>
+</tr>
+<tr>
+<td>2:10 ~ 2:20</td>
+<td>실습 ③ 저장소 마무리 (About, Topics, 배지, 릴리스 v1.0.0)</td>
+<td>실습</td>
+</tr>
+<tr>
+<td>2:20 ~ 2:55</td>
+<td>발표 (1인 3~5분)</td>
+<td>발표</td>
+</tr>
+<tr>
+<td>2:55 ~ 3:00</td>
+<td>KPT 회고 · 수료</td>
+<td>정리</td>
+</tr>
+</tbody></table></div>
+<h2 id="1-학습-목표">1. 학습 목표<a class="anchor" href="#1-학습-목표" aria-label="이 절의 링크">#</a></h2>
+<ol>
+<li>채용 담당자 관점에서 <strong>30초 안에 이해되는 README</strong> 구조를 설계할 수 있다.</li>
+<li>9주간 적용한 <strong>AI 엔지니어링 6단계를 근거(코드·그림·수치)와 함께</strong> 설명할 수 있다.</li>
+<li>AI 번역 + 용어집 + 검사 스크립트(하네스)로 <strong>자연스러운 일본어 README</strong>를 만들 수 있다.</li>
+<li>GitHub 저장소를 포트폴리오로 정돈하고 <strong>v1.0.0 릴리스</strong>를 발행할 수 있다.</li>
+</ol>
+<hr>
+<h2 id="2-개념-①-좋은-readme의-조건">2. 개념 ① 좋은 README의 조건<a class="anchor" href="#2-개념-①-좋은-readme의-조건" aria-label="이 절의 링크">#</a></h2>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — README</strong></p>
+<p><strong>뜻</strong>: 저장소 첫 화면에 자동으로 표시되는 <strong>설명서 파일</strong>(<code>README.md</code>). &quot;나를 먼저 읽어 주세요(Read me)&quot;라는 뜻입니다.</p>
+<p><strong>왜 중요한가</strong>: 채용 담당자는 코드를 한 줄씩 읽을 시간이 없습니다. README는 <strong>프로젝트의 표지이자 요약 보고서</strong>이고, 많은 경우 <strong>유일하게 읽히는 문서</strong>입니다.</p>
+<p><strong>Markdown</strong>: <code>#</code> 제목, <code>**굵게**</code>, <code>| 표 |</code>처럼 간단한 기호로 서식을 표현하는 문서 형식. 이 교안도 Markdown으로 쓰였습니다.</p>
+</blockquote>
+<h3 id="21-채용-담당자의-30초">2.1 채용 담당자의 30초<a class="anchor" href="#21-채용-담당자의-30초" aria-label="이 절의 링크">#</a></h3>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    A[&quot;0~5초&lt;br/&gt;제목·한 줄 소개·데모 이미지&quot;] --&gt; B[&quot;5~15초&lt;br/&gt;주요 기능·기술 스택&quot;]
+    B --&gt; C[&quot;15~25초&lt;br/&gt;아키텍처 그림·내가 한 고민&quot;]
+    C --&gt; D[&quot;25~30초&lt;br/&gt;배포 링크·테스트·CI 배지&quot;]
+    D --&gt; E{&quot;더 볼까?&quot;}
+    E --&gt;|&quot;예&quot;| F[&quot;코드·커밋 기록·트러블슈팅&quot;]</pre></div>
+<blockquote class="key"><p>📌 <strong>앞쪽 5초에 승부가 납니다.</strong> 데모 GIF/스크린샷과 한 줄 소개를 맨 위에 두세요.</p>
+</blockquote>
+<h3 id="22-readme-품질-공식">2.2 README 품질 공식<a class="anchor" href="#22-readme-품질-공식" aria-label="이 절의 링크">#</a></h3>
+<div class="math-block">\[\text{README 점수} = \underbrace{\text{명확성}}_{\text{무엇을 만들었나}} \times \underbrace{\text{근거}}_{\text{그림·수치·코드 링크}} \times \underbrace{\text{재현성}}_{\text{따라 하면 실행되나}} \times \underbrace{\text{성찰}}_{\text{왜·어떻게 고민했나}}\]</div>
+<p>곱셈이라는 점에 주목하세요. 기능이 화려해도 <strong>실행 방법이 없거나(재현성 0)</strong>, <strong>고민의 흔적이 없으면(성찰 0)</strong> 점수가 크게 떨어집니다.</p>
+<h3 id="23-한국과-일본-채용-담당자가-특히-보는-것">2.3 한국과 일본 채용 담당자가 특히 보는 것<a class="anchor" href="#23-한국과-일본-채용-담당자가-특히-보는-것" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>관점</th>
+<th>한국</th>
+<th>일본</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>자주 묻는 질문</td>
+<td>&quot;어떤 문제를 어떻게 해결했나요?&quot;</td>
+<td>「なぜその技術を選びましたか？」「工夫した点・苦労した点は？」</td>
+</tr>
+<tr>
+<td>README에서 강조</td>
+<td>트러블슈팅, 성능 개선 수치</td>
+<td><strong>기술 선정 이유(技術選定理由)</strong>, <strong>工夫した点</strong>, 팀/개인 역할</td>
+</tr>
+<tr>
+<td>문체</td>
+<td>간결한 개조식</td>
+<td><strong>です・ます調</strong>(정중체), 개조식 + 짧은 설명</td>
+</tr>
+<tr>
+<td>날짜·숫자</td>
+<td>2026.12.01</td>
+<td>2026年12月1日 또는 2026/12/01</td>
+</tr>
+<tr>
+<td>주의</td>
+<td>과장 표현 지양</td>
+<td>과도한 자기 PR보다 <strong>사실과 과정</strong> 중심</td>
+</tr>
+</tbody></table></div>
+<h3 id="24-readme-목차-한국어-일본어-대응표">2.4 README 목차 (한국어 ↔ 일본어 대응표)<a class="anchor" href="#24-readme-목차-한국어-일본어-대응표" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>한국어</th>
+<th>日本語</th>
+<th>담을 내용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>프로젝트 소개</td>
+<td>プロジェクト概要</td>
+<td>한 줄 소개, 만든 이유</td>
+</tr>
+<tr>
+<td>2</td>
+<td>데모</td>
+<td>デモ</td>
+<td>배포 URL, GIF, 스크린샷</td>
+</tr>
+<tr>
+<td>3</td>
+<td>주요 기능</td>
+<td>主な機能</td>
+<td>기능 4~6개</td>
+</tr>
+<tr>
+<td>4</td>
+<td>기술 스택</td>
+<td>技術スタック</td>
+<td>표 + <strong>선정 이유</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td>시스템 아키텍처</td>
+<td>システム構成</td>
+<td>Mermaid 그림</td>
+</tr>
+<tr>
+<td>6</td>
+<td>AI 엔지니어링 적용</td>
+<td>AIエンジニアリングの実践</td>
+<td>6단계별 적용 내용</td>
+</tr>
+<tr>
+<td>7</td>
+<td>실행 방법</td>
+<td>起動方法</td>
+<td>복사해서 실행 가능한 명령</td>
+</tr>
+<tr>
+<td>8</td>
+<td>API 명세</td>
+<td>API仕様</td>
+<td>표 또는 문서 링크</td>
+</tr>
+<tr>
+<td>9</td>
+<td>테스트와 CI/CD</td>
+<td>テストとCI/CD</td>
+<td>배지, 파이프라인 그림</td>
+</tr>
+<tr>
+<td>10</td>
+<td>트러블슈팅</td>
+<td>苦労した点と解決策</td>
+<td>문제 → 원인 → 해결 → 배운 점</td>
+</tr>
+<tr>
+<td>11</td>
+<td>회고</td>
+<td>振り返り</td>
+<td>배운 점, 아쉬운 점, 다음 계획</td>
+</tr>
+<tr>
+<td>12</td>
+<td>개발자</td>
+<td>開発者</td>
+<td>이름, 연락처, GitHub</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="3-실습-①-한국어-readme-작성">3. 실습 ① 한국어 README 작성<a class="anchor" href="#3-실습-①-한국어-readme-작성" aria-label="이 절의 링크">#</a></h2>
+<h3 id="31-재료-모으기">3.1 재료 모으기<a class="anchor" href="#31-재료-모으기" aria-label="이 절의 링크">#</a></h3>
+<p>README에 넣을 재료는 <strong>이미 9주 동안 만들어 두었습니다.</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>재료</th>
+<th>위치</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>아키텍처·API</td>
+<td><code>docs/architecture.md</code>, <code>docs/api-spec.md</code></td>
+</tr>
+<tr>
+<td>규칙·명령어</td>
+<td><code>CLAUDE.md</code></td>
+</tr>
+<tr>
+<td>그래프 그림</td>
+<td>계획 화면의 Mermaid 출력</td>
+</tr>
+<tr>
+<td>트러블슈팅</td>
+<td>각 주차 회고표, PR 설명, 커밋 기록(<code>git log --oneline</code>)</td>
+</tr>
+<tr>
+<td>스크린샷</td>
+<td>각 주차 과제 캡처</td>
+</tr>
+</tbody></table></div>
+<p>스크린샷과 GIF는 <code>docs/images/</code> 폴더에 모읍니다.</p>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — 이미지 폴더 만들기</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">mkdir -p docs/images
+# 예: docs/images/demo.gif, tasks.png, coach.png, plan.png, actions.png</code></pre></div>
+<blockquote class="tip"><p>💡 GIF 녹화 도구: Windows는 <strong>ScreenToGif</strong>, macOS는 <strong>Kap</strong> 등. 10~20초, 가로 1000px 안팎이 적당합니다.</p>
+</blockquote>
+<h3 id="32-ai로-초안-만들기-컨텍스트-엔지니어링-복습">3.2 AI로 초안 만들기 (컨텍스트 엔지니어링 복습)<a class="anchor" href="#32-ai로-초안-만들기-컨텍스트-엔지니어링-복습" aria-label="이 절의 링크">#</a></h3>
+<p>Claude Code에게 <strong>재료(컨텍스트)를 지정</strong>해서 초안을 맡깁니다. 4주차에 배운 <code>@파일</code> 참조가 여기서 다시 쓰입니다.</p>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — README 초안</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">@CLAUDE.md @docs/architecture.md @docs/api-spec.md 를 참고해서 프로젝트 루트에 README.md 초안을 작성해 줘.
+
+[독자] 한국 IT 기업 채용 담당자와 현직 개발자
+[목차] 프로젝트 소개 / 데모 / 주요 기능 / 기술 스택(선정 이유 포함) / 시스템 아키텍처(Mermaid) /
+       AI 엔지니어링 적용(바이브·프롬프트·컨텍스트·하네스·루프·그래프 6단계 표) / 실행 방법 /
+       API 명세 / 테스트와 CI/CD / 트러블슈팅 / 회고 / 개발자
+[규칙]
+- 과장하지 말고, 실제 코드에 있는 내용만 쓴다. 확실하지 않은 부분은 &lt;!-- TODO: 확인 --&gt; 주석으로 남긴다.
+- 실행 방법은 복사해서 바로 실행할 수 있게 쓴다.
+- 트러블슈팅과 회고는 내가 직접 쓸 것이므로 빈 틀(문제/원인/해결/배운 점)만 만든다.
+- 맨 위에 언어 전환 링크: [한국어](README.md) | [日本語](README.ja.md)</code></pre></div>
+<blockquote class="warn"><p>⚠️ <strong>트러블슈팅과 회고는 반드시 직접 쓰세요.</strong> 면접에서 가장 많이 질문받는 부분이며, AI가 쓴 문장은 면접관이 금방 알아챕니다. AI는 <strong>문장 다듬기</strong>에만 쓰세요.</p>
+</blockquote>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 초안 점검표</span></h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>✔</th>
+<th>확인 항목</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>☐</td>
+<td>맨 위 언어 전환 링크, 제목, <strong>한 줄 소개</strong>가 있다</td>
+</tr>
+<tr>
+<td>☐</td>
+<td>기술 스택 표에 <strong>선정 이유</strong> 열이 있다</td>
+</tr>
+<tr>
+<td>☐</td>
+<td>아키텍처 Mermaid 그림이 GitHub에서 그림으로 보인다</td>
+</tr>
+<tr>
+<td>☐</td>
+<td>AI 엔지니어링 6단계 표의 <strong>관련 코드 경로가 실제로 존재</strong>한다 (AI가 없는 파일을 지어내지 않았는지!)</td>
+</tr>
+<tr>
+<td>☐</td>
+<td>실행 방법을 <strong>새 폴더에 clone해서 그대로 따라 하면</strong> 실행된다</td>
+</tr>
+<tr>
+<td>☐</td>
+<td><code>&lt;!-- TODO: 확인 --&gt;</code> 주석을 모두 해결했다</td>
+</tr>
+</tbody></table></div>
+<blockquote class="tip"><p>💡 Markdown 미리보기: VS Code에서 <code>Ctrl+Shift+V</code>(macOS <code>Cmd+Shift+V</code>)를 누르면 GitHub와 비슷한 모양으로 볼 수 있습니다.</p>
+</blockquote>
+<h3 id="33-참고-코드-readmemd-한국어">3.3 📄 참고 코드 — README.md (한국어)<a class="anchor" href="#33-참고-코드-readmemd-한국어" aria-label="이 절의 링크">#</a></h3>
+<p>아래를 기준으로 <strong>자신의 내용으로 바꿔</strong> 완성합니다. <code>&lt;...&gt;</code> 부분은 반드시 수정하세요.</p>
+<div class="code-block"><div class="code-head"><span>markdown</span><button class="copy" type="button">복사</button></div><pre><code class="language-markdown">[한국어](README.md) | [日本語](README.ja.md)
+
+# 📚 AI 스터디 플래너
+
+&gt; 할 일·공부 노트를 관리하고, AI가 **요약 · 노트 기반 질의응답 · 도구를 쓰는 코치 · 검증된 학습계획**을 제공하는 웹 서비스
+
+[![CI](https://github.com/&lt;아이디&gt;/ai-study-planner/actions/workflows/ci.yml/badge.svg)](https://github.com/&lt;아이디&gt;/ai-study-planner/actions/workflows/ci.yml)
+[![Deploy](https://github.com/&lt;아이디&gt;/ai-study-planner/actions/workflows/deploy.yml/badge.svg)](https://github.com/&lt;아이디&gt;/ai-study-planner/actions/workflows/deploy.yml)
+
+🔗 **서비스 주소**: http://&lt;탄력적IP&gt;  ·  📅 **개발 기간**: 2026.10 ~ 2026.12 (9주, 개인 프로젝트)
+
+![데모](docs/images/demo.gif)
+
+## 1. 프로젝트 소개
+
+시험 기간마다 할 일과 노트가 흩어져 &quot;무엇부터 공부할지&quot; 정하는 데 시간을 쓰는 문제를 해결하고자 만들었습니다.
+AI 코딩 도구(Claude Code)로 개발하면서 **바이브코딩부터 그래프 엔지니어링까지 6단계 AI 엔지니어링 기법**을 단계적으로 적용했습니다.
+
+## 2. 주요 기능
+
+| 기능 | 설명 | 화면 |
+|---|---|---|
+| ✅ 할 일 관리 | 과목·마감일·예상 시간, 상태 변경, D-Day | ![](docs/images/tasks.png) |
+| ✨ AI 노트 요약 | 3줄 요약·핵심 키워드·셀프 체크 질문 | ![](docs/images/summary.png) |
+| 🔎 노트 Q&amp;A (RAG) | 내 노트에서만 근거를 찾아 출처와 함께 답변 | ![](docs/images/qna.png) |
+| 🤖 AI 코치 (에이전트 루프) | 할 일 조회·추가·상태 변경 도구를 스스로 호출 | ![](docs/images/coach.png) |
+| 🗺️ AI 학습계획 (그래프) | 분석→초안→코드 검증→수정 워크플로우로 계획 생성 | ![](docs/images/plan.png) |
+
+## 3. 기술 스택
+
+| 영역 | 기술 | 선정 이유 |
+|---|---|---|
+| Frontend | React, TypeScript, Vite | 타입 안정성, 빠른 개발 서버, 생태계 |
+| Backend | Spring Boot 4, Java 21, JPA | 계층 구조와 트랜잭션 관리, 국내외 수요 |
+| DB | MariaDB 11.8 | MySQL 호환 오픈소스, Docker로 간편 실행 |
+| AI | Gemini API (Function Calling) | 무료 등급으로 학습·시연 가능, 도구 호출 지원 |
+| AI 개발 도구 | Claude Code | CLAUDE.md·Hooks·Skill·Subagent로 하네스 구성 |
+| Infra | Docker Compose, GitHub Actions, GHCR, AWS EC2 | 테스트 통과 시 자동 배포 |
+
+## 4. 시스템 아키텍처
+
+```mermaid
+flowchart LR
+    U[&quot;사용자&quot;] --&gt; N[&quot;Nginx + React&quot;]
+    N --&gt;|&quot;/api&quot;| S[&quot;Spring Boot&quot;]
+    S --&gt; D[(&quot;MariaDB&quot;)]
+    S --&gt; G[&quot;Gemini API&quot;]
+    GH[&quot;GitHub Actions&quot;] --&gt;|&quot;이미지 빌드·배포&quot;| EC2[&quot;AWS EC2&quot;]
+```
+
+## 5. AI 엔지니어링 적용
+
+| 단계 | 적용 내용 | 관련 코드 |
+|---|---|---|
+| 바이브코딩 | 프로젝트 뼈대·D-Day 컴포넌트를 자연어로 생성하고 한계를 체험 | `frontend/src/components/DdayCounter.tsx` |
+| 프롬프트 | 역할·맥락·작업·제약·형식·예시 6요소 템플릿을 코드로 관리 | `ai/PromptTemplates.java` |
+| 컨텍스트 | `CLAUDE.md`·설계 문서, TF-IDF 기반 RAG(상위 3개·노트당 1,500자) | `CLAUDE.md`, `ai/rag/` |
+| 하네스 | 권한 규칙, PreToolUse 차단·PostToolUse 컴파일 Hook, Skill, 리뷰 Subagent, 가짜 LLM 테스트, CI | `.claude/`, `src/test/` |
+| 루프 | Function Calling 에이전트(최대 6단계), Stop Hook 테스트 검증 루프 | `agent/StudyCoachAgent.java` |
+| 그래프 | 직접 구현한 StateGraph, LLM 노드 + 코드 검증 노드 + 최대 2회 수정 순환 | `graph/` |
+
+**학습계획 그래프**
+
+```mermaid
+flowchart LR
+    A[&quot;analyze (LLM)&quot;] --&gt; B[&quot;draft (LLM)&quot;] --&gt; C{&quot;validate (코드)&quot;}
+    C -.-&gt;|&quot;문제 있음&quot;| R[&quot;revise&quot;] --&gt; B
+    C -.-&gt;|&quot;통과&quot;| F[&quot;finalize&quot;]
+```
+
+## 6. 실행 방법
+
+```bash
+git clone https://github.com/&lt;아이디&gt;/ai-study-planner.git
+cd ai-study-planner
+cp .env.example .env        # GEMINI_API_KEY 등 입력
+docker compose up -d --build
+# http://localhost:3000 접속
+```
+
+## 7. API 명세
+
+[docs/api-spec.md](docs/api-spec.md) 참고
+
+## 8. 테스트와 CI/CD
+
+- 백엔드: JUnit 5 + H2, **가짜 LLM(FakeLlmClient)** 으로 AI 기능을 결정적으로 테스트
+- 프론트엔드: Vitest
+- main에 push → 테스트 → GHCR 이미지 빌드 → EC2 배포 → 헬스 체크 (테스트 실패 시 배포 중단)
+
+## 9. 트러블슈팅
+
+### D-Day가 하루 어긋나는 문제
+- **문제**: &lt;직접 작성&gt;
+- **원인**: &lt;직접 작성&gt;
+- **해결**: &lt;직접 작성&gt;
+- **배운 점**: &lt;직접 작성&gt;
+
+### &lt;두 번째 문제&gt;
+- ...
+
+## 10. 회고
+
+- **잘한 점(Keep)**: &lt;직접 작성&gt;
+- **아쉬운 점(Problem)**: &lt;직접 작성&gt;
+- **다음 시도(Try)**: &lt;직접 작성&gt;
+
+## 11. 개발자
+
+| 이름 | GitHub | 이메일 |
+|---|---|---|
+| &lt;이름&gt; | [@&lt;아이디&gt;](https://github.com/&lt;아이디&gt;) | &lt;이메일&gt; |</code></pre></div>
+<hr>
+<h2 id="4-실습-②-일본어-readme">4. 실습 ② 일본어 README<a class="anchor" href="#4-실습-②-일본어-readme" aria-label="이 절의 링크">#</a></h2>
+<h3 id="41-번역-품질을-높이는-3가지-장치">4.1 번역 품질을 높이는 3가지 장치<a class="anchor" href="#41-번역-품질을-높이는-3가지-장치" aria-label="이 절의 링크">#</a></h3>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    KO[&quot;README.md&lt;br/&gt;(한국어 원본)&quot;] --&gt; T[&quot;① 번역 Skill&lt;br/&gt;(문체·규칙 = 가이드)&quot;]
+    G[&quot;② 용어집&lt;br/&gt;glossary&quot;] --&gt; T
+    T --&gt; JA[&quot;README.ja.md&quot;]
+    JA --&gt; C{&quot;③ 검사 스크립트&lt;br/&gt;(구조 비교 = 센서)&quot;}
+    C --&gt;|&quot;불일치&quot;| T
+    C --&gt;|&quot;통과&quot;| H[&quot;사람 검토&lt;br/&gt;(역번역으로 의미 확인)&quot;]</pre></div>
+<p>5주차에 배운 <strong>하네스(가이드 + 센서)</strong> 를 번역 작업에 그대로 적용하는 것입니다.</p>
+<h3 id="42-①-용어집-일관성의-핵심">4.2 ① 용어집 (일관성의 핵심)<a class="anchor" href="#42-①-용어집-일관성의-핵심" aria-label="이 절의 링크">#</a></h3>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 용어집 (Glossary)</strong></p>
+<p>같은 단어를 <strong>항상 같은 번역어</strong>로 쓰기 위한 대응표. AI는 같은 문서 안에서도 &quot;タスク&quot;와 &quot;課題&quot;처럼 번역어를 바꿔 쓰기 쉽습니다. 용어집을 컨텍스트로 주면 <strong>일관성</strong>이 생깁니다(4주차 컨텍스트 엔지니어링의 응용).</p>
+</blockquote>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — 용어집</span></h4>
+<p><code>docs/glossary-ja.md</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>한국어</th>
+<th>日本語</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>프로젝트 소개</td>
+<td>プロジェクト概要</td>
+<td></td>
+</tr>
+<tr>
+<td>주요 기능</td>
+<td>主な機能</td>
+<td></td>
+</tr>
+<tr>
+<td>기술 스택</td>
+<td>技術スタック</td>
+<td></td>
+</tr>
+<tr>
+<td>선정 이유</td>
+<td>選定理由</td>
+<td></td>
+</tr>
+<tr>
+<td>시스템 아키텍처</td>
+<td>システム構成</td>
+<td>アーキテクチャ도 가능</td>
+</tr>
+<tr>
+<td>실행 방법</td>
+<td>起動方法</td>
+<td></td>
+</tr>
+<tr>
+<td>트러블슈팅</td>
+<td>苦労した点と解決策</td>
+<td>일본 포트폴리오 관례</td>
+</tr>
+<tr>
+<td>회고</td>
+<td>振り返り</td>
+<td></td>
+</tr>
+<tr>
+<td>할 일</td>
+<td>タスク</td>
+<td></td>
+</tr>
+<tr>
+<td>공부 노트</td>
+<td>学習ノート</td>
+<td></td>
+</tr>
+<tr>
+<td>학습계획</td>
+<td>学習計画</td>
+<td></td>
+</tr>
+<tr>
+<td>배포</td>
+<td>デプロイ</td>
+<td></td>
+</tr>
+<tr>
+<td>테스트</td>
+<td>テスト</td>
+<td></td>
+</tr>
+<tr>
+<td>가짜 LLM</td>
+<td>フェイクLLM</td>
+<td></td>
+</tr>
+<tr>
+<td>하네스 엔지니어링</td>
+<td>ハーネスエンジニアリング</td>
+<td>고유 용어는 가타카나</td>
+</tr>
+<tr>
+<td>루프 엔지니어링</td>
+<td>ループエンジニアリング</td>
+<td></td>
+</tr>
+<tr>
+<td>그래프 엔지니어링</td>
+<td>グラフエンジニアリング</td>
+<td></td>
+</tr>
+<tr>
+<td>컨텍스트 엔지니어링</td>
+<td>コンテキストエンジニアリング</td>
+<td></td>
+</tr>
+<tr>
+<td>프롬프트 엔지니어링</td>
+<td>プロンプトエンジニアリング</td>
+<td></td>
+</tr>
+<tr>
+<td>바이브코딩</td>
+<td>バイブコーディング</td>
+<td></td>
+</tr>
+<tr>
+<td>개인 프로젝트</td>
+<td>個人開発</td>
+<td></td>
+</tr>
+<tr>
+<td>개발 기간</td>
+<td>開発期間</td>
+<td></td>
+</tr>
+</tbody></table></div>
+<h3 id="43-②-번역-skill">4.3 ② 번역 Skill<a class="anchor" href="#43-②-번역-skill" aria-label="이 절의 링크">#</a></h3>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — 번역 절차서 (Skill)</span></h4>
+<p>5주차에 만든 <code>add-feature</code>와 같은 방식입니다. 번역의 <strong>문체·규칙·확인 절차</strong>를 한 번 적어 두면 README를 고칠 때마다 같은 품질로 번역할 수 있습니다.</p>
+<p><code>.claude/skills/translate-readme-ja/SKILL.md</code></p>
+<div class="code-block"><div class="code-head"><span>markdown</span><button class="copy" type="button">복사</button></div><pre><code class="language-markdown">---
+name: translate-readme-ja
+description: 한국어 README.md를 일본 IT 기업 채용 담당자가 읽기 좋은 README.ja.md로 번역한다. README 번역·갱신 요청 시 사용한다.
+---
+
+# README 일본어 번역 절차
+
+1. `docs/glossary-ja.md` 용어집을 먼저 읽고, 용어집의 번역어를 반드시 사용한다.
+2. 문체: 설명문은 です・ます調, 표와 목록은 체언 종지(名詞止め)로 간결하게.
+3. 다음은 번역하지 않고 그대로 둔다: 코드 블록, 명령어, 파일 경로, URL, 배지, Mermaid 노드 ID.
+   Mermaid 노드의 **표시 문자열(따옴표 안)** 은 번역한다.
+4. 맨 위 언어 전환 링크는 `[한국어](README.md) | [日本語](README.ja.md)` 그대로 유지한다.
+5. 날짜는 `2026年10月〜2026年12月` 형식, 기간은 `9週間`.
+6. 한국 고유 표현은 일본 독자가 이해하도록 의역한다. (예: &quot;D-Day&quot; → &quot;試験日カウントダウン(D-Day)&quot;)
+7. 번역 후 `node scripts/check-readme.mjs`를 실행해 구조가 일치하는지 확인하고, 불일치하면 고친다.
+8. 마지막으로 의미가 바뀌었을 가능성이 있는 문장 3개를 골라 한국어로 역번역해 보여 준다.</code></pre></div>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 번역 실행</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">/translate-readme-ja</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — AI의 진행 과정 (예시)</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">● Read(docs/glossary-ja.md)            ← 1. 용어집 먼저 읽기
+● Read(README.md)
+● Write(README.ja.md)                  ← 2. 번역 작성
+● Bash(node scripts/check-readme.mjs)  ← 7. 구조 검사 (센서)
+  ⎿ images  8  7 ❌
+● 이미지 하나가 빠졌습니다. 「主な機能」 표의 화면 이미지를 추가하겠습니다.
+● Bash(node scripts/check-readme.mjs)
+  ⎿ ✅ 구조가 일치합니다.
+● 역번역 확인 (의미가 바뀌었을 가능성이 있는 문장 3개) ...</code></pre></div>
+<p>절차서대로 <strong>용어집 → 번역 → 검사 → 수정 → 역번역</strong>을 수행하는지 확인하세요. 검사 스크립트가 실패를 잡아 AI가 스스로 고치는 장면이 보이면, 6주차의 <strong>검증 루프</strong>가 번역에도 적용된 것입니다.</p>
+<h3 id="44-③-구조-검사-스크립트-센서">4.4 ③ 구조 검사 스크립트 (센서)<a class="anchor" href="#44-③-구조-검사-스크립트-센서" aria-label="이 절의 링크">#</a></h3>
+<p>번역 과정에서 <strong>절이 빠지거나 링크·이미지가 누락되는</strong> 실수를 자동으로 잡습니다.</p>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — check-readme.mjs</span></h4>
+<p><code>scripts/check-readme.mjs</code></p>
+<div class="code-block"><div class="code-head"><span>js</span><button class="copy" type="button">복사</button></div><pre><code class="language-javascript">// README.md와 README.ja.md의 구조(제목 수, 코드 블록 수, 이미지·링크 수)를 비교한다.
+import fs from 'node:fs';
+
+const count = (text, re) =&gt; (text.match(re) ?? []).length;
+
+function profile(file) {
+  const text = fs.readFileSync(file, 'utf8');
+  return {
+    h2: count(text, /^## /gm),
+    h3: count(text, /^### /gm),
+    codeBlocks: count(text, /^```/gm) / 2,
+    images: count(text, /!\[[^\]]*\]\([^)]+\)/g),
+    links: count(text, /(?&lt;!!)\[[^\]]+\]\([^)]+\)/g),
+    tables: count(text, /^\|(?:\s*:?-{3,}:?\s*\|)+$/gm),   // 표의 구분선(|---|---|) 개수
+  };
+}
+
+const ko = profile('README.md');
+const ja = profile('README.ja.md');
+let ok = true;
+
+console.log('항목'.padEnd(12), 'KO'.padStart(4), 'JA'.padStart(4));
+for (const key of Object.keys(ko)) {
+  const same = ko[key] === ja[key];
+  if (!same) ok = false;
+  console.log(key.padEnd(12), String(ko[key]).padStart(4), String(ja[key]).padStart(4), same ? '✅' : '❌');
+}
+
+const jaText = fs.readFileSync('README.ja.md', 'utf8');
+const hangul = jaText.replace(/```[\s\S]*?```/g, '').match(/[가-힣]+/g) ?? [];
+const leftover = hangul.filter((w) =&gt; w !== '한국어');
+if (leftover.length &gt; 0) {
+  ok = false;
+  console.log('❌ 일본어 README에 번역되지 않은 한국어:', [...new Set(leftover)].slice(0, 10).join(', '));
+}
+
+console.log(ok ? '\n✅ 구조가 일치합니다.' : '\n❌ 구조가 다릅니다. 위 항목을 확인하세요.');
+process.exit(ok ? 0 : 1);</code></pre></div>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">node scripts/check-readme.mjs</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">항목             KO   JA
+h2             11   11 ✅
+h3              2    2 ✅
+codeBlocks      3    3 ✅
+images          8    8 ✅
+links           6    6 ✅
+tables          4    4 ✅
+
+✅ 구조가 일치합니다.</code></pre></div>
+<blockquote class="tip"><p>💡 이 스크립트를 <code>ci.yml</code>에 한 단계로 추가하면, README 한쪽만 고치고 다른 쪽을 잊은 PR을 <strong>CI가 막아 줍니다.</strong></p>
+</blockquote>
+<h3 id="45-참고-코드-readmejamd-일본어">4.5 📄 참고 코드 — README.ja.md (일본어)<a class="anchor" href="#45-참고-코드-readmejamd-일본어" aria-label="이 절의 링크">#</a></h3>
+<div class="code-block"><div class="code-head"><span>markdown</span><button class="copy" type="button">복사</button></div><pre><code class="language-markdown">[한국어](README.md) | [日本語](README.ja.md)
+
+# 📚 AI スタディプランナー
+
+&gt; タスクと学習ノートを管理し、AI が **要約・ノートに基づく質疑応答・ツールを使うコーチ・検証済みの学習計画** を提供する Web サービスです。
+
+[![CI](https://github.com/&lt;ID&gt;/ai-study-planner/actions/workflows/ci.yml/badge.svg)](https://github.com/&lt;ID&gt;/ai-study-planner/actions/workflows/ci.yml)
+[![Deploy](https://github.com/&lt;ID&gt;/ai-study-planner/actions/workflows/deploy.yml/badge.svg)](https://github.com/&lt;ID&gt;/ai-study-planner/actions/workflows/deploy.yml)
+
+🔗 **URL**: http://&lt;Elastic IP&gt;  ·  📅 **開発期間**: 2026年10月〜2026年12月（9週間・個人開発）
+
+![デモ](docs/images/demo.gif)
+
+## 1. プロジェクト概要
+
+試験期間のたびにタスクやノートが散らばり、「何から勉強すべきか」を決めるだけで時間を使ってしまう課題を解決するために開発しました。
+AI コーディングツール（Claude Code）を活用し、**バイブコーディングからグラフエンジニアリングまでの 6 段階の AI エンジニアリング手法** を段階的に取り入れています。
+
+## 2. 主な機能
+
+| 機能 | 説明 | 画面 |
+|---|---|---|
+| ✅ タスク管理 | 科目・締切・所要時間の登録、ステータス変更、試験日カウントダウン（D-Day） | ![](docs/images/tasks.png) |
+| ✨ AI ノート要約 | 3 行要約・キーワード・セルフチェック問題 | ![](docs/images/summary.png) |
+| 🔎 ノート Q&amp;A（RAG） | 自分のノートだけを根拠に、出典付きで回答 | ![](docs/images/qna.png) |
+| 🤖 AI コーチ（エージェントループ） | タスクの参照・追加・更新ツールを自律的に呼び出し | ![](docs/images/coach.png) |
+| 🗺️ AI 学習計画（グラフ） | 分析→下書き→コード検証→修正のワークフローで計画を生成 | ![](docs/images/plan.png) |
+
+## 3. 技術スタック
+
+| 領域 | 技術 | 選定理由 |
+|---|---|---|
+| Frontend | React, TypeScript, Vite | 型安全性、高速な開発サーバー、豊富なエコシステム |
+| Backend | Spring Boot 4, Java 21, JPA | レイヤー構造とトランザクション管理、国内外での需要 |
+| DB | MariaDB 11.8 | MySQL 互換の OSS、Docker で手軽に起動可能 |
+| AI | Gemini API（Function Calling） | 無料枠で学習・デモが可能、ツール呼び出しに対応 |
+| AI 開発ツール | Claude Code | CLAUDE.md・Hooks・Skill・Subagent でハーネスを構築 |
+| Infra | Docker Compose, GitHub Actions, GHCR, AWS EC2 | テスト通過時に自動デプロイ |
+
+## 4. システム構成
+
+```mermaid
+flowchart LR
+    U[&quot;ユーザー&quot;] --&gt; N[&quot;Nginx + React&quot;]
+    N --&gt;|&quot;/api&quot;| S[&quot;Spring Boot&quot;]
+    S --&gt; D[(&quot;MariaDB&quot;)]
+    S --&gt; G[&quot;Gemini API&quot;]
+    GH[&quot;GitHub Actions&quot;] --&gt;|&quot;イメージのビルド・デプロイ&quot;| EC2[&quot;AWS EC2&quot;]
+```
+
+## 5. AIエンジニアリングの実践
+
+| 段階 | 取り組み内容 | 関連コード |
+|---|---|---|
+| バイブコーディング | プロジェクトの雛形と D-Day コンポーネントを自然言語で生成し、その限界を体験 | `frontend/src/components/DdayCounter.tsx` |
+| プロンプト | 役割・文脈・タスク・制約・形式・例の 6 要素テンプレートをコードで管理 | `ai/PromptTemplates.java` |
+| コンテキスト | `CLAUDE.md`・設計ドキュメント、TF-IDF ベースの RAG（上位 3 件・1 ノート 1,500 文字） | `CLAUDE.md`, `ai/rag/` |
+| ハーネス | 権限ルール、PreToolUse によるブロック・PostToolUse によるコンパイル検査、Skill、レビュー用 Subagent、フェイク LLM テスト、CI | `.claude/`, `src/test/` |
+| ループ | Function Calling エージェント（最大 6 ステップ）、Stop Hook によるテスト検証ループ | `agent/StudyCoachAgent.java` |
+| グラフ | 自作の StateGraph、LLM ノード＋コード検証ノード＋最大 2 回の修正サイクル | `graph/` |
+
+**学習計画グラフ**
+
+```mermaid
+flowchart LR
+    A[&quot;analyze (LLM)&quot;] --&gt; B[&quot;draft (LLM)&quot;] --&gt; C{&quot;validate (コード)&quot;}
+    C -.-&gt;|&quot;問題あり&quot;| R[&quot;revise&quot;] --&gt; B
+    C -.-&gt;|&quot;合格&quot;| F[&quot;finalize&quot;]
+```
+
+## 6. 起動方法
+
+```bash
+git clone https://github.com/&lt;ID&gt;/ai-study-planner.git
+cd ai-study-planner
+cp .env.example .env        # GEMINI_API_KEY などを入力
+docker compose up -d --build
+# http://localhost:3000 にアクセス
+```
+
+## 7. API仕様
+
+[docs/api-spec.md](docs/api-spec.md) を参照してください（韓国語）。
+
+## 8. テストとCI/CD
+
+- バックエンド：JUnit 5 + H2。**フェイク LLM（FakeLlmClient）** により AI 機能を決定的にテスト
+- フロントエンド：Vitest
+- main へ push → テスト → GHCR へイメージをビルド → EC2 へデプロイ → ヘルスチェック（テスト失敗時はデプロイを中止）
+
+## 9. 苦労した点と解決策
+
+### 試験日カウントダウンが 1 日ずれる問題
+- **課題**：&lt;記入&gt;
+- **原因**：&lt;記入&gt;
+- **解決策**：&lt;記入&gt;
+- **学び**：&lt;記入&gt;
+
+### &lt;2 つ目の課題&gt;
+- ...
+
+## 10. 振り返り
+
+- **良かった点（Keep）**：&lt;記入&gt;
+- **課題（Problem）**：&lt;記入&gt;
+- **次に挑戦したいこと（Try）**：&lt;記入&gt;
+
+## 11. 開発者
+
+| 名前 | GitHub | メール |
+|---|---|---|
+| &lt;名前&gt; | [@&lt;ID&gt;](https://github.com/&lt;ID&gt;) | &lt;メール&gt; |</code></pre></div>
+<blockquote class="tip"><p>💡 <strong>이름 표기</strong>: 일본어 README의 개발자 이름은 「홍길동（ホン・ギルドン）」처럼 <strong>가타카나 읽기</strong>를 함께 적으면 읽기 쉽습니다.</p>
+</blockquote>
+<h3 id="46-역번역으로-의미-확인">4.6 역번역으로 의미 확인<a class="anchor" href="#46-역번역으로-의미-확인" aria-label="이 절의 링크">#</a></h3>
+<p>AI 번역은 문법은 자연스럽지만 <strong>의미가 미묘하게 바뀌는</strong> 경우가 있습니다. 중요한 문장은 역번역(일→한)으로 확인합니다.</p>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 역번역 (Back-translation)</strong></p>
+<p>번역된 글을 <strong>다시 원래 언어로 번역</strong>해서 원문과 비교하는 검증 방법. 일본어를 잘 몰라도 <strong>의미가 바뀐 곳</strong>을 찾을 수 있습니다.</p>
+</blockquote>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 역번역 검증</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">README.ja.md의 &quot;苦労した点と解決策&quot; 절을 한국어로 직역해 줘. 원문(README.md)과 의미가 달라진 곳을 표로 표시해 줘.</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 표 채우기</span></h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>원문(한)</th>
+<th>일본어</th>
+<th>역번역(한)</th>
+<th>의미 차이</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="5-실습-③-저장소-마무리">5. 실습 ③ 저장소 마무리<a class="anchor" href="#5-실습-③-저장소-마무리" aria-label="이 절의 링크">#</a></h2>
+<h3 id="51-체크리스트">5.1 체크리스트<a class="anchor" href="#51-체크리스트" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>✔</th>
+<th>항목</th>
+<th>방법</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>☐</td>
+<td>About(설명)·웹사이트 주소</td>
+<td>저장소 오른쪽 ⚙️ → Description, Website</td>
+</tr>
+<tr>
+<td>☐</td>
+<td>Topics</td>
+<td><code>spring-boot</code>, <code>react</code>, <code>typescript</code>, <code>gemini-api</code>, <code>ai-agent</code>, <code>docker</code>, <code>github-actions</code>, <code>aws</code></td>
+</tr>
+<tr>
+<td>☐</td>
+<td><code>.env</code>, <code>*.pem</code>이 저장소에 없음</td>
+<td><code>git log --all --full-history -- .env</code> 결과가 비어 있어야 함</td>
+</tr>
+<tr>
+<td>☐</td>
+<td>실행 방법대로 새 폴더에서 실행 확인</td>
+<td>다른 폴더에 clone해서 <code>docker compose up</code></td>
+</tr>
+<tr>
+<td>☐</td>
+<td>CI·Deploy 배지 초록색</td>
+<td>README 상단</td>
+</tr>
+<tr>
+<td>☐</td>
+<td>스크린샷·GIF가 깨지지 않음</td>
+<td>GitHub 웹에서 확인</td>
+</tr>
+<tr>
+<td>☐</td>
+<td>프로필에 저장소 고정(Pin)</td>
+<td>GitHub 프로필 → Customize your pins</td>
+</tr>
+</tbody></table></div>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — Topics·배지·핀</strong></p>
+<p><strong>Topics</strong>: 저장소에 붙이는 <strong>검색용 태그</strong>. GitHub 검색·탐색에서 내 프로젝트가 노출됩니다.</p>
+<p><strong>배지 (Badge)</strong>: README에 표시하는 <strong>작은 상태 이미지</strong>(예: CI passing). &quot;이 프로젝트는 지금 테스트가 통과 중&quot;이라는 <strong>살아 있는 증거</strong>입니다.</p>
+<p><strong>Pin</strong>: 프로필 첫 화면에 <strong>대표 저장소를 고정</strong>하는 기능.</p>
+</blockquote>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — GitHub CLI로 설명·토픽 설정</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">gh repo edit --description &quot;AI 스터디 플래너 — Spring Boot · React · Gemini 에이전트/그래프 워크플로우&quot; \
+  --add-topic spring-boot --add-topic react --add-topic typescript --add-topic gemini-api \
+  --add-topic ai-agent --add-topic docker --add-topic github-actions --add-topic aws</code></pre></div>
+<h3 id="52-v100-릴리스">5.2 v1.0.0 릴리스<a class="anchor" href="#52-v100-릴리스" aria-label="이 절의 링크">#</a></h3>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 릴리스 (Release)와 시맨틱 버전 (Semantic Versioning)</strong></p>
+<p><strong>릴리스</strong>: 특정 버전을 <strong>공식적으로 발표</strong>하는 것. GitHub Releases에 버전·변경 내역·다운로드가 정리됩니다.</p>
+<p><strong>시맨틱 버전 <code>MAJOR.MINOR.PATCH</code></strong>: <code>1.0.0</code>에서 <strong>MAJOR</strong>는 호환이 깨지는 큰 변경, <strong>MINOR</strong>는 기능 추가, <strong>PATCH</strong>는 버그 수정 때 올립니다. 예: 기능 추가 → <code>1.1.0</code>, 버그 수정 → <code>1.1.1</code>.</p>
+</blockquote>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">git add .
+git commit -m &quot;docs: 한국어·일본어 README와 번역 하네스 추가&quot;
+git push
+git tag -a v1.0.0 -m &quot;AI 스터디 플래너 1.0.0 — 9주 과정 완성&quot;
+git push origin v1.0.0
+gh release create v1.0.0 --generate-notes --title &quot;v1.0.0 AI 스터디 플래너&quot;</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 자동 생성된 릴리스 노트 (예시)</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">v1.0.0 AI 스터디 플래너                                    Latest
+
+## What's Changed
+* feat: D-Day 7일 이하일 때 강조 표시 by @gildong in #1
+* feat: 할 일·노트 CRUD API와 Gemini 노트 요약 기능 추가
+* feat: TF-IDF 기반 노트 질의응답(RAG) 추가
+* feat: 도구 호출 루프 기반 AI 스터디 코치 에이전트 ...
+* feat: StateGraph 엔진과 학습계획 생성 그래프 워크플로우 추가
+* ci: GHCR 이미지 빌드와 EC2 자동 배포 워크플로우 추가
+* docs: 한국어·일본어 README와 번역 하네스 추가
+
+Full Changelog: https://github.com/&lt;아이디&gt;/ai-study-planner/commits/v1.0.0</code></pre></div>
+<p><code>--generate-notes</code>는 커밋·PR 기록으로 <strong>릴리스 노트를 자동 작성</strong>합니다. 9주 동안 Conventional Commits를 지킨 보람이 여기서 나타납니다!</p>
+<hr>
+<h2 id="6-발표-1인-35분">6. 발표 (1인 3~5분)<a class="anchor" href="#6-발표-1인-35분" aria-label="이 절의 링크">#</a></h2>
+<h3 id="61-발표-구성">6.1 발표 구성<a class="anchor" href="#61-발표-구성" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>순서</th>
+<th>시간</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>30초</td>
+<td>한 줄 소개 + 데모 GIF</td>
+</tr>
+<tr>
+<td>2</td>
+<td>60초</td>
+<td>라이브 데모 (배포 주소에서 코치·계획 기능)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>90초</td>
+<td><strong>가장 인상 깊었던 엔지니어링 단계 1개</strong> 깊게: 문제 → 적용 → 결과(수치/그림)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>60초</td>
+<td>트러블슈팅 1개</td>
+</tr>
+<tr>
+<td>5</td>
+<td>30초</td>
+<td>회고와 다음 계획</td>
+</tr>
+</tbody></table></div>
+<h3 id="62-평가-기준표-루브릭">6.2 평가 기준표 (루브릭)<a class="anchor" href="#62-평가-기준표-루브릭" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>배점</th>
+<th>우수 (만점)</th>
+<th>보통</th>
+<th>미흡</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>기능 완성도</td>
+<td>20</td>
+<td>5개 기능 모두 배포 환경에서 동작</td>
+<td>일부 기능 동작</td>
+<td>로컬에서만 동작</td>
+</tr>
+<tr>
+<td>AI 엔지니어링 이해</td>
+<td>25</td>
+<td>6단계를 <strong>자기 코드로</strong> 설명</td>
+<td>개념은 설명하나 코드 연결 약함</td>
+<td>용어 나열</td>
+</tr>
+<tr>
+<td>하네스·테스트·CI/CD</td>
+<td>20</td>
+<td>테스트·Hook·CI·자동배포 모두 동작</td>
+<td>일부 동작</td>
+<td>없음</td>
+</tr>
+<tr>
+<td>README (한·일)</td>
+<td>20</td>
+<td>30초 안에 이해, 재현 가능, 트러블슈팅 구체적</td>
+<td>구성은 갖춤</td>
+<td>템플릿 그대로</td>
+</tr>
+<tr>
+<td>발표·회고</td>
+<td>15</td>
+<td>근거 있는 회고, 시간 준수</td>
+<td>회고가 일반적</td>
+<td>준비 부족</td>
+</tr>
+</tbody></table></div>
+<hr>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — KPT</strong></p>
+<p><strong>K</strong>eep(계속할 것) · <strong>P</strong>roblem(문제였던 것) · <strong>T</strong>ry(다음에 시도할 것)로 나누어 돌아보는 <strong>회고 방법</strong>. 일본 IT 기업에서 매우 널리 쓰이는 방식(「KPT法」)이라 알아 두면 좋습니다.</p>
+</blockquote>
+<h2 id="7-kpt-회고-5분">7. KPT 회고 (5분)<a class="anchor" href="#7-kpt-회고-5분" aria-label="이 절의 링크">#</a></h2>
+<p>포스트잇이나 노션에 각자 작성합니다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Keep (계속할 것)</th>
+<th>Problem (문제였던 것)</th>
+<th>Try (다음에 시도할 것)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table></div>
+<p><strong>질문 가이드</strong></p>
+<ol>
+<li>9주 전의 나와 비교해 AI에게 일을 시키는 방식이 어떻게 달라졌나?</li>
+<li>6단계 중 <strong>가장 실무에 쓸모 있다고 느낀 단계</strong>는? 왜?</li>
+<li>AI가 만든 코드를 <strong>믿지 못했던 순간</strong>은? 그때 무엇으로 확인했나?</li>
+</ol>
+<hr>
+<h2 id="8-9주-과정-총정리">8. 9주 과정 총정리<a class="anchor" href="#8-9주-과정-총정리" aria-label="이 절의 링크">#</a></h2>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    V[&quot;바이브&lt;br/&gt;말로 만들기&quot;] --&gt; P[&quot;프롬프트&lt;br/&gt;잘 묻기&quot;]
+    P --&gt; C[&quot;컨텍스트&lt;br/&gt;잘 알려 주기&quot;]
+    C --&gt; H[&quot;하네스&lt;br/&gt;잘 일하는 환경&quot;]
+    H --&gt; L[&quot;루프&lt;br/&gt;스스로 반복&quot;]
+    L --&gt; G[&quot;그래프&lt;br/&gt;흐름 설계&quot;]
+    G --&gt; D[&quot;CI/CD&lt;br/&gt;자동 배포&quot;]
+    D --&gt; R[&quot;README&lt;br/&gt;증명하기&quot;]</pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>핵심 질문</th>
+<th>9주 후 내가 할 수 있는 것</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>바이브</td>
+<td>무엇을 원하나?</td>
+<td>AI로 빠르게 시제품을 만들고 그 한계를 안다</td>
+</tr>
+<tr>
+<td>프롬프트</td>
+<td>어떻게 물을까?</td>
+<td>6요소 프롬프트와 완료 조건을 쓴다</td>
+</tr>
+<tr>
+<td>컨텍스트</td>
+<td>무엇을 알려 줄까?</td>
+<td><code>CLAUDE.md</code>와 RAG로 필요한 정보만 골라 준다</td>
+</tr>
+<tr>
+<td>하네스</td>
+<td>어떤 환경에서 일하게 할까?</td>
+<td>권한·Hook·테스트·CI로 AI의 실수를 잡는다</td>
+</tr>
+<tr>
+<td>루프</td>
+<td>언제 반복하고 언제 멈출까?</td>
+<td>검증기와 멈춤 조건이 있는 에이전트를 만든다</td>
+</tr>
+<tr>
+<td>그래프</td>
+<td>흐름을 어떻게 설계할까?</td>
+<td>LLM 노드와 코드 노드를 섞은 워크플로우를 만든다</td>
+</tr>
+</tbody></table></div>
+<blockquote class="key"><p>🎓 <strong>마지막 메시지</strong>: 도구와 용어는 빠르게 바뀝니다. 내년에는 또 새로운 &quot;○○ 엔지니어링&quot;이 등장할 것입니다. 하지만 <strong>&quot;AI에게 무엇을 보여 주고(컨텍스트), 어떤 울타리 안에서(하네스), 어떻게 확인하며(루프), 어떤 순서로(그래프) 일하게 할 것인가&quot;</strong> 라는 질문은 바뀌지 않습니다. 9주 동안 그 질문에 답하는 법을 연습했습니다. 수고하셨습니다!</p>
+</blockquote>
+<h2 id="9-최종-제출물">9. 최종 제출물<a class="anchor" href="#9-최종-제출물" aria-label="이 절의 링크">#</a></h2>
+<ol>
+<li>GitHub 저장소 주소 (<code>v1.0.0</code> 릴리스 포함)</li>
+<li>배포 주소 (발표 당일 동작 확인)</li>
+<li><code>README.md</code>, <code>README.ja.md</code> (구조 검사 스크립트 통과)</li>
+<li>KPT 회고 1페이지</li>
+</ol>
+<blockquote class="warn"><p>⚠️ 발표가 끝나면 AWS 인스턴스를 <strong>중지</strong>하고, 과정 종료 후에는 <strong>종료(Terminate)·탄력적 IP 해제·예산 확인</strong>까지 마무리하세요. 포트폴리오용으로 계속 운영하려면 예상 월 비용을 먼저 계산해 보세요.</p>
+</blockquote>
+<hr>
+<h2 id="10-9주-전체-진행-상황-수료-후-다음-단계">10. 9주 전체 진행 상황 &amp; 수료 후 다음 단계<a class="anchor" href="#10-9주-전체-진행-상황-수료-후-다음-단계" aria-label="이 절의 링크">#</a></h2>
+<h3 id="101-완주">10.1 완주!<a class="anchor" href="#101-완주" aria-label="이 절의 링크">#</a></h3>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    W1[&quot;✅ 1주&lt;br/&gt;지도&quot;]:::done --&gt; W2[&quot;✅ 2주&lt;br/&gt;바이브&quot;]:::done --&gt; W3[&quot;✅ 3주&lt;br/&gt;프롬프트&quot;]:::done --&gt; W4[&quot;✅ 4주&lt;br/&gt;컨텍스트&quot;]:::done --&gt; W5[&quot;✅ 5주&lt;br/&gt;하네스&quot;]:::done --&gt; W6[&quot;✅ 6주&lt;br/&gt;루프&quot;]:::done --&gt; W7[&quot;✅ 7주&lt;br/&gt;그래프&quot;]:::done --&gt; W8[&quot;✅ 8주&lt;br/&gt;CI/CD&quot;]:::done --&gt; W9[&quot;✅ 9주&lt;br/&gt;포트폴리오&quot;]:::done
+    classDef done fill:#dcfce7,stroke:#16a34a</pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>주차</th>
+<th>만든 것</th>
+<th>Git 태그</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>개발 환경, Claude Code 첫 사용</td>
+<td>-</td>
+</tr>
+<tr>
+<td>2</td>
+<td>프로젝트 뼈대(React·Spring Boot·MariaDB), D-Day, 첫 PR</td>
+<td><code>week-02</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>할 일·노트 CRUD, Gemini 클라이언트, AI 요약</td>
+<td><code>week-03</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>CLAUDE.md</code>·설계 문서, RAG 노트 Q&amp;A</td>
+<td><code>week-04</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>권한·Hooks·Skill·Subagent·MCP, 테스트, Docker, CI</td>
+<td><code>week-05</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Stop Hook 검증 루프, AI 스터디 코치(Function Calling)</td>
+<td><code>week-06</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>StateGraph 엔진, AI 학습계획 워크플로우</td>
+<td><code>week-07</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td>GHCR + EC2 자동 배포, 롤백</td>
+<td><code>week-08</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td>한국어·일본어 README, 번역 하네스, 릴리스</td>
+<td><code>v1.0.0</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>최종 프로젝트 구조</strong></p>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">ai-study-planner/
+├── CLAUDE.md                      # 컨텍스트: AI에게 주는 프로젝트 규칙
+├── README.md / README.ja.md       # 포트폴리오 (한·일)
+├── docs/                          # 설계 문서, 용어집, 이미지
+├── .claude/                       # 하네스: 권한·Hooks·Skill·Subagent
+├── backend/                       # Spring Boot (task, note, ai, agent, graph, common)
+├── frontend/                      # React (할 일·노트·코치·계획)
+├── scripts/                       # fix-loop.sh, check-readme.mjs
+├── docker-compose.yml / .prod.yml # 개발용 / 운영용
+└── .github/workflows/             # ci.yml, deploy.yml</code></pre></div>
+<h3 id="102-수료-후-다음-단계-추천-로드맵">10.2 수료 후 다음 단계 (추천 로드맵)<a class="anchor" href="#102-수료-후-다음-단계-추천-로드맵" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방향</th>
+<th>다음에 해 볼 것</th>
+<th>이 과정의 어느 부분을 확장?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>기능 확장</td>
+<td>로그인(Spring Security), 사용자별 데이터</td>
+<td>3주차 CRUD</td>
+</tr>
+<tr>
+<td>AI 고도화</td>
+<td>임베딩 검색, 라우팅 그래프(<code>/api/ai/chat</code>), 대화 기억</td>
+<td>4·6·7주차 도전 과제</td>
+</tr>
+<tr>
+<td>운영</td>
+<td>HTTPS·도메인, 모니터링, 배포 알림</td>
+<td>8주차 도전 과제</td>
+</tr>
+<tr>
+<td>협업</td>
+<td>팀 프로젝트에서 공용 <code>CLAUDE.md</code>·Skill 운영, PR 리뷰</td>
+<td>5주차 하네스</td>
+</tr>
+<tr>
+<td>일본 취업</td>
+<td>일본어 자기소개·기술 면접 연습, JLPT N2 이상 목표</td>
+<td>매주 일본어 용어표</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="11-일본-취업-대비-it-용어-9주차-포트폴리오면접-편">11. 🇯🇵 일본 취업 대비 IT 용어 (9주차 — 포트폴리오·면접 편)<a class="anchor" href="#11-일본-취업-대비-it-용어-9주차-포트폴리오면접-편" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>한국어</th>
+<th>日本語</th>
+<th>읽는 법</th>
+<th>예문 (日本語)</th>
+<th>예문 해석</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>포트폴리오</td>
+<td>ポートフォリオ</td>
+<td>포-토호리오</td>
+<td>ポートフォリオとしてWebサービスを公開しています。</td>
+<td>포트폴리오로 웹 서비스를 공개하고 있습니다.</td>
+</tr>
+<tr>
+<td>개인 개발</td>
+<td>個人開発</td>
+<td>こじんかいはつ</td>
+<td>9週間の個人開発で企画から運用まで担当しました。</td>
+<td>9주간의 개인 개발로 기획부터 운영까지 담당했습니다.</td>
+</tr>
+<tr>
+<td>팀 개발</td>
+<td>チーム開発</td>
+<td>チームかいはつ</td>
+<td>今後はチーム開発でも同じ仕組みを活かしたいです。</td>
+<td>앞으로는 팀 개발에서도 같은 구조를 살리고 싶습니다.</td>
+</tr>
+<tr>
+<td>기술 선정 이유</td>
+<td>技術選定理由</td>
+<td>ぎじゅつせんていりゆう</td>
+<td>技術選定理由はREADMEに表でまとめています。</td>
+<td>기술 선정 이유는 README에 표로 정리해 두었습니다.</td>
+</tr>
+<tr>
+<td>고민·궁리한 점</td>
+<td>工夫した点</td>
+<td>くふうしたてん</td>
+<td>工夫した点は、AIの出力をコードで検証したことです。</td>
+<td>궁리한 점은 AI의 출력을 코드로 검증한 것입니다.</td>
+</tr>
+<tr>
+<td>어려웠던 점</td>
+<td>苦労した点</td>
+<td>くろうしたてん</td>
+<td>苦労した点は、日付が1日ずれる不具合の原因特定です。</td>
+<td>어려웠던 점은 날짜가 하루 어긋나는 버그의 원인 파악입니다.</td>
+</tr>
+<tr>
+<td>버그 / 결함</td>
+<td>不具合</td>
+<td>ふぐあい</td>
+<td>テストを追加して同じ不具合の再発を防ぎました。</td>
+<td>테스트를 추가해 같은 버그의 재발을 막았습니다.</td>
+</tr>
+<tr>
+<td>담당 범위</td>
+<td>担当範囲</td>
+<td>たんとうはんい</td>
+<td>担当範囲は設計・実装・デプロイの全てです。</td>
+<td>담당 범위는 설계·구현·배포 전부입니다.</td>
+</tr>
+<tr>
+<td>성과</td>
+<td>成果</td>
+<td>せいか</td>
+<td>成果として自動デプロイまで完成させました。</td>
+<td>성과로 자동 배포까지 완성했습니다.</td>
+</tr>
+<tr>
+<td>회고</td>
+<td>振り返り</td>
+<td>ふりかえり</td>
+<td>毎週KPTで振り返りを行いました。</td>
+<td>매주 KPT로 회고를 했습니다.</td>
+</tr>
+<tr>
+<td>자기 PR</td>
+<td>自己PR</td>
+<td>じこピーアール</td>
+<td>自己PRでは学習の継続力を伝えたいです。</td>
+<td>자기 PR에서는 꾸준한 학습력을 전하고 싶습니다.</td>
+</tr>
+<tr>
+<td>경력 기술서</td>
+<td>職務経歴書</td>
+<td>しょくむけいれきしょ</td>
+<td>職務経歴書にGitHubのURLを記載しました。</td>
+<td>경력 기술서에 GitHub URL을 기재했습니다.</td>
+</tr>
+<tr>
+<td>기술 면접</td>
+<td>技術面接</td>
+<td>ぎじゅつめんせつ</td>
+<td>技術面接ではアーキテクチャ図を使って説明しました。</td>
+<td>기술 면접에서는 아키텍처 그림을 써서 설명했습니다.</td>
+</tr>
+<tr>
+<td>신입 채용</td>
+<td>新卒採用</td>
+<td>しんそつさいよう</td>
+<td>新卒採用でWebエンジニア職に応募しています。</td>
+<td>신입 채용으로 웹 엔지니어 직무에 지원하고 있습니다.</td>
+</tr>
+</tbody></table></div>
+<blockquote class="speak"><p>💬 <strong>면접 자기소개 예시 (약 30초)</strong></p>
+<p>「韓国の〇〇大学でコンピュータ工学を専攻している〇〇です。9週間の個人開発で、React と Spring Boot を使った AI 学習支援サービスを作り、AWS に自動デプロイするところまで一人で担当しました。特に工夫した点は、生成AIの出力をそのまま使わず、テストやコードによる検証の仕組みで品質を担保したことです。」</p>
+<p>(한국 ○○대학에서 컴퓨터공학을 전공하는 ○○입니다. 9주간의 개인 개발로 React와 Spring Boot를 사용한 AI 학습 지원 서비스를 만들고, AWS에 자동 배포하는 데까지 혼자 담당했습니다. 특히 궁리한 점은 생성형 AI의 출력을 그대로 쓰지 않고, 테스트와 코드에 의한 검증 구조로 품질을 담보한 것입니다.)</p>
+</blockquote>
+<p><a href="week08-cicd-aws.html">← 8주차</a> · <a href="week01-overview.html">처음으로: 1주차 →</a></p>
+
+</article>
+<nav class="pager">
+  <a href="week08-cicd-aws.html"><small>← 이전</small>8주차 · CI/CD·AWS</a>
+  <a class="next" href="index.html"><small>완료 🎓</small>과정 소개로</a>
+</nav>
+</main>
+<aside class="toc"><h4>이 페이지에서</h4>
+<a class="h2" href="#0-수업-진행표-3시간">0. 수업 진행표 (3시간)</a>
+<a class="h2" href="#1-학습-목표">1. 학습 목표</a>
+<a class="h2" href="#2-개념-①-좋은-readme의-조건">2. 개념 ① 좋은 README의 조건</a>
+<a class="h3" href="#21-채용-담당자의-30초">2.1 채용 담당자의 30초</a>
+<a class="h3" href="#22-readme-품질-공식">2.2 README 품질 공식</a>
+<a class="h3" href="#23-한국과-일본-채용-담당자가-특히-보는-것">2.3 한국과 일본 채용 담당자가 특히 보는 것</a>
+<a class="h3" href="#24-readme-목차-한국어-일본어-대응표">2.4 README 목차 (한국어 ↔ 일본어 대응표)</a>
+<a class="h2" href="#3-실습-①-한국어-readme-작성">3. 실습 ① 한국어 README 작성</a>
+<a class="h3" href="#31-재료-모으기">3.1 재료 모으기</a>
+<a class="h3" href="#32-ai로-초안-만들기-컨텍스트-엔지니어링-복습">3.2 AI로 초안 만들기 (컨텍스트 엔지니어링 복습)</a>
+<a class="h3" href="#33-참고-코드-readmemd-한국어">3.3 📄 참고 코드 — README.md (한국어)</a>
+<a class="h2" href="#4-실습-②-일본어-readme">4. 실습 ② 일본어 README</a>
+<a class="h3" href="#41-번역-품질을-높이는-3가지-장치">4.1 번역 품질을 높이는 3가지 장치</a>
+<a class="h3" href="#42-①-용어집-일관성의-핵심">4.2 ① 용어집 (일관성의 핵심)</a>
+<a class="h3" href="#43-②-번역-skill">4.3 ② 번역 Skill</a>
+<a class="h3" href="#44-③-구조-검사-스크립트-센서">4.4 ③ 구조 검사 스크립트 (센서)</a>
+<a class="h3" href="#45-참고-코드-readmejamd-일본어">4.5 📄 참고 코드 — README.ja.md (일본어)</a>
+<a class="h3" href="#46-역번역으로-의미-확인">4.6 역번역으로 의미 확인</a>
+<a class="h2" href="#5-실습-③-저장소-마무리">5. 실습 ③ 저장소 마무리</a>
+<a class="h3" href="#51-체크리스트">5.1 체크리스트</a>
+<a class="h3" href="#52-v100-릴리스">5.2 v1.0.0 릴리스</a>
+<a class="h2" href="#6-발표-1인-35분">6. 발표 (1인 3~5분)</a>
+<a class="h3" href="#61-발표-구성">6.1 발표 구성</a>
+<a class="h3" href="#62-평가-기준표-루브릭">6.2 평가 기준표 (루브릭)</a>
+<a class="h2" href="#7-kpt-회고-5분">7. KPT 회고 (5분)</a>
+<a class="h2" href="#8-9주-과정-총정리">8. 9주 과정 총정리</a>
+<a class="h2" href="#9-최종-제출물">9. 최종 제출물</a>
+<a class="h2" href="#10-9주-전체-진행-상황-수료-후-다음-단계">10. 9주 전체 진행 상황 &amp; 수료 후 다음 단계</a>
+<a class="h3" href="#101-완주">10.1 완주!</a>
+<a class="h3" href="#102-수료-후-다음-단계-추천-로드맵">10.2 수료 후 다음 단계 (추천 로드맵)</a>
+<a class="h2" href="#11-일본-취업-대비-it-용어-9주차-포트폴리오면접-편">11. 🇯🇵 일본 취업 대비 IT 용어 (9주차 — 포트폴리오·면접 편)</a>
+</aside>
+</div>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/dockerfile.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/nginx.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/powershell.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/groovy.min.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', function () {
+// AI 엔지니어링 특강 — 강의 자료 공통 스크립트
+(function () {
+  // 1) 코드 복사 버튼
+  document.querySelectorAll('.code-block .copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var code = btn.closest('.code-block').querySelector('pre code');
+      var text = code ? code.innerText : '';
+      var done = function () {
+        btn.textContent = '복사됨 ✓';
+        setTimeout(function () { btn.textContent = '복사'; }, 1500);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done);
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); done(); } finally { document.body.removeChild(ta); }
+      }
+    });
+  });
+
+  // 2) 모바일 메뉴
+  var menu = document.querySelector('.menu-btn');
+  if (menu) {
+    menu.addEventListener('click', function () { document.body.classList.toggle('nav-open'); });
+    document.querySelectorAll('.sidebar a').forEach(function (a) {
+      a.addEventListener('click', function () { document.body.classList.remove('nav-open'); });
+    });
+  }
+
+  // 3) 현재 읽는 절을 목차에 표시
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  if (links.length && 'IntersectionObserver' in window) {
+    var map = {};
+    links.forEach(function (a) { map[decodeURIComponent(a.getAttribute('href').slice(1))] = a; });
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting && map[e.target.id]) {
+          links.forEach(function (l) { l.classList.remove('active'); });
+          map[e.target.id].classList.add('active');
+        }
+      });
+    }, { rootMargin: '-60px 0px -70% 0px' });
+    document.querySelectorAll('.paper h2[id], .paper h3[id]').forEach(function (h) { observer.observe(h); });
+  }
+
+  // 4) 코드 하이라이트 (highlight.js가 로드된 경우)
+  if (window.hljs) {
+    document.querySelectorAll('.code-block pre code').forEach(function (el) {
+      if (!el.classList.contains('language-plaintext')) {
+        window.hljs.highlightElement(el);
+      }
+    });
+  }
+
+  // 5) 수식 (KaTeX auto-render가 로드된 경우)
+  if (window.renderMathInElement) {
+    window.renderMathInElement(document.querySelector('.paper') || document.body, {
+      delimiters: [
+        { left: '\\[', right: '\\]', display: true },
+        { left: '\\(', right: '\\)', display: false },
+      ],
+      ignoredClasses: ['code-block', 'mermaid'],
+      throwOnError: false,
+      strict: false,
+    });
+  }
+})();
+
+});
+</script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose', fontFamily: 'Pretendard, sans-serif' });
+  await mermaid.run({ querySelector: 'pre.mermaid' });
+</script>
+</body>
+</html>

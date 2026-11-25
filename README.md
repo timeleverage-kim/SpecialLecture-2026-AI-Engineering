@@ -56,6 +56,7 @@
 │   ├── index.html        # 과정 소개 · 주차 카드
 │   ├── week01 ~ week09.html
 │   ├── images/           # 빌드 시 docs/images에서 복사
+│   ├── standalone/       # CSS·JS를 내장한 단독 HTML (노션 임베드용)
 │   └── assets/           # style.css, app.js
 ├── scripts/
 │   └── build-html.mjs    # docs/*.md → html/*.html 변환

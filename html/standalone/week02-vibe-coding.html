@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2주차 · 바이브코딩 + Git·GitHub 기초 | AI와 함께하는 풀스택 개발 — 바이브코딩에서 그래프 엔지니어링까지</title>
+<meta name="description" content="말로 프로젝트 뼈대(React·Spring Boot·MariaDB)를 만들고 D-Day 카운터로 바이브코딩의 속도와 함정을 체험합니다.">
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css">
+<style>
+/* AI 엔지니어링 특강 — 강의 자료 공통 스타일 */
+:root {
+  --bg: #f7f8fb;
+  --paper: #ffffff;
+  --ink: #1d2433;
+  --ink-soft: #5b6476;
+  --line: #e4e7ee;
+  --brand: #4338ca;
+  --brand-soft: #eef0ff;
+  --code-bg: #0f172a;
+  --code-ink: #e2e8f0;
+  --tip: #0e7490;   --tip-bg: #ecfeff;
+  --warn: #b45309;  --warn-bg: #fffbeb;
+  --key: #4338ca;   --key-bg: #eef2ff;
+  --sec: #be123c;   --sec-bg: #fff1f2;
+  --sidebar-w: 260px;
+  --toc-w: 240px;
+  font-family: 'Pretendard', 'Noto Sans KR', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: var(--brand); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── 상단 바 ── */
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 12px;
+  height: 56px; padding: 0 20px;
+  background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar .brand { font-weight: 800; color: var(--ink); letter-spacing: -0.01em; }
+.topbar .brand span { color: var(--brand); }
+.topbar .spacer { flex: 1; }
+.topbar .md-link { font-size: 0.85rem; color: var(--ink-soft); border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; }
+.menu-btn { display: none; background: none; border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; font-size: 1.1rem; cursor: pointer; }
+
+/* ── 3단 레이아웃 ── */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr) var(--toc-w);
+  max-width: 1480px; margin: 0 auto;
+}
+.sidebar, .toc {
+  position: sticky; top: 56px; align-self: start;
+  height: calc(100vh - 56px); overflow-y: auto;
+  padding: 24px 16px; font-size: 0.9rem;
+}
+.sidebar { border-right: 1px solid var(--line); }
+.sidebar h4, .toc h4 { margin: 0 0 10px; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.sidebar ol { list-style: none; padding: 0; margin: 0; }
+.sidebar li a { display: block; padding: 7px 10px; border-radius: 8px; color: var(--ink); line-height: 1.35; }
+.sidebar li a small { display: block; color: var(--ink-soft); font-size: 0.75rem; }
+.sidebar li a:hover { background: var(--brand-soft); text-decoration: none; }
+.sidebar li a.active { background: var(--brand); color: #fff; }
+.sidebar li a.active small { color: #c7d2fe; }
+.toc { border-left: 1px solid var(--line); }
+.toc a { display: block; padding: 3px 0; color: var(--ink-soft); line-height: 1.4; }
+.toc a.h3 { padding-left: 12px; font-size: 0.82rem; }
+.toc a.active { color: var(--brand); font-weight: 700; }
+
+/* ── 본문 ── */
+main.content { padding: 32px 48px 80px; min-width: 0; }
+.paper { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 40px 48px; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04); }
+.paper h1 { font-size: 2rem; line-height: 1.3; margin: 0 0 16px; letter-spacing: -0.02em; }
+.paper h2 { font-size: 1.45rem; margin: 2.4em 0 0.8em; padding-top: 0.6em; border-top: 1px solid var(--line); letter-spacing: -0.01em; }
+.paper h3 { font-size: 1.15rem; margin: 1.8em 0 0.6em; }
+.paper h4 { font-size: 1rem; margin: 1.4em 0 0.4em; }
+.paper h2, .paper h3 { scroll-margin-top: 72px; }
+.paper hr { border: none; border-top: 1px dashed var(--line); margin: 2em 0; }
+.paper img { max-width: 100%; }
+.anchor { margin-left: 6px; color: var(--line); font-weight: 400; visibility: hidden; }
+h2:hover .anchor, h3:hover .anchor { visibility: visible; }
+
+/* 표 */
+.table-wrap { overflow-x: auto; margin: 1em 0 1.4em; border: 1px solid var(--line); border-radius: 12px; }
+.table-wrap table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+.table-wrap th { background: #f3f4f8; text-align: left; font-weight: 700; }
+.table-wrap th, .table-wrap td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.table-wrap tr:last-child td { border-bottom: none; }
+
+/* 인라인 코드 */
+:not(pre) > code { background: #f1f3f9; border: 1px solid #e6e9f2; border-radius: 6px; padding: 0.1em 0.4em; font-size: 0.88em; font-family: 'JetBrains Mono', 'D2Coding', ui-monospace, Consolas, monospace; }
+
+/* 코드 블록 */
+.code-block { position: relative; margin: 1em 0 1.4em; border-radius: 12px; overflow: hidden; background: var(--code-bg); }
+.code-block .code-head { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; font-size: 0.75rem; color: #94a3b8; background: #1e293b; font-family: ui-monospace, monospace; }
+.code-block .copy { background: none; border: 1px solid #334155; color: #cbd5e1; border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer; }
+.code-block .copy:hover { background: #334155; }
+.code-block pre { margin: 0; padding: 14px 16px; overflow-x: auto; }
+.code-block pre code { font-family: 'JetBrains Mono', 'D2Coding', ui-monospace, Consolas, monospace; font-size: 0.85rem; line-height: 1.6; color: var(--code-ink); background: none; }
+.code-block pre code.hljs { padding: 0; background: none; }
+
+/* Mermaid */
+.diagram { margin: 1.2em 0 1.6em; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: #fcfcfe; text-align: center; overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; background: none; font-size: 0.85rem; white-space: pre; text-align: left; }
+.diagram pre.mermaid[data-processed] { text-align: center; }
+
+/* 수식 */
+.math-block { overflow-x: auto; padding: 14px 8px; margin: 1em 0; background: #fafbff; border: 1px solid #eceffa; border-radius: 12px; text-align: center; }
+
+/* 콜아웃 */
+blockquote { margin: 1.2em 0; padding: 12px 18px; border-left: 4px solid var(--line); background: #f8f9fc; border-radius: 0 12px 12px 0; color: var(--ink); }
+blockquote p { margin: 0.4em 0; }
+blockquote.tip { border-color: var(--tip); background: var(--tip-bg); }
+blockquote.warn { border-color: var(--warn); background: var(--warn-bg); }
+blockquote.key { border-color: var(--key); background: var(--key-bg); }
+blockquote.sec { border-color: var(--sec); background: var(--sec-bg); }
+
+/* 주차 머리 배지 */
+.week-hero { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.week-hero .pill { font-size: 0.78rem; padding: 3px 10px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+
+/* 이전/다음 */
+.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 28px; }
+.pager a { display: block; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
+.pager a:hover { border-color: var(--brand); text-decoration: none; }
+.pager a small { display: block; color: var(--ink-soft); font-size: 0.78rem; }
+.pager a.next { text-align: right; }
+
+/* ── 첫 화면(index) ── */
+.hero { padding: 64px 24px 40px; text-align: center; background: radial-gradient(1200px 400px at 50% -10%, #e0e7ff 0%, transparent 70%); }
+.hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin: 0 0 12px; letter-spacing: -0.03em; }
+.hero p { color: var(--ink-soft); max-width: 760px; margin: 0 auto; font-size: 1.05rem; }
+.ladder { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 28px auto 0; max-width: 980px; }
+.ladder span { padding: 8px 14px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); font-weight: 600; font-size: 0.9rem; }
+.ladder i { align-self: center; color: var(--ink-soft); font-style: normal; }
+.section { max-width: 1180px; margin: 0 auto; padding: 24px; }
+.section h2 { font-size: 1.35rem; margin: 24px 0 14px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.card { display: flex; flex-direction: column; gap: 6px; padding: 20px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; color: var(--ink); transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(67, 56, 202, 0.08); border-color: #c7d2fe; text-decoration: none; }
+.card .num { font-size: 0.78rem; font-weight: 700; color: var(--brand); letter-spacing: 0.06em; }
+.card h3 { margin: 0; font-size: 1.1rem; }
+.card p { margin: 0; color: var(--ink-soft); font-size: 0.92rem; }
+.card .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 8px; }
+.card .tags span { font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; background: #f1f3f9; color: var(--ink-soft); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.box { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; }
+.box h3 { margin-top: 0; }
+footer.site { text-align: center; color: var(--ink-soft); font-size: 0.85rem; padding: 40px 16px; }
+
+/* ── 반응형 ── */
+@media (max-width: 1200px) {
+  .layout { grid-template-columns: var(--sidebar-w) minmax(0, 1fr); }
+  .toc { display: none; }
+}
+@media (max-width: 860px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .menu-btn { display: inline-block; }
+  .sidebar { position: fixed; left: 0; top: 56px; width: 280px; background: var(--paper); z-index: 30; transform: translateX(-100%); transition: transform 0.2s; box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08); }
+  body.nav-open .sidebar { transform: none; }
+  main.content { padding: 16px 10px 60px; }
+  .paper { padding: 24px 18px; border-radius: 12px; }
+}
+
+/* ── 인쇄 ── */
+@media print {
+  .topbar, .sidebar, .toc, .pager, .copy { display: none !important; }
+  .layout { display: block; }
+  main.content { padding: 0; }
+  .paper { border: none; box-shadow: none; padding: 0; }
+  .code-block { background: #f6f8fa; }
+  .code-block pre code { color: #111; }
+  h2, h3 { break-after: avoid; }
+  .code-block, .diagram, .table-wrap { break-inside: avoid; }
+}
+
+/* ── 실습 단계 머리표 (🤖 ⌨️ ✅ 📄) ── */
+.paper h4.step { display: flex; align-items: center; gap: 10px; margin: 1.8em 0 0.7em; padding: 9px 14px; border-radius: 10px; border-left: 5px solid; font-size: 1rem; line-height: 1.4; }
+.paper h4.step .step-icon { font-size: 1.15rem; }
+.paper h4.step-ai { background: #eef2ff; border-color: #4338ca; color: #312e81; }
+.paper h4.step-cmd { background: #f1f5f9; border-color: #475569; color: #1e293b; }
+.paper h4.step-result { background: #ecfdf5; border-color: #059669; color: #064e3b; }
+.paper h4.step-ref { background: #fff7ed; border-color: #ea580c; color: #7c2d12; }
+.code-block.prompt { background: #1e1b4b; box-shadow: 0 0 0 2px #6366f1 inset; }
+.code-block.prompt .code-head { background: #312e81; color: #c7d2fe; }
+.code-block.prompt pre code { color: #e0e7ff; white-space: pre-wrap; }
+blockquote.term { border-color: #7c3aed; background: #f5f3ff; }
+blockquote.speak { border-color: #db2777; background: #fdf2f8; }
+.paper img { display: block; margin: 0.8em auto 1.4em; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px; }
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <button class="menu-btn" type="button" aria-label="메뉴">☰</button>
+  <a class="brand" href="index.html">AI <span>Engineering</span> Lab</a>
+  <div class="spacer"></div>
+  <a class="md-link" href="../docs/week02-vibe-coding.md">📄 Markdown 원본</a>
+</header>
+<div class="layout">
+<aside class="sidebar"><h4>강의 목차</h4><ol>
+<li><a href="index.html">🏠 과정 소개<small>개요 · 로드맵</small></a></li>
+<li><a href="week01-overview.html">1주차 · 전체 지도<small>개요</small></a></li>
+<li><a href="week02-vibe-coding.html" class="active">2주차 · 바이브코딩<small>① 바이브</small></a></li>
+<li><a href="week03-prompt-engineering.html">3주차 · 프롬프트<small>② 프롬프트</small></a></li>
+<li><a href="week04-context-engineering.html">4주차 · 컨텍스트<small>③ 컨텍스트</small></a></li>
+<li><a href="week05-harness-engineering.html">5주차 · 하네스<small>④ 하네스</small></a></li>
+<li><a href="week06-loop-engineering.html">6주차 · 루프<small>⑤ 루프</small></a></li>
+<li><a href="week07-graph-engineering.html">7주차 · 그래프<small>⑥ 그래프</small></a></li>
+<li><a href="week08-cicd-aws.html">8주차 · CI/CD·AWS<small>배포</small></a></li>
+<li><a href="week09-portfolio-readme.html">9주차 · 포트폴리오<small>정리</small></a></li>
+</ol></aside>
+<main class="content">
+<article class="paper">
+<h1>2주차 · 바이브코딩 (Vibe Coding) + Git·GitHub 기초</h1>
+<div class="week-hero"><span class="pill">2주차</span><span class="pill">3시간 (설명 + 실습)</span><span class="pill">① 바이브</span></div>
+<blockquote>
+<p><strong>&quot;코드는 AI가, 방향은 내가.&quot;</strong></p>
+<p>오늘은 AI에게 말로 시켜서 프로젝트 뼈대를 세우고, 바이브코딩의 <strong>속도와 함정</strong>을 동시에 체험합니다. 그리고 모든 결과를 Git으로 기록해 GitHub에 올립니다.</p>
+</blockquote>
+<hr>
+<h2 id="0-수업-진행표-3시간">0. 수업 진행표 (3시간)<a class="anchor" href="#0-수업-진행표-3시간" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>시간</th>
+<th>내용</th>
+<th>형태</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0:00 ~ 0:30</td>
+<td>바이브코딩이란? 장점·함정·안전 수칙</td>
+<td>설명</td>
+</tr>
+<tr>
+<td>0:30 ~ 0:55</td>
+<td>Git·GitHub 핵심 개념 (그림으로 이해)</td>
+<td>설명</td>
+</tr>
+<tr>
+<td>0:55 ~ 1:05</td>
+<td>휴식</td>
+<td></td>
+</tr>
+<tr>
+<td>1:05 ~ 2:05</td>
+<td>실습 ①~④ 프로젝트 뼈대 만들기 (백엔드·프론트·DB)</td>
+<td>실습</td>
+</tr>
+<tr>
+<td>2:05 ~ 2:35</td>
+<td>실습 ⑤ 바이브코딩 체험: D-Day 카운터</td>
+<td>실습</td>
+</tr>
+<tr>
+<td>2:35 ~ 2:55</td>
+<td>실습 ⑥ GitHub에 올리기 · 브랜치 · PR</td>
+<td>실습</td>
+</tr>
+<tr>
+<td>2:55 ~ 3:00</td>
+<td>회고 · 과제</td>
+<td>정리</td>
+</tr>
+</tbody></table></div>
+<h2 id="1-학습-목표">1. 학습 목표<a class="anchor" href="#1-학습-목표" aria-label="이 절의 링크">#</a></h2>
+<ol>
+<li>바이브코딩의 개념과 <strong>&quot;이해하지 못한 코드는 내 코드가 아니다&quot;</strong> 원칙을 설명할 수 있다.</li>
+<li>Claude Code에게 자연어로 지시하여 <strong>React + Spring Boot + MariaDB</strong> 프로젝트 뼈대를 만들 수 있다.</li>
+<li>Git의 3영역(작업 폴더·스테이징·저장소)과 GitHub 원격 저장소를 이해하고, <strong>commit → push → PR</strong> 흐름을 수행할 수 있다.</li>
+<li>API 키 같은 비밀 정보를 <code>.env</code>와 <code>.gitignore</code>로 보호할 수 있다.</li>
+</ol>
+<hr>
+<h2 id="2-개념-①-바이브코딩이란">2. 개념 ① 바이브코딩이란?<a class="anchor" href="#2-개념-①-바이브코딩이란" aria-label="이 절의 링크">#</a></h2>
+<h3 id="21-정의">2.1 정의<a class="anchor" href="#21-정의" aria-label="이 절의 링크">#</a></h3>
+<blockquote>
+<p><strong>바이브코딩</strong>: 원하는 결과를 자연어로 설명하고, AI가 생성한 코드를 <strong>실행해 보며 결과(느낌)를 기준으로</strong> 계속 수정을 요청하는 개발 방식.</p>
+<p>2025년 초 안드레이 카르파시(Andrej Karpathy)가 &quot;코드가 존재한다는 사실도 잊고 분위기(vibe)에 몸을 맡긴다&quot;고 표현하며 널리 퍼졌습니다.</p>
+</blockquote>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 기술 부채 (Technical Debt)</strong></p>
+<p><strong>뜻</strong>: 지금 편하려고 대충 만든 코드 때문에 <strong>나중에 치러야 하는 수정 비용</strong>. 빚(부채)처럼 시간이 갈수록 이자가 붙습니다.</p>
+<p><strong>왜 알아야 하나</strong>: 바이브코딩은 속도가 빠른 대신 기술 부채가 쌓이기 쉽습니다. &quot;지금 빨리&quot;와 &quot;나중에 고치기 쉬움&quot; 사이에서 <strong>균형을 잡는 것</strong>이 엔지니어의 일입니다.</p>
+</blockquote>
+<h3 id="22-비유-택시-vs-직접-운전">2.2 비유: 택시 vs 직접 운전<a class="anchor" href="#22-비유-택시-vs-직접-운전" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>직접 코딩 (직접 운전)</th>
+<th>바이브코딩 (택시)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>속도</td>
+<td>느림</td>
+<td>매우 빠름</td>
+</tr>
+<tr>
+<td>길을 아는가?</td>
+<td>안다</td>
+<td><strong>모를 수 있다</strong></td>
+</tr>
+<tr>
+<td>기사가 길을 잘못 들면?</td>
+<td>해당 없음</td>
+<td><strong>알아채지 못한다</strong></td>
+</tr>
+<tr>
+<td>잘 맞는 상황</td>
+<td>핵심 로직, 보안</td>
+<td>프로토타입, 화면 시안, 일회성 스크립트</td>
+</tr>
+</tbody></table></div>
+<h3 id="23-바이브코딩-사이클">2.3 바이브코딩 사이클<a class="anchor" href="#23-바이브코딩-사이클" aria-label="이 절의 링크">#</a></h3>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    A[&quot;말로 요청&lt;br/&gt;(의도)&quot;] --&gt; B[&quot;AI가 코드 생성&quot;]
+    B --&gt; C[&quot;실행해 보기&quot;]
+    C --&gt; D{&quot;느낌이 맞나?&quot;}
+    D --&gt;|&quot;아니오&quot;| E[&quot;말로 수정 요청&quot;]
+    E --&gt; B
+    D --&gt;|&quot;예&quot;| F[&quot;다음 기능&quot;]</pre></div>
+<h3 id="24-바이브코딩의-함정-기술-부채의-복리">2.4 바이브코딩의 함정: &quot;기술 부채의 복리&quot;<a class="anchor" href="#24-바이브코딩의-함정-기술-부채의-복리" aria-label="이 절의 링크">#</a></h3>
+<p>코드를 이해하지 못한 채 수정을 거듭하면, 나중에 고치는 비용이 <strong>복리</strong>처럼 불어납니다.</p>
+<div class="math-block">\[\text{수정 비용}(n) \approx C_0 \times (1 + r)^{n}\]</div>
+<ul>
+<li><span class="math-inline">\(C_0\)</span>: 처음 이해하고 고칠 때의 비용</li>
+<li><span class="math-inline">\(r\)</span>: 한 번 &quot;이해 없이&quot; 수정할 때마다 늘어나는 혼란 비율</li>
+<li><span class="math-inline">\(n\)</span>: 이해 없이 수정한 횟수</li>
+</ul>
+<p>예를 들어 <span class="math-inline">\(r = 0.3\)</span>이고 <span class="math-inline">\(n = 10\)</span>이면 <span class="math-inline">\((1.3)^{10} \approx 13.8\)</span>배, 즉 <strong>처음보다 약 14배 고치기 어려운 코드</strong>가 됩니다.</p>
+<h3 id="25-바이브코딩-안전-수칙-5가지">2.5 바이브코딩 안전 수칙 5가지<a class="anchor" href="#25-바이브코딩-안전-수칙-5가지" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>수칙</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><strong>작게 요청</strong>하고 자주 실행한다</td>
+<td>문제가 생긴 지점을 쉽게 찾는다</td>
+</tr>
+<tr>
+<td>2</td>
+<td>동작하면 <strong>바로 커밋</strong>한다</td>
+<td>망가지면 되돌릴 수 있는 &quot;세이브 포인트&quot;</td>
+</tr>
+<tr>
+<td>3</td>
+<td>생성된 코드를 <strong>한 번은 읽는다</strong> (&quot;설명해 줘&quot;)</td>
+<td>이해하지 못한 코드는 고칠 수 없다</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>비밀 정보</strong>(API 키, 비밀번호)를 프롬프트·코드에 넣지 않는다</td>
+<td>유출 사고 방지</td>
+</tr>
+<tr>
+<td>5</td>
+<td>핵심 로직·보안은 바이브로 끝내지 않는다</td>
+<td>3주차 이후 단계(프롬프트·하네스)로 보완</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="3-개념-②-git과-github">3. 개념 ② Git과 GitHub<a class="anchor" href="#3-개념-②-git과-github" aria-label="이 절의 링크">#</a></h2>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — Git과 GitHub는 다릅니다</strong></p>
+<p><strong>Git</strong>: 내 PC에서 파일 변경 이력을 기록하는 <strong>프로그램</strong>. (인터넷 없이도 동작)</p>
+<p><strong>GitHub</strong>: Git 기록을 인터넷에 올려 <strong>공유·협업</strong>하는 <strong>웹 서비스</strong>. (코드 저장소 + 포트폴리오 + 자동화)</p>
+<p><strong>왜 쓰나</strong>: AI가 코드를 망가뜨려도 <strong>이전 상태로 되돌릴 수 있고</strong>, 9주 동안의 커밋 기록 자체가 취업용 <strong>성장 증거</strong>가 됩니다.</p>
+</blockquote>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>용어</th>
+<th>뜻</th>
+<th>비유</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>저장소</strong> (Repository, repo)</td>
+<td>Git이 관리하는 프로젝트 폴더</td>
+<td>앨범</td>
+</tr>
+<tr>
+<td><strong>커밋</strong> (Commit)</td>
+<td>변경 사항을 메시지와 함께 저장한 한 시점</td>
+<td>앨범에 붙인 사진 한 장</td>
+</tr>
+<tr>
+<td><strong>브랜치</strong> (Branch)</td>
+<td>원본을 건드리지 않고 작업하는 갈래</td>
+<td>평행 세계</td>
+</tr>
+<tr>
+<td><strong>원격</strong> (Remote, <code>origin</code>)</td>
+<td>GitHub에 있는 저장소의 별명</td>
+<td>클라우드 앨범</td>
+</tr>
+<tr>
+<td><strong>push / pull</strong></td>
+<td>내 기록을 원격에 올리기 / 원격 기록을 내려받기</td>
+<td>업로드 / 다운로드</td>
+</tr>
+<tr>
+<td><strong>PR</strong> (Pull Request)</td>
+<td>브랜치 변경을 main에 합쳐 달라는 검토 요청</td>
+<td>결재 서류</td>
+</tr>
+<tr>
+<td><strong>태그</strong> (Tag)</td>
+<td>특정 커밋에 붙이는 이름표 (<code>week-02</code>)</td>
+<td>책갈피</td>
+</tr>
+</tbody></table></div>
+<h3 id="31-git의-3영역-비유-사진-찍기">3.1 Git의 3영역 비유: &quot;사진 찍기&quot;<a class="anchor" href="#31-git의-3영역-비유-사진-찍기" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Git 영역</th>
+<th>비유</th>
+<th>명령</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>작업 폴더 (Working Directory)</td>
+<td>무대 위의 사람들</td>
+<td>파일 수정</td>
+</tr>
+<tr>
+<td>스테이징 영역 (Staging Area)</td>
+<td><strong>사진 찍을 사람을 프레임 안에 세우기</strong></td>
+<td><code>git add</code></td>
+</tr>
+<tr>
+<td>로컬 저장소 (Repository)</td>
+<td><strong>셔터를 눌러 앨범에 저장</strong></td>
+<td><code>git commit</code></td>
+</tr>
+<tr>
+<td>원격 저장소 (GitHub)</td>
+<td>클라우드 앨범에 업로드</td>
+<td><code>git push</code></td>
+</tr>
+</tbody></table></div>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    WD[&quot;작업 폴더&quot;] --&gt;|&quot;git add&quot;| ST[&quot;스테이징&quot;]
+    ST --&gt;|&quot;git commit&quot;| LR[&quot;로컬 저장소&quot;]
+    LR --&gt;|&quot;git push&quot;| GH[&quot;GitHub&lt;br/&gt;(원격)&quot;]
+    GH --&gt;|&quot;git pull&quot;| WD</pre></div>
+<h3 id="32-브랜치와-pr-pull-request">3.2 브랜치와 PR (Pull Request)<a class="anchor" href="#32-브랜치와-pr-pull-request" aria-label="이 절의 링크">#</a></h3>
+<div class="diagram"><pre class="mermaid">gitGraph
+    commit id: &quot;프로젝트 생성&quot;
+    commit id: &quot;백엔드 뼈대&quot;
+    branch feature/dday
+    checkout feature/dday
+    commit id: &quot;D-Day 카운터&quot;
+    commit id: &quot;날짜 버그 수정&quot;
+    checkout main
+    merge feature/dday id: &quot;PR #1 병합&quot;
+    commit id: &quot;week-02 태그&quot;</pre></div>
+<ul>
+<li><strong>브랜치</strong>: 원본(main)을 건드리지 않고 실험하는 <strong>평행 세계</strong></li>
+<li><strong>PR</strong>: &quot;내 평행 세계의 변경을 main에 합쳐도 될까요?&quot;라고 <strong>검토를 요청하는 문서</strong></li>
+</ul>
+<h3 id="33-커밋-메시지-규칙-conventional-commits">3.3 커밋 메시지 규칙 (Conventional Commits)<a class="anchor" href="#33-커밋-메시지-규칙-conventional-commits" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>타입</th>
+<th>의미</th>
+<th>예</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>feat</code></td>
+<td>새 기능</td>
+<td><code>feat: D-Day 카운터 컴포넌트 추가</code></td>
+</tr>
+<tr>
+<td><code>fix</code></td>
+<td>버그 수정</td>
+<td><code>fix: D-Day 계산이 하루 어긋나는 문제 수정</code></td>
+</tr>
+<tr>
+<td><code>docs</code></td>
+<td>문서</td>
+<td><code>docs: README 실행 방법 추가</code></td>
+</tr>
+<tr>
+<td><code>refactor</code></td>
+<td>동작 변화 없는 구조 개선</td>
+<td><code>refactor: 날짜 계산을 utils로 분리</code></td>
+</tr>
+<tr>
+<td><code>test</code></td>
+<td>테스트</td>
+<td><code>test: calcDday 단위 테스트 추가</code></td>
+</tr>
+<tr>
+<td><code>chore</code></td>
+<td>설정·빌드</td>
+<td><code>chore: docker-compose에 MariaDB 추가</code></td>
+</tr>
+</tbody></table></div>
+<blockquote class="tip"><p>💡 9주차 포트폴리오에서 <strong>커밋 기록 자체가 성장의 증거</strong>가 됩니다. 의미 있는 메시지를 남기세요.</p>
+</blockquote>
+<hr>
+<h2 id="4-실습-프로젝트-뼈대-만들기">4. 실습: 프로젝트 뼈대 만들기<a class="anchor" href="#4-실습-프로젝트-뼈대-만들기" aria-label="이 절의 링크">#</a></h2>
+<h3 id="최종-폴더-구조-오늘-목표">최종 폴더 구조 (오늘 목표)<a class="anchor" href="#최종-폴더-구조-오늘-목표" aria-label="이 절의 링크">#</a></h3>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">ai-study-planner/
+├── backend/                 # Spring Boot (Java 21, Gradle)
+│   ├── build.gradle
+│   └── src/main/java/com/example/planner/
+│       ├── PlannerApplication.java
+│       └── HelloController.java
+├── frontend/                # React + Vite + TypeScript
+│   ├── vite.config.ts
+│   └── src/
+│       ├── App.tsx
+│       └── components/DdayCounter.tsx
+├── docker-compose.yml       # MariaDB
+├── .env.example             # 환경 변수 견본 (Git에 올림)
+├── .env                     # 실제 비밀 값 (Git에 올리지 않음!)
+└── .gitignore</code></pre></div>
+<h3 id="실습-①-저장소-폴더-만들기">실습 ① 저장소 폴더 만들기<a class="anchor" href="#실습-①-저장소-폴더-만들기" aria-label="이 절의 링크">#</a></h3>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — 프로젝트 폴더와 Git 저장소 만들기</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">mkdir ai-study-planner &amp;&amp; cd ai-study-planner
+git init</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">Initialized empty Git repository in /Users/me/ai-study-planner/.git/</code></pre></div>
+<p><code>.git</code>이라는 숨김 폴더가 생기면 이 폴더는 이제 Git이 기록하는 <strong>저장소</strong>입니다.</p>
+<h3 id="실습-②-바이브코딩으로-백엔드-뼈대-만들기">실습 ② 바이브코딩으로 백엔드 뼈대 만들기<a class="anchor" href="#실습-②-바이브코딩으로-백엔드-뼈대-만들기" aria-label="이 절의 링크">#</a></h3>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — Spring Boot · Gradle · 의존성</strong></p>
+<p><strong>Spring Boot</strong>: Java로 웹 서버(백엔드)를 빠르게 만드는 <strong>프레임워크</strong>. 프레임워크는 &quot;집을 지을 때 미리 세워 둔 골조&quot;처럼 기본 구조를 제공해 우리는 기능만 채우면 됩니다.</p>
+<p><strong>Gradle</strong>: 필요한 라이브러리를 내려받고, 코드를 컴파일·실행·테스트해 주는 <strong>빌드 도구</strong>. (<code>./gradlew</code>로 실행)</p>
+<p><strong>의존성 (Dependency)</strong>: 우리 프로젝트가 가져다 쓰는 <strong>외부 라이브러리</strong>. <code>build.gradle</code>에 적어 두면 Gradle이 자동으로 내려받습니다. &quot;요리에 필요한 재료 목록&quot;이라고 생각하세요.</p>
+</blockquote>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — 프로젝트 폴더에서 Claude Code 시작</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">claude</code></pre></div>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 바이브 방식으로 요청 (일부러 짧게)</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">backend 폴더에 Spring Boot 프로젝트 만들어 줘. Java 21, Gradle, MariaDB 쓸 거야.</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 옆 사람과 결과를 비교해 보세요</span></h4>
+<p>AI가 만든 결과를 확인해 보면, 사람마다 <strong>결과가 다를 것</strong>입니다. 이것이 바이브코딩의 첫 번째 교훈입니다: <strong>모호한 요청 = 들쭉날쭉한 결과.</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>비교 항목</th>
+<th>나</th>
+<th>옆 사람</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>빌드 도구 (Gradle / Maven)</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Spring Boot 버전 (3.x / 4.x)</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>패키지 이름</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>만들어진 파일 수</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table></div>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — Spring Initializr</strong></p>
+<p><strong>뜻</strong>: Spring 팀이 운영하는 <strong>프로젝트 생성기</strong> 웹사이트(start.spring.io). 옵션을 고르면 표준 구조의 빈 프로젝트를 zip으로 만들어 줍니다.</p>
+<p><strong>왜 쓰나</strong>: AI에게 처음부터 만들게 하면 버전·구조가 제각각입니다. <strong>공식 생성기로 같은 출발점</strong>을 만든 뒤 AI에게 기능을 맡기는 것이 안전합니다. (사람이 정해야 할 것과 AI에게 맡길 것을 나누는 첫 연습)</p>
+</blockquote>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 모두 같은 출발점 만들기</span></h4>
+<p>수업에서는 모두 같은 출발점을 갖기 위해 <strong>Spring Initializr</strong>를 사용합니다. Claude Code에게 이렇게 요청하세요.</p>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">방금 만든 backend 폴더는 지워 줘. 대신 아래 명령으로 Spring Initializr에서 프로젝트를 내려받아 backend 폴더에 풀어 줘.</code></pre></div>
+<p>AI는 아래 명령을 실행하겠다고 <strong>허락을 요청</strong>합니다. 명령 내용을 읽어 보고 승인하세요. (AI가 다른 명령을 제안하면 &quot;아래 명령을 그대로 써 줘&quot;라고 다시 지시합니다. 직접 터미널에 입력해도 됩니다.)</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">curl https://start.spring.io/starter.zip \
+  -d type=gradle-project -d language=java -d javaVersion=21 \
+  -d groupId=com.example -d artifactId=planner -d name=planner \
+  -d packageName=com.example.planner \
+  -d dependencies=web,data-jpa,mariadb,validation,actuator,h2 \
+  -o backend.zip
+unzip backend.zip -d backend &amp;&amp; rm backend.zip</code></pre></div>
+<blockquote class="tip"><p>💡 Windows PowerShell에서 <code>curl</code>이 동작하지 않으면 브라우저로 <a href="https://start.spring.io">start.spring.io</a>에 접속해 같은 옵션(Gradle-Groovy, Java 21, 의존성 6개)을 선택하고 <strong>GENERATE</strong>로 내려받아 <code>backend</code> 폴더에 풀어도 됩니다.</p>
+</blockquote>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — backend 폴더 구조</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">backend/
+├── build.gradle            ← 의존성 목록
+├── gradlew, gradlew.bat    ← Gradle 실행 스크립트 (설치 없이 사용)
+├── settings.gradle
+└── src/
+    ├── main/java/com/example/planner/PlannerApplication.java   ← 프로그램 시작점
+    ├── main/resources/application.properties                   ← 설정 파일
+    └── test/java/com/example/planner/PlannerApplicationTests.java</code></pre></div>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — build.gradle 의존성 부분</span></h4>
+<p>생성된 <code>backend/build.gradle</code>의 의존성 부분은 대략 아래와 같습니다. (Spring Boot 4부터 웹 스타터 이름이 <code>spring-boot-starter-webmvc</code>로 바뀌었습니다. <strong>Initializr가 만들어 준 버전과 이름을 그대로 사용하세요.</strong>)</p>
+<div class="code-block"><div class="code-head"><span>groovy</span><button class="copy" type="button">복사</button></div><pre><code class="language-groovy">dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    // ... (Initializr가 추가한 나머지 테스트 의존성)
+}</code></pre></div>
+<p>H2는 <strong>테스트용 메모리 DB</strong>입니다. 5주차에 테스트를 돌릴 때 사용합니다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>의존성</th>
+<th>하는 일</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>webmvc</code></td>
+<td>웹 요청(HTTP)을 받아 처리 — REST API 만들기</td>
+</tr>
+<tr>
+<td><code>data-jpa</code></td>
+<td>Java 객체로 DB를 다루기 (SQL을 덜 쓰게 해 줌)</td>
+</tr>
+<tr>
+<td><code>validation</code></td>
+<td>입력값 검사 (&quot;제목은 비어 있으면 안 됨&quot;)</td>
+</tr>
+<tr>
+<td><code>actuator</code></td>
+<td>서버 상태 확인 주소(<code>/actuator/health</code>) 제공</td>
+</tr>
+<tr>
+<td><code>mariadb-java-client</code></td>
+<td>MariaDB에 접속하는 드라이버</td>
+</tr>
+<tr>
+<td><code>h2</code></td>
+<td>테스트용 메모리 DB</td>
+</tr>
+</tbody></table></div>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 설정 파일과 첫 API 만들기</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">backend의 application.properties를 지우고 application.yml을 만들어 줘.
+- MariaDB 접속 정보는 환경 변수(DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD)로 받고 기본값은 localhost:3306/planner, planner/planner1234
+- JPA ddl-auto는 update, open-in-view는 false
+- actuator는 health만 공개
+- gemini.api-key, gemini.model 설정을 환경 변수 GEMINI_API_KEY, GEMINI_MODEL(기본값 gemini-flash-lite-latest)로 추가
+그리고 com.example.planner 패키지에 GET /api/hello 가 {&quot;message&quot;: &quot;안녕하세요, AI 스터디 플래너입니다!&quot;}를 돌려주는 HelloController를 만들어 줘.</code></pre></div>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — application.yml</span></h4>
+<p><code>backend/src/main/resources/application.properties</code>를 삭제하고 <strong><code>application.yml</code></strong> 을 만듭니다.</p>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — YAML (<code>.yml</code>)</strong></p>
+<p><strong>뜻</strong>: 들여쓰기로 계층을 표현하는 <strong>설정 파일 형식</strong>. <code>spring:</code> 아래에 두 칸 들여 쓴 항목은 spring의 하위 설정입니다.</p>
+<p><strong>주의</strong>: 들여쓰기는 <strong>스페이스</strong>로만! 탭을 쓰면 오류가 납니다.</p>
+</blockquote>
+<div class="code-block"><div class="code-head"><span>yaml</span><button class="copy" type="button">복사</button></div><pre><code class="language-yaml">spring:
+  application:
+    name: planner
+  datasource:
+    url: jdbc:mariadb://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:planner}
+    username: ${DB_USER:planner}
+    password: ${DB_PASSWORD:planner1234}
+  jpa:
+    hibernate:
+      ddl-auto: update        # 엔티티를 보고 테이블 자동 생성/수정 (학습용)
+    open-in-view: false
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health       # /actuator/health 공개 (배포 시 상태 확인용)
+
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model: ${GEMINI_MODEL:gemini-flash-lite-latest}</code></pre></div>
+<blockquote class="tip"><p>💡 <code>${DB_HOST:localhost}</code>는 <strong>&quot;환경 변수 DB_HOST가 있으면 그 값, 없으면 localhost&quot;</strong> 라는 뜻입니다. 같은 코드를 내 PC·Docker·AWS에서 설정만 바꿔 쓸 수 있게 해 줍니다.</p>
+</blockquote>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — HelloController.java</span></h4>
+<p><code>backend/src/main/java/com/example/planner/HelloController.java</code></p>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 컨트롤러와 애너테이션(@)</strong></p>
+<p><strong>컨트롤러 (Controller)</strong>: 특정 주소로 들어온 요청을 받아 <strong>응답을 돌려주는 클래스</strong>. 식당의 &quot;주문 받는 직원&quot;.</p>
+<p><strong>애너테이션 (Annotation, <code>@...</code>)</strong>: 코드에 붙이는 <strong>이름표</strong>. <code>@RestController</code>는 &quot;이 클래스는 REST API 창구다&quot;, <code>@GetMapping(&quot;/hello&quot;)</code>는 &quot;GET /hello 요청은 이 메서드가 처리한다&quot;는 뜻입니다. Spring이 이 이름표를 보고 알아서 연결해 줍니다.</p>
+</blockquote>
+<div class="code-block"><div class="code-head"><span>java</span><button class="copy" type="button">복사</button></div><pre><code class="language-java">package com.example.planner;
+
+import java.util.Map;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping(&quot;/api&quot;)
+public class HelloController {
+
+    @GetMapping(&quot;/hello&quot;)
+    public Map&lt;String, String&gt; hello() {
+        return Map.of(&quot;message&quot;, &quot;안녕하세요, AI 스터디 플래너입니다!&quot;);
+    }
+}</code></pre></div>
+<h3 id="실습-③-mariadb를-docker로-실행하기">실습 ③ MariaDB를 Docker로 실행하기<a class="anchor" href="#실습-③-mariadb를-docker로-실행하기" aria-label="이 절의 링크">#</a></h3>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — Docker · 이미지 · 컨테이너 · Docker Compose</strong></p>
+<p><strong>이미지 (Image)</strong>: 프로그램 + 실행 환경을 담은 <strong>설치 CD</strong> 같은 것. 예: <code>mariadb:11.8</code></p>
+<p><strong>컨테이너 (Container)</strong>: 이미지를 실행한 <strong>실제 프로그램</strong>. 같은 이미지로 컨테이너를 여러 개 만들 수 있습니다.</p>
+<p><strong>Docker Compose</strong>: 여러 컨테이너의 설정을 <strong><code>docker-compose.yml</code> 한 파일</strong>에 적어 두고 한 명령으로 실행하는 도구.</p>
+<p><strong>왜 쓰나</strong>: MariaDB를 PC에 직접 설치하면 운영체제마다 방법이 다르고 지우기도 어렵습니다. Docker로 실행하면 <strong>모두 같은 명령 한 줄</strong>로 똑같은 DB가 뜨고, 필요 없으면 깨끗이 지울 수 있습니다.</p>
+</blockquote>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    I[&quot;이미지&lt;br/&gt;mariadb:11.8&lt;br/&gt;(설치 CD)&quot;] --&gt;|&quot;docker compose up&quot;| C[&quot;컨테이너&lt;br/&gt;planner-db&lt;br/&gt;(실행 중인 DB)&quot;]
+    C --&gt; V[(&quot;볼륨 db-data&lt;br/&gt;(데이터가 저장되는 외장 하드)&quot;)]
+    P[&quot;내 PC의 3306 포트&quot;] --&gt;|&quot;ports 연결&quot;| C</pre></div>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — DB 컨테이너 설정 만들기</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">프로젝트 루트에 MariaDB 11.8을 실행하는 docker-compose.yml을 만들어 줘.
+- 서비스 이름 db, 컨테이너 이름 planner-db, 포트 3306 공개
+- DB 이름 planner, 사용자 planner. 비밀번호는 .env 파일의 DB_PASSWORD, DB_ROOT_PASSWORD를 쓰고 없으면 기본값 사용
+- 한글이 깨지지 않게 utf8mb4, 시간대 Asia/Seoul
+- 데이터는 db-data 볼륨에 저장, healthcheck 추가
+그리고 .env.example(견본, Git에 올림)과 .env(실제 값, Git에 올리지 않음)를 만들어 줘.</code></pre></div>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — docker-compose.yml</span></h4>
+<p>프로젝트 루트에 <code>docker-compose.yml</code>을 만듭니다.</p>
+<div class="code-block"><div class="code-head"><span>yaml</span><button class="copy" type="button">복사</button></div><pre><code class="language-yaml">services:
+  db:
+    image: mariadb:11.8
+    container_name: planner-db
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root1234}
+      MARIADB_DATABASE: planner
+      MARIADB_USER: planner
+      MARIADB_PASSWORD: ${DB_PASSWORD:-planner1234}
+      TZ: Asia/Seoul
+    command: [&quot;--character-set-server=utf8mb4&quot;, &quot;--collation-server=utf8mb4_unicode_ci&quot;]
+    ports:
+      - &quot;3306:3306&quot;
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;healthcheck.sh&quot;, &quot;--connect&quot;, &quot;--innodb_initialized&quot;]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db-data:</code></pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>설정</th>
+<th>뜻</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>image</code></td>
+<td>사용할 이미지 (설치 CD)</td>
+</tr>
+<tr>
+<td><code>environment</code></td>
+<td>컨테이너에 넘겨줄 환경 변수 (DB 이름·사용자·비밀번호)</td>
+</tr>
+<tr>
+<td><code>${DB_PASSWORD:-planner1234}</code></td>
+<td><code>.env</code>에 값이 있으면 그 값, 없으면 <code>planner1234</code></td>
+</tr>
+<tr>
+<td><code>ports: &quot;3306:3306&quot;</code></td>
+<td><strong>내 PC의 3306번 → 컨테이너의 3306번</strong> 연결 (백엔드가 접속할 문)</td>
+</tr>
+<tr>
+<td><code>volumes</code></td>
+<td>컨테이너를 지워도 데이터가 남도록 별도 저장소에 보관</td>
+</tr>
+<tr>
+<td><code>healthcheck</code></td>
+<td>DB가 &quot;정말로 준비됐는지&quot; 주기적으로 검사</td>
+</tr>
+</tbody></table></div>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 포트 (Port)</strong></p>
+<p><strong>뜻</strong>: 한 컴퓨터 안에서 프로그램을 구분하는 <strong>문 번호</strong>. 아파트(컴퓨터 주소) 안의 <strong>호수</strong>와 같습니다.</p>
+<p><strong>이 과정의 포트</strong>: MariaDB <code>3306</code>, Spring Boot <code>8080</code>, Vite 개발 서버 <code>5173</code>, Docker 프론트 <code>3000</code>, 배포 서버 웹 <code>80</code>.</p>
+</blockquote>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — .env.example / .env</span></h4>
+<p>비밀 값은 <code>.env</code> 파일에, 견본은 <code>.env.example</code>에 둡니다.</p>
+<p><code>.env.example</code> (Git에 <strong>올립니다</strong>)</p>
+<div class="code-block"><div class="code-head"><span>dotenv</span><button class="copy" type="button">복사</button></div><pre><code class="language-ini">DB_ROOT_PASSWORD=change-me
+DB_PASSWORD=change-me
+GEMINI_API_KEY=your-gemini-api-key
+GEMINI_MODEL=gemini-flash-lite-latest</code></pre></div>
+<p><code>.env</code> (Git에 <strong>절대 올리지 않습니다</strong>)</p>
+<div class="code-block"><div class="code-head"><span>dotenv</span><button class="copy" type="button">복사</button></div><pre><code class="language-ini">DB_ROOT_PASSWORD=root1234
+DB_PASSWORD=planner1234
+GEMINI_API_KEY=실제_발급받은_키
+GEMINI_MODEL=gemini-flash-lite-latest</code></pre></div>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — DB 띄우기</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">docker compose up -d
+docker compose ps            # STATUS에 (healthy)가 보이면 준비 완료</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — DB 컨테이너 상태</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">NAME         IMAGE          COMMAND                  SERVICE   STATUS                    PORTS
+planner-db   mariadb:11.8   &quot;docker-entrypoint.s…&quot;   db        Up 30 seconds (healthy)   0.0.0.0:3306-&gt;3306/tcp</code></pre></div>
+<p><code>(health: starting)</code>이면 10~30초 기다렸다가 다시 확인하세요. <code>(healthy)</code>가 되면 준비 완료입니다.</p>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — 백엔드 실행</span></h4>
+<p>이제 백엔드를 실행합니다.</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">cd backend
+./gradlew bootRun            # Windows: .\gradlew.bat bootRun</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 백엔드 실행 로그와 API 응답</span></h4>
+<p>실행한 터미널에 아래와 같은 줄이 보이면 서버가 켜진 것입니다. (이 터미널은 서버가 계속 돌아가야 하므로 닫지 마세요. <code>Ctrl+C</code>로 종료)</p>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+ ...
+INFO  --- [main] o.s.b.w.e.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http)
+INFO  --- [main] c.e.planner.PlannerApplication     : Started PlannerApplication in 3.2 seconds</code></pre></div>
+<p><strong>새 터미널</strong>을 하나 더 열어 확인합니다.</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">curl http://localhost:8080/api/hello
+curl http://localhost:8080/actuator/health</code></pre></div>
+<div class="code-block"><div class="code-head"><span>json</span><button class="copy" type="button">복사</button></div><pre><code class="language-json">{&quot;message&quot;:&quot;안녕하세요, AI 스터디 플래너입니다!&quot;}
+{&quot;status&quot;:&quot;UP&quot;}</code></pre></div>
+<h3 id="실습-④-프론트엔드-만들기-react-vite-typescript">실습 ④ 프론트엔드 만들기 (React + Vite + TypeScript)<a class="anchor" href="#실습-④-프론트엔드-만들기-react-vite-typescript" aria-label="이 절의 링크">#</a></h3>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — React · TypeScript · Vite</strong></p>
+<p><strong>React</strong>: 화면을 <strong>컴포넌트(부품)</strong> 단위로 만드는 JavaScript 라이브러리. 버튼·카드·목록을 레고처럼 조립합니다.</p>
+<p><strong>TypeScript</strong>: JavaScript에 <strong>타입(자료형)</strong> 을 붙인 언어. <code>title: string</code>처럼 써 두면 실수를 코드 작성 단계에서 잡아 줍니다. AI가 만든 코드의 실수도 잡아 주는 <strong>센서</strong> 역할을 합니다(5주차).</p>
+<p><strong>Vite</strong>: React 프로젝트를 만들고, 개발 서버를 띄우고, 배포용 파일로 묶어 주는 <strong>빠른 빌드 도구</strong>. 코드를 저장하면 브라우저에 즉시 반영됩니다.</p>
+</blockquote>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — React 프로젝트 생성</span></h4>
+<p>프로젝트 루트로 돌아와서:</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">npm create vite@latest frontend -- --template react-ts
+cd frontend
+npm install</code></pre></div>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 프록시 설정과 첫 화면</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">frontend의 vite.config.ts에 개발 서버 프록시를 설정해서 /api 요청을 http://localhost:8080 으로 넘겨 줘.
+그리고 App.tsx를 &quot;📚 AI 스터디 플래너&quot; 제목과, /api/hello에서 받아온 message를 보여 주는 화면으로 바꿔 줘.
+백엔드에 연결이 안 되면 &quot;백엔드에 연결할 수 없습니다. bootRun을 확인하세요.&quot;를 보여 줘.</code></pre></div>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — vite.config.ts</span></h4>
+<p><code>frontend/vite.config.ts</code> — 개발 서버에서 <code>/api</code> 요청을 백엔드(8080)로 넘겨 줍니다(프록시).</p>
+<div class="code-block"><div class="code-head"><span>ts</span><button class="copy" type="button">복사</button></div><pre><code class="language-typescript">import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': 'http://localhost:8080',
+    },
+  },
+});</code></pre></div>
+<div class="diagram"><pre class="mermaid">sequenceDiagram
+    participant B as 브라우저 (localhost:5173)
+    participant V as Vite 개발 서버
+    participant S as Spring Boot (localhost:8080)
+    B-&gt;&gt;V: GET /api/hello
+    V-&gt;&gt;S: GET /api/hello (프록시 전달)
+    S--&gt;&gt;V: {&quot;message&quot;: &quot;...&quot;}
+    V--&gt;&gt;B: {&quot;message&quot;: &quot;...&quot;}</pre></div>
+<blockquote class="tip"><p>💡 <strong>왜 프록시를 쓰나요?</strong> 브라우저는 보안상 &quot;다른 주소(포트)&quot;로 요청하는 것을 제한합니다(CORS). 프록시를 쓰면 브라우저 입장에서는 같은 주소로 보이므로 문제가 사라집니다. 8주차 배포에서는 Nginx가 같은 역할을 합니다.</p>
+</blockquote>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 프록시 (Proxy) 와 CORS</strong></p>
+<p><strong>프록시</strong>: 요청을 <strong>대신 전달해 주는 중개인</strong>. 브라우저는 Vite(5173)에게만 말하고, Vite가 뒤에서 Spring Boot(8080)에 전달합니다.</p>
+<p><strong>CORS</strong>: 브라우저가 &quot;다른 출처(주소·포트)&quot;로 보내는 요청을 <strong>기본적으로 막는 보안 규칙</strong>. 프록시를 쓰면 같은 출처처럼 보여서 이 문제를 피할 수 있습니다.</p>
+</blockquote>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — App.tsx</span></h4>
+<p><code>frontend/src/App.tsx</code>를 아래로 교체합니다.</p>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — useState · useEffect</strong></p>
+<p><strong>useState</strong>: 화면에 보여 줄 <strong>값을 기억하는 상자</strong>. 값이 바뀌면 화면이 자동으로 다시 그려집니다. (<code>message</code>)</p>
+<p><strong>useEffect</strong>: 화면이 처음 나타난 <strong>뒤에 할 일</strong>을 적는 곳. 여기서는 백엔드에 <code>/api/hello</code>를 요청합니다.</p>
+</blockquote>
+<div class="code-block"><div class="code-head"><span>tsx</span><button class="copy" type="button">복사</button></div><pre><code class="language-typescript">import { useEffect, useState } from 'react';
+import './App.css';
+
+export default function App() {
+  const [message, setMessage] = useState('불러오는 중...');
+
+  useEffect(() =&gt; {
+    fetch('/api/hello')
+      .then((res) =&gt; res.json())
+      .then((data: { message: string }) =&gt; setMessage(data.message))
+      .catch(() =&gt; setMessage('백엔드에 연결할 수 없습니다. bootRun을 확인하세요.'));
+  }, []);
+
+  return (
+    &lt;div className=&quot;app&quot;&gt;
+      &lt;h1&gt;📚 AI 스터디 플래너&lt;/h1&gt;
+      &lt;p&gt;{message}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</code></pre></div>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — 개발 서버 실행</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">npm run dev</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 풀스택 연결 성공</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">  VITE v7.x.x  ready in 350 ms
+
+  ➜  Local:   http://localhost:5173/</code></pre></div>
+<p>브라우저에서 <code>http://localhost:5173</code>을 열어 <strong>&quot;안녕하세요, AI 스터디 플래너입니다!&quot;</strong> 가 보이면 <strong>풀스택 연결 성공</strong>입니다! 🎉 (브라우저 → Vite → Spring Boot → 응답이 한 바퀴 돈 것)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>화면에 보이는 문구</th>
+<th>의미</th>
+<th>할 일</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>안녕하세요, AI 스터디 플래너입니다!</td>
+<td>성공</td>
+<td>다음 실습으로</td>
+</tr>
+<tr>
+<td>불러오는 중... (계속)</td>
+<td>요청이 끝나지 않음</td>
+<td>개발자 도구(F12) → Network 탭 확인</td>
+</tr>
+<tr>
+<td>백엔드에 연결할 수 없습니다</td>
+<td>백엔드가 꺼져 있거나 프록시 설정 오류</td>
+<td><code>bootRun</code> 터미널 확인, <code>vite.config.ts</code> 확인</td>
+</tr>
+</tbody></table></div>
+<h3 id="실습-⑤-바이브코딩-체험-d-day-카운터">실습 ⑤ 바이브코딩 체험: D-Day 카운터<a class="anchor" href="#실습-⑤-바이브코딩-체험-d-day-카운터" aria-label="이 절의 링크">#</a></h3>
+<p>이제 진짜 바이브코딩을 해 봅니다. <strong>코드를 직접 쓰지 말고 말로만</strong> 만들어 보세요.</p>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 1라운드: 바이브 요청</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">프론트엔드에 시험 D-Day 카운터 컴포넌트를 만들어서 App에 붙여 줘. 예쁘게.</code></pre></div>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 2라운드: 느낌대로 수정 (한 줄씩 차례로 입력)</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">시험 이름이랑 날짜를 입력할 수 있게 해 줘.
+시험이 지나면 D+로 표시해 줘.
+오늘이 시험날이면 &quot;D-Day 🔥&quot;라고 보여 줘.</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 3라운드: 버그 사냥 (아래를 직접 테스트해 보세요)</span></h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>테스트</th>
+<th>기대 결과</th>
+<th>내 결과</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>오늘 날짜 입력</td>
+<td><code>D-Day</code></td>
+<td></td>
+</tr>
+<tr>
+<td>내일 날짜 입력</td>
+<td><code>D-1</code></td>
+<td></td>
+</tr>
+<tr>
+<td>어제 날짜 입력</td>
+<td><code>D+1</code></td>
+<td></td>
+</tr>
+<tr>
+<td>밤 11시 59분에 내일 날짜</td>
+<td><code>D-1</code> (D-0이 아님!)</td>
+<td></td>
+</tr>
+</tbody></table></div>
+<p>많은 경우 AI가 처음 만든 코드는 <strong>시간대(UTC)·시각 차이</strong> 때문에 하루가 어긋납니다.</p>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — UTC와 시간대</strong></p>
+<p><strong>UTC</strong>: 세계 표준시. 한국 시간(KST)은 <strong>UTC보다 9시간 빠릅니다</strong>(UTC+9).</p>
+<p><strong>왜 문제가 되나</strong>: 컴퓨터가 날짜를 &quot;UTC 자정&quot;으로 해석하면 한국에서는 <strong>오전 9시</strong>가 되어, 시각에 따라 하루 차이가 생깁니다. 날짜 계산은 AI도 사람도 자주 틀리는 대표 영역입니다.</p>
+</blockquote>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — DdayCounter.tsx (올바른 구현 예시)</span></h4>
+<p>아래는 올바른 구현의 예시입니다. 여러분의 AI 결과와 비교해 보세요.</p>
+<p><code>frontend/src/components/DdayCounter.tsx</code></p>
+<div class="code-block"><div class="code-head"><span>tsx</span><button class="copy" type="button">복사</button></div><pre><code class="language-typescript">import { useState } from 'react';
+
+function calcDday(target: string, today: Date = new Date()): number {
+  // 'YYYY-MM-DD'를 &quot;현지 시각 자정&quot;으로 해석해야 하루 오차가 생기지 않는다
+  const [y, m, d] = target.split('-').map(Number);
+  const targetDate = new Date(y, m - 1, d);
+  const base = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return Math.round((targetDate.getTime() - base.getTime()) / 86_400_000);
+}
+
+function formatDday(diff: number): string {
+  if (diff === 0) return 'D-Day 🔥';
+  return diff &gt; 0 ? `D-${diff}` : `D+${-diff}`;
+}
+
+export default function DdayCounter() {
+  const [examName, setExamName] = useState('정보처리기사 실기');
+  const [examDate, setExamDate] = useState('');
+
+  return (
+    &lt;section className=&quot;card&quot;&gt;
+      &lt;h2&gt;⏰ 시험 D-Day&lt;/h2&gt;
+      &lt;div className=&quot;row&quot;&gt;
+        &lt;input value={examName} onChange={(e) =&gt; setExamName(e.target.value)} placeholder=&quot;시험 이름&quot; /&gt;
+        &lt;input type=&quot;date&quot; value={examDate} onChange={(e) =&gt; setExamDate(e.target.value)} /&gt;
+      &lt;/div&gt;
+      {examDate &amp;&amp; (
+        &lt;p className=&quot;dday&quot;&gt;
+          {examName} &lt;strong&gt;{formatDday(calcDday(examDate))}&lt;/strong&gt;
+        &lt;/p&gt;
+      )}
+    &lt;/section&gt;
+  );
+}</code></pre></div>
+<p>D-Day 계산 수식:</p>
+<div class="math-block">\[\text{D} = \operatorname{round}\left(\frac{t_{\text{시험일 0시}} - t_{\text{오늘 0시}}}{86{,}400{,}000\ \text{ms}}\right)\]</div>
+<p><code>new Date(&#39;2026-12-01&#39;)</code>처럼 <strong>문자열을 그대로 넣으면 UTC 자정</strong>으로 해석되어 한국(UTC+9)에서는 오전 9시가 됩니다. 이런 미묘한 버그를 <strong>AI도, 사람도 쉽게 놓칩니다.</strong> → 5주차에 <strong>테스트(센서)</strong> 로 잡는 법을 배웁니다.</p>
+<p>App에 붙이기 (<code>App.tsx</code>의 <code>return</code> 안에 추가):</p>
+<div class="code-block"><div class="code-head"><span>tsx</span><button class="copy" type="button">복사</button></div><pre><code class="language-typescript">import DdayCounter from './components/DdayCounter';
+// ...
+      &lt;p&gt;{message}&lt;/p&gt;
+      &lt;DdayCounter /&gt;</code></pre></div>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 4라운드: AI에게 설명 요청 (안전 수칙 3번)</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">DdayCounter.tsx 코드를 초보자도 이해할 수 있게 줄마다 설명해 줘. 특히 왜 Math.round를 쓰는지 알려 줘.</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 오늘 만든 화면</span></h4>
+<p><img src="https://raw.githubusercontent.com/timeleverage-kim/SpecialLecture-2026-AI-Engineering/main/docs/images/week02-hello-dday.png" alt="2주차 결과 화면: 백엔드 메시지와 D-Day 카운터"></p>
+<h3 id="실습-⑥-git-커밋하고-github에-올리기">실습 ⑥ Git 커밋하고 GitHub에 올리기<a class="anchor" href="#실습-⑥-git-커밋하고-github에-올리기" aria-label="이 절의 링크">#</a></h3>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — .gitignore</strong></p>
+<p><strong>뜻</strong>: Git이 <strong>기록하지 말아야 할 파일 목록</strong>. 비밀 정보(<code>.env</code>), 자동 생성 폴더(<code>node_modules</code>, <code>build</code>)를 적습니다.</p>
+<p><strong>왜 쓰나</strong>: <code>node_modules</code>는 수백 MB라 올릴 필요가 없고(<code>npm install</code>로 다시 생성), <code>.env</code>는 올리면 <strong>API 키가 전 세계에 공개</strong>됩니다. GitHub에 공개된 키는 몇 분 안에 자동 수집 프로그램에 털릴 수 있습니다.</p>
+</blockquote>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — .gitignore 작성 (가장 먼저!)</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">프로젝트 루트에 .gitignore를 만들어 줘. .env와 *.pem 같은 비밀 파일, backend의 build·.gradle, frontend의 node_modules·dist, IDE 설정, .claude/settings.local.json을 제외해 줘.</code></pre></div>
+<h4 class="step step-ref"><span class="step-icon">📄</span><span>참고 코드 — .gitignore</span></h4>
+<p>프로젝트 루트의 <code>.gitignore</code>:</p>
+<div class="code-block"><div class="code-head"><span>gitignore</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext"># 비밀 정보
+.env
+*.pem
+
+# Java / Gradle
+backend/build/
+backend/.gradle/
+*.class
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Claude Code 개인 설정
+.claude/settings.local.json</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — <code>.env</code>가 무시되는지 확인</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">git status            # 목록에 .env가 보이면 안 됩니다!
+git check-ignore .env # &quot;.env&quot;가 출력되면 정상적으로 무시되는 중</code></pre></div>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — 첫 커밋</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">git add .
+git commit -m &quot;chore: 프로젝트 뼈대 생성 (Spring Boot, React, MariaDB)&quot;</code></pre></div>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — GitHub 저장소 만들고 push</span></h4>
+<ol>
+<li>GitHub → <strong>New repository</strong> → 이름 <code>ai-study-planner</code>, <strong>Public</strong>, README 체크 해제 → Create</li>
+<li>화면에 나온 주소로 연결합니다.</li>
+</ol>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">git remote add origin https://github.com/&lt;내아이디&gt;/ai-study-planner.git
+git push -u origin main</code></pre></div>
+<blockquote class="tip"><p>💡 GitHub CLI(<code>gh</code>)가 있으면 한 줄로도 가능합니다: <code>gh repo create ai-study-planner --public --source=. --push</code></p>
+</blockquote>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — 브랜치 → PR 흐름 체험</span></h4>
+<p>D-Day 기능을 브랜치에서 개선하고 PR로 합쳐 봅니다.</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">git switch -c feature/dday-style
+# Claude Code에게: &quot;D-Day가 7일 이하면 빨간색으로 보여 줘&quot;
+git add .
+git commit -m &quot;feat: D-Day 7일 이하일 때 강조 표시&quot;
+git push -u origin feature/dday-style</code></pre></div>
+<p>GitHub 웹에서 <strong>Compare &amp; pull request</strong> → 설명 작성 → <strong>Merge pull request</strong>.</p>
+<p>로컬을 최신으로 맞추고 태그를 답니다.</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">git switch main
+git pull
+git tag week-02
+git push origin week-02</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — GitHub에서 확인할 것</span></h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>위치</th>
+<th>보여야 하는 것</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>저장소 첫 화면</td>
+<td><code>backend/</code>, <code>frontend/</code>, <code>docker-compose.yml</code>, <code>.env.example</code>, <code>.gitignore</code> (<strong><code>.env</code>는 없어야 함!</strong>)</td>
+</tr>
+<tr>
+<td>Commits</td>
+<td><code>chore: 프로젝트 뼈대 생성 ...</code>, <code>feat: D-Day 7일 이하일 때 강조 표시</code></td>
+</tr>
+<tr>
+<td>Pull requests → Closed</td>
+<td>병합된 PR #1</td>
+</tr>
+<tr>
+<td>Tags (Releases 옆)</td>
+<td><code>week-02</code></td>
+</tr>
+</tbody></table></div>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 커밋 메시지를 AI에게 맡기기 (선택)</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">지금 변경 사항을 보고 Conventional Commits 형식(한국어 설명)으로 커밋해 줘. 커밋하기 전에 메시지를 먼저 보여 줘.</code></pre></div>
+<p>AI는 <code>git diff</code>를 읽고(도구 사용) 메시지를 만듭니다. 메시지가 마음에 들면 승인하세요.</p>
+<hr>
+<h2 id="5-회고-바이브코딩-체크-5분">5. 회고: 바이브코딩 체크 (5분)<a class="anchor" href="#5-회고-바이브코딩-체크-5분" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>질문</th>
+<th>나의 답</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AI가 만든 코드 중 <strong>이해하지 못한 부분</strong>이 있었나?</td>
+<td></td>
+</tr>
+<tr>
+<td>같은 요청인데 옆 사람과 결과가 <strong>달랐던</strong> 점은?</td>
+<td></td>
+</tr>
+<tr>
+<td>하루 어긋나는 버그를 <strong>어떻게 발견</strong>했나? 발견 못 했다면 왜?</td>
+<td></td>
+</tr>
+<tr>
+<td>다음 주에 <strong>더 잘 요청</strong>하려면 무엇을 바꿀까?</td>
+<td></td>
+</tr>
+</tbody></table></div>
+<blockquote class="key"><p>📌 <strong>오늘의 결론</strong>: 바이브코딩은 <strong>빠른 출발</strong>에는 최고지만, <strong>품질의 보증</strong>은 해 주지 않습니다. 다음 주에는 &quot;잘 묻는 법&quot;인 <strong>프롬프트 엔지니어링</strong>으로 결과를 안정시킵니다.</p>
+</blockquote>
+<hr>
+<h2 id="6-자주-겪는-문제-트러블슈팅">6. 자주 겪는 문제 (트러블슈팅)<a class="anchor" href="#6-자주-겪는-문제-트러블슈팅" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>증상</th>
+<th>원인</th>
+<th>해결</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>bootRun</code> 시 <code>Connection refused</code> (3306)</td>
+<td>DB 컨테이너 미실행</td>
+<td><code>docker compose up -d</code>, <code>docker compose ps</code>로 healthy 확인</td>
+</tr>
+<tr>
+<td><code>Access denied for user &#39;planner&#39;</code></td>
+<td><code>.env</code>의 비밀번호와 컨테이너 생성 당시 비밀번호가 다름</td>
+<td><code>docker compose down -v</code>(데이터 삭제 주의) 후 다시 <code>up -d</code></td>
+</tr>
+<tr>
+<td>프론트에서 &quot;백엔드에 연결할 수 없습니다&quot;</td>
+<td>백엔드 미실행 또는 프록시 설정 누락</td>
+<td><code>vite.config.ts</code>의 <code>proxy</code> 확인, 8080 실행 확인</td>
+</tr>
+<tr>
+<td><code>./gradlew: Permission denied</code></td>
+<td>실행 권한 없음</td>
+<td><code>chmod +x gradlew</code></td>
+</tr>
+<tr>
+<td>한글이 <code>???</code>로 저장됨</td>
+<td>DB 문자셋</td>
+<td>compose의 <code>utf8mb4</code> 옵션 확인 후 볼륨 재생성</td>
+</tr>
+<tr>
+<td><code>.env</code>를 실수로 push함</td>
+<td><code>.gitignore</code> 누락</td>
+<td><strong>즉시 키를 폐기·재발급</strong>하고 저장소 기록에서 제거 (깃 기록에 남아 있으므로 삭제 커밋만으로는 부족)</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="7-과제">7. 과제<a class="anchor" href="#7-과제" aria-label="이 절의 링크">#</a></h2>
+<ol>
+<li><strong>필수</strong>: <code>week-02</code> 태그가 달린 GitHub 저장소 주소 제출 (<code>.env</code>가 올라가지 않았는지 확인!)</li>
+<li><strong>필수</strong>: 바이브코딩 회고표(5절) 작성</li>
+<li><strong>도전</strong>: Claude Code에게 &quot;뽀모도로 타이머(25분 공부/5분 휴식)&quot; 컴포넌트를 바이브코딩으로 만들게 하고, <strong>발견한 버그 1개와 해결 과정</strong>을 PR 설명에 적어 보세요.</li>
+</ol>
+<hr>
+<h2 id="8-지금까지의-진행-상황-다음-주-예고">8. 지금까지의 진행 상황 &amp; 다음 주 예고<a class="anchor" href="#8-지금까지의-진행-상황-다음-주-예고" aria-label="이 절의 링크">#</a></h2>
+<h3 id="81-2주차까지-진행-상황">8.1 2주차까지 진행 상황<a class="anchor" href="#81-2주차까지-진행-상황" aria-label="이 절의 링크">#</a></h3>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    W1[&quot;✅ 1주&quot;]:::done --&gt; W2[&quot;✅ 2주&lt;br/&gt;바이브코딩&quot;]:::done --&gt; W3[&quot;3주&lt;br/&gt;프롬프트&quot;] --&gt; W4[&quot;4주&quot;] --&gt; W5[&quot;5주&quot;] --&gt; W6[&quot;6주&quot;] --&gt; W7[&quot;7주&quot;] --&gt; W8[&quot;8주&quot;] --&gt; W9[&quot;9주&quot;]
+    classDef done fill:#dcfce7,stroke:#16a34a</pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>구분</th>
+<th>완료한 것</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>개념</td>
+<td>바이브코딩의 장점·함정(기술 부채), Git 3영역·브랜치·PR, Conventional Commits</td>
+</tr>
+<tr>
+<td>백엔드</td>
+<td>Spring Boot 프로젝트, <code>application.yml</code>(환경 변수), <code>GET /api/hello</code></td>
+</tr>
+<tr>
+<td>프론트엔드</td>
+<td>React + Vite + TypeScript, <code>/api</code> 프록시, D-Day 카운터</td>
+</tr>
+<tr>
+<td>인프라</td>
+<td>Docker Compose로 MariaDB 실행, <code>.env</code>/<code>.env.example</code>, <code>.gitignore</code></td>
+</tr>
+<tr>
+<td>GitHub</td>
+<td>저장소 생성, 첫 PR 병합, <code>week-02</code> 태그</td>
+</tr>
+</tbody></table></div>
+<p><strong>현재 프로젝트 구조</strong></p>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">ai-study-planner/
+├── backend/   (Spring Boot: HelloController)
+├── frontend/  (React: App, DdayCounter)
+├── docker-compose.yml   (MariaDB)
+├── .env.example  .gitignore
+└── (.env — Git에는 없음)</code></pre></div>
+<h3 id="82-다음-주3주차-예고-프롬프트-엔지니어링">8.2 다음 주(3주차) 예고 — 프롬프트 엔지니어링<a class="anchor" href="#82-다음-주3주차-예고-프롬프트-엔지니어링" aria-label="이 절의 링크">#</a></h3>
+<ul>
+<li><strong>배울 것</strong>: 오늘 겪은 &quot;같은 요청인데 결과가 제각각&quot; 문제를 <strong>잘 쓴 지시문(프롬프트)</strong> 으로 해결합니다. 6요소 프롬프트로 <strong>할 일·노트 CRUD API</strong>를 만들고, 앱에 <strong>Gemini를 연결해 AI 노트 요약</strong> 기능을 추가합니다.</li>
+<li><strong>왜 배우나</strong>: AI의 결과 품질은 <strong>질문의 품질</strong>을 넘지 못합니다. 같은 AI도 지시문만 바꾸면 결과가 확 달라지는 것을 실험으로 확인합니다.</li>
+<li><strong>미리 준비</strong>: ① <code>GEMINI_API_KEY</code> 환경 변수 설정 확인 ② 공부 노트 2~3개(아무 과목) 준비 ③ <code>docker compose up -d</code>로 DB가 뜨는지 확인</li>
+</ul>
+<hr>
+<h2 id="9-일본-취업-대비-it-용어-2주차">9. 🇯🇵 일본 취업 대비 IT 용어 (2주차)<a class="anchor" href="#9-일본-취업-대비-it-용어-2주차" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>한국어</th>
+<th>日本語</th>
+<th>읽는 법</th>
+<th>예문 (日本語)</th>
+<th>예문 해석</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>바이브코딩</td>
+<td>バイブコーディング</td>
+<td>바이부코-딘구</td>
+<td>バイブコーディングで試作品を素早く作りました。</td>
+<td>바이브코딩으로 시제품을 빠르게 만들었습니다.</td>
+</tr>
+<tr>
+<td>시제품</td>
+<td>試作 / プロトタイプ</td>
+<td>しさく</td>
+<td>一週間でプロトタイプを作成しました。</td>
+<td>일주일 만에 프로토타입을 만들었습니다.</td>
+</tr>
+<tr>
+<td>기술 부채</td>
+<td>技術的負債</td>
+<td>ぎじゅつてきふさい</td>
+<td>技術的負債がたまらないようにリファクタリングしました。</td>
+<td>기술 부채가 쌓이지 않도록 리팩터링했습니다.</td>
+</tr>
+<tr>
+<td>프론트엔드 / 백엔드</td>
+<td>フロントエンド / バックエンド</td>
+<td>후론토엔도 / 박쿠엔도</td>
+<td>フロントエンドはReact、バックエンドはSpring Bootを使用しました。</td>
+<td>프론트엔드는 React, 백엔드는 Spring Boot를 사용했습니다.</td>
+</tr>
+<tr>
+<td>프레임워크</td>
+<td>フレームワーク</td>
+<td>후레-무와-쿠</td>
+<td>フレームワークの公式ドキュメントを参考にしました。</td>
+<td>프레임워크의 공식 문서를 참고했습니다.</td>
+</tr>
+<tr>
+<td>저장소</td>
+<td>リポジトリ</td>
+<td>리포지토리</td>
+<td>GitHubにリポジトリを公開しています。</td>
+<td>GitHub에 저장소를 공개하고 있습니다.</td>
+</tr>
+<tr>
+<td>커밋</td>
+<td>コミット</td>
+<td>코밋토</td>
+<td>意味のある単位でコミットするよう心がけました。</td>
+<td>의미 있는 단위로 커밋하도록 신경 썼습니다.</td>
+</tr>
+<tr>
+<td>브랜치</td>
+<td>ブランチ</td>
+<td>부란치</td>
+<td>機能ごとにブランチを分けて開発しました。</td>
+<td>기능별로 브랜치를 나눠 개발했습니다.</td>
+</tr>
+<tr>
+<td>풀 리퀘스트</td>
+<td>プルリクエスト（プルリク）</td>
+<td>푸루리쿠에스토</td>
+<td>プルリクエストでセルフレビューを行いました。</td>
+<td>풀 리퀘스트로 셀프 리뷰를 했습니다.</td>
+</tr>
+<tr>
+<td>병합</td>
+<td>マージ</td>
+<td>마-지</td>
+<td>レビュー後にmainブランチへマージしました。</td>
+<td>리뷰 후 main 브랜치에 병합했습니다.</td>
+</tr>
+<tr>
+<td>컨테이너</td>
+<td>コンテナ</td>
+<td>콘테나</td>
+<td>データベースはDockerコンテナで起動しています。</td>
+<td>데이터베이스는 Docker 컨테이너로 실행하고 있습니다.</td>
+</tr>
+<tr>
+<td>기밀 정보</td>
+<td>機密情報</td>
+<td>きみつじょうほう</td>
+<td>機密情報は.envで管理し、Gitには含めていません。</td>
+<td>기밀 정보는 .env로 관리하고 Git에는 포함하지 않았습니다.</td>
+</tr>
+</tbody></table></div>
+<blockquote class="speak"><p>💬 <strong>면접에서 이렇게 말해 보세요</strong></p>
+<p>「AIが生成したコードはそのまま使わず、必ず動作確認してからコミットしました。」</p>
+<p>(AI가 생성한 코드는 그대로 쓰지 않고 반드시 동작을 확인한 뒤 커밋했습니다.)</p>
+</blockquote>
+<p><a href="week01-overview.html">← 1주차</a> · <a href="week03-prompt-engineering.html">3주차: 프롬프트 엔지니어링 →</a></p>
+
+</article>
+<nav class="pager">
+  <a href="week01-overview.html"><small>← 이전</small>1주차 · 전체 지도</a>
+  <a class="next" href="week03-prompt-engineering.html"><small>다음 →</small>3주차 · 프롬프트</a>
+</nav>
+</main>
+<aside class="toc"><h4>이 페이지에서</h4>
+<a class="h2" href="#0-수업-진행표-3시간">0. 수업 진행표 (3시간)</a>
+<a class="h2" href="#1-학습-목표">1. 학습 목표</a>
+<a class="h2" href="#2-개념-①-바이브코딩이란">2. 개념 ① 바이브코딩이란?</a>
+<a class="h3" href="#21-정의">2.1 정의</a>
+<a class="h3" href="#22-비유-택시-vs-직접-운전">2.2 비유: 택시 vs 직접 운전</a>
+<a class="h3" href="#23-바이브코딩-사이클">2.3 바이브코딩 사이클</a>
+<a class="h3" href="#24-바이브코딩의-함정-기술-부채의-복리">2.4 바이브코딩의 함정: &quot;기술 부채의 복리&quot;</a>
+<a class="h3" href="#25-바이브코딩-안전-수칙-5가지">2.5 바이브코딩 안전 수칙 5가지</a>
+<a class="h2" href="#3-개념-②-git과-github">3. 개념 ② Git과 GitHub</a>
+<a class="h3" href="#31-git의-3영역-비유-사진-찍기">3.1 Git의 3영역 비유: &quot;사진 찍기&quot;</a>
+<a class="h3" href="#32-브랜치와-pr-pull-request">3.2 브랜치와 PR (Pull Request)</a>
+<a class="h3" href="#33-커밋-메시지-규칙-conventional-commits">3.3 커밋 메시지 규칙 (Conventional Commits)</a>
+<a class="h2" href="#4-실습-프로젝트-뼈대-만들기">4. 실습: 프로젝트 뼈대 만들기</a>
+<a class="h3" href="#최종-폴더-구조-오늘-목표">최종 폴더 구조 (오늘 목표)</a>
+<a class="h3" href="#실습-①-저장소-폴더-만들기">실습 ① 저장소 폴더 만들기</a>
+<a class="h3" href="#실습-②-바이브코딩으로-백엔드-뼈대-만들기">실습 ② 바이브코딩으로 백엔드 뼈대 만들기</a>
+<a class="h3" href="#실습-③-mariadb를-docker로-실행하기">실습 ③ MariaDB를 Docker로 실행하기</a>
+<a class="h3" href="#실습-④-프론트엔드-만들기-react-vite-typescript">실습 ④ 프론트엔드 만들기 (React + Vite + TypeScript)</a>
+<a class="h3" href="#실습-⑤-바이브코딩-체험-d-day-카운터">실습 ⑤ 바이브코딩 체험: D-Day 카운터</a>
+<a class="h3" href="#실습-⑥-git-커밋하고-github에-올리기">실습 ⑥ Git 커밋하고 GitHub에 올리기</a>
+<a class="h2" href="#5-회고-바이브코딩-체크-5분">5. 회고: 바이브코딩 체크 (5분)</a>
+<a class="h2" href="#6-자주-겪는-문제-트러블슈팅">6. 자주 겪는 문제 (트러블슈팅)</a>
+<a class="h2" href="#7-과제">7. 과제</a>
+<a class="h2" href="#8-지금까지의-진행-상황-다음-주-예고">8. 지금까지의 진행 상황 &amp; 다음 주 예고</a>
+<a class="h3" href="#81-2주차까지-진행-상황">8.1 2주차까지 진행 상황</a>
+<a class="h3" href="#82-다음-주3주차-예고-프롬프트-엔지니어링">8.2 다음 주(3주차) 예고 — 프롬프트 엔지니어링</a>
+<a class="h2" href="#9-일본-취업-대비-it-용어-2주차">9. 🇯🇵 일본 취업 대비 IT 용어 (2주차)</a>
+</aside>
+</div>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/dockerfile.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/nginx.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/powershell.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/groovy.min.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', function () {
+// AI 엔지니어링 특강 — 강의 자료 공통 스크립트
+(function () {
+  // 1) 코드 복사 버튼
+  document.querySelectorAll('.code-block .copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var code = btn.closest('.code-block').querySelector('pre code');
+      var text = code ? code.innerText : '';
+      var done = function () {
+        btn.textContent = '복사됨 ✓';
+        setTimeout(function () { btn.textContent = '복사'; }, 1500);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done);
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); done(); } finally { document.body.removeChild(ta); }
+      }
+    });
+  });
+
+  // 2) 모바일 메뉴
+  var menu = document.querySelector('.menu-btn');
+  if (menu) {
+    menu.addEventListener('click', function () { document.body.classList.toggle('nav-open'); });
+    document.querySelectorAll('.sidebar a').forEach(function (a) {
+      a.addEventListener('click', function () { document.body.classList.remove('nav-open'); });
+    });
+  }
+
+  // 3) 현재 읽는 절을 목차에 표시
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  if (links.length && 'IntersectionObserver' in window) {
+    var map = {};
+    links.forEach(function (a) { map[decodeURIComponent(a.getAttribute('href').slice(1))] = a; });
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting && map[e.target.id]) {
+          links.forEach(function (l) { l.classList.remove('active'); });
+          map[e.target.id].classList.add('active');
+        }
+      });
+    }, { rootMargin: '-60px 0px -70% 0px' });
+    document.querySelectorAll('.paper h2[id], .paper h3[id]').forEach(function (h) { observer.observe(h); });
+  }
+
+  // 4) 코드 하이라이트 (highlight.js가 로드된 경우)
+  if (window.hljs) {
+    document.querySelectorAll('.code-block pre code').forEach(function (el) {
+      if (!el.classList.contains('language-plaintext')) {
+        window.hljs.highlightElement(el);
+      }
+    });
+  }
+
+  // 5) 수식 (KaTeX auto-render가 로드된 경우)
+  if (window.renderMathInElement) {
+    window.renderMathInElement(document.querySelector('.paper') || document.body, {
+      delimiters: [
+        { left: '\\[', right: '\\]', display: true },
+        { left: '\\(', right: '\\)', display: false },
+      ],
+      ignoredClasses: ['code-block', 'mermaid'],
+      throwOnError: false,
+      strict: false,
+    });
+  }
+})();
+
+});
+</script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose', fontFamily: 'Pretendard, sans-serif' });
+  await mermaid.run({ querySelector: 'pre.mermaid' });
+</script>
+</body>
+</html>
