@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1주차 · AI 엔지니어링 6단계 전체 지도 | AI와 함께하는 풀스택 개발 — 바이브코딩에서 그래프 엔지니어링까지</title>
+<meta name="description" content="바이브·프롬프트·컨텍스트·하네스·루프·그래프를 &quot;천재 신입 인턴&quot; 비유와 수식으로 한눈에 이해하고 개발 환경을 설치합니다.">
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="topbar">
+  <button class="menu-btn" type="button" aria-label="메뉴">☰</button>
+  <a class="brand" href="index.html">AI <span>Engineering</span> Lab</a>
+  <div class="spacer"></div>
+  <a class="md-link" href="../docs/week01-overview.md">📄 Markdown 원본</a>
+</header>
+<div class="layout">
+<aside class="sidebar"><h4>강의 목차</h4><ol>
+<li><a href="index.html">🏠 과정 소개<small>개요 · 로드맵</small></a></li>
+<li><a href="week01-overview.html" class="active">1주차 · 전체 지도<small>개요</small></a></li>
+<li><a href="week02-vibe-coding.html">2주차 · 바이브코딩<small>① 바이브</small></a></li>
+<li><a href="week03-prompt-engineering.html">3주차 · 프롬프트<small>② 프롬프트</small></a></li>
+<li><a href="week04-context-engineering.html">4주차 · 컨텍스트<small>③ 컨텍스트</small></a></li>
+<li><a href="week05-harness-engineering.html">5주차 · 하네스<small>④ 하네스</small></a></li>
+<li><a href="week06-loop-engineering.html">6주차 · 루프<small>⑤ 루프</small></a></li>
+<li><a href="week07-graph-engineering.html">7주차 · 그래프<small>⑥ 그래프</small></a></li>
+<li><a href="week08-cicd-aws.html">8주차 · CI/CD·AWS<small>배포</small></a></li>
+<li><a href="week09-portfolio-readme.html">9주차 · 포트폴리오<small>정리</small></a></li>
+</ol></aside>
+<main class="content">
+<article class="paper">
+<h1>1주차 · AI 엔지니어링 6단계 전체 지도</h1>
+<div class="week-hero"><span class="pill">1주차</span><span class="pill">3시간 (설명 + 실습)</span><span class="pill">개요</span></div>
+<blockquote>
+<p><strong>바이브코딩 → 프롬프트 → 컨텍스트 → 하네스 → 루프 → 그래프</strong></p>
+<p>오늘은 9주 동안 걸어갈 길의 &quot;지도&quot;를 먼저 펼쳐 봅니다. 코드를 많이 짜기보다, <strong>왜 이런 단계가 생겼는지</strong> 이해하고 개발 환경을 준비하는 날입니다.</p>
+</blockquote>
+<hr>
+<h2 id="이-교안을-읽는-법-9주-공통">📘 이 교안을 읽는 법 (9주 공통)<a class="anchor" href="#이-교안을-읽는-법-9주-공통" aria-label="이 절의 링크">#</a></h2>
+<p>이 교안은 <strong>&quot;AI에게 시키는 부분&quot;</strong> 과 <strong>&quot;그 결과를 확인·비교하는 부분&quot;</strong> 을 아이콘으로 분명하게 나눠 두었습니다. 실습할 때 지금 내가 <strong>무엇을 해야 하는 단계인지</strong> 아이콘을 먼저 보세요.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>표시</th>
+<th>이름</th>
+<th>무엇이 들어 있나</th>
+<th>여러분이 할 일</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>🤖</td>
+<td><strong>Claude Code 프롬프트</strong></td>
+<td>Claude Code 입력창에 붙여 넣을 <strong>지시문</strong>과 AI가 진행하는 모습</td>
+<td>복사해서 입력 → AI가 보여 주는 계획을 읽고 승인</td>
+</tr>
+<tr>
+<td>⌨️</td>
+<td><strong>직접 실행</strong></td>
+<td>터미널(명령 프롬프트)에 <strong>직접 입력</strong>하는 명령</td>
+<td>한 줄씩 입력하고 결과 보기</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>결과 확인</strong></td>
+<td>잘 되었는지 확인하는 방법, <strong>기대 결과(출력·화면)</strong></td>
+<td>내 결과와 비교</td>
+</tr>
+<tr>
+<td>📄</td>
+<td><strong>참고 코드</strong></td>
+<td>AI가 만든 코드와 <strong>비교할 기준 코드</strong></td>
+<td>다른 점을 찾고, 이해 안 되면 AI에게 질문</td>
+</tr>
+<tr>
+<td>📖</td>
+<td><strong>용어 풀이</strong></td>
+<td>처음 나오는 용어의 <strong>뜻·비유·쓰는 이유</strong></td>
+<td>읽고 이해한 뒤 넘어가기</td>
+</tr>
+<tr>
+<td>💡 / ⚠️</td>
+<td>팁 / 주의</td>
+<td>알아 두면 좋은 것 / 꼭 지켜야 하는 것</td>
+<td></td>
+</tr>
+</tbody></table></div>
+<h3 id="한-번의-실습은-이렇게-흘러갑니다">한 번의 실습은 이렇게 흘러갑니다<a class="anchor" href="#한-번의-실습은-이렇게-흘러갑니다" aria-label="이 절의 링크">#</a></h3>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    A[&quot;🤖 프롬프트 입력&quot;] --&gt; B[&quot;AI가 계획 제시&quot;]
+    B --&gt; C{&quot;계획이&lt;br/&gt;맞나?&quot;}
+    C --&gt;|&quot;아니오&quot;| A
+    C --&gt;|&quot;예, 승인&quot;| D[&quot;AI가 파일 작성·명령 실행&quot;]
+    D --&gt; E[&quot;✅ 결과 확인&lt;br/&gt;(실행·화면·테스트)&quot;]
+    E --&gt;|&quot;안 됨&quot;| F[&quot;오류 메시지를&lt;br/&gt;AI에게 전달&quot;]
+    F --&gt; D
+    E --&gt;|&quot;됨&quot;| G[&quot;📄 참고 코드와 비교&lt;br/&gt;이해 안 되면 질문&quot;]
+    G --&gt; H[&quot;git commit&lt;br/&gt;(세이브 포인트)&quot;]</pre></div>
+<blockquote class="key"><p>📌 <strong>참고 코드는 &quot;정답&quot;이 아니라 &quot;비교 기준&quot;입니다.</strong> AI는 같은 프롬프트에도 조금씩 다른 코드를 만듭니다. ✅ 결과 확인을 통과했다면 여러분의 AI가 만든 코드도 훌륭한 답입니다. 다만 막혔을 때, 시간이 부족할 때는 📄 참고 코드를 그대로 붙여 넣고 다음 단계로 넘어가세요. 다음 주 실습은 참고 코드를 기준으로 이어집니다.</p>
+</blockquote>
+<blockquote class="tip"><p>💡 <strong>화면 예시 이미지</strong>: 결과 확인에 나오는 앱 화면 이미지는 이해를 돕기 위한 <strong>예시 화면(모의 데이터)</strong> 입니다. 할 일 이름·날짜·AI 답변 문장은 여러분의 화면과 다를 수 있습니다.</p>
+</blockquote>
+<hr>
+<h2 id="0-오늘의-수업-진행표-3시간">0. 오늘의 수업 진행표 (3시간)<a class="anchor" href="#0-오늘의-수업-진행표-3시간" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>시간</th>
+<th>내용</th>
+<th>형태</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0:00 ~ 0:15</td>
+<td>오리엔테이션 · 9주 로드맵 · 최종 결과물 소개</td>
+<td>설명</td>
+</tr>
+<tr>
+<td>0:15 ~ 1:10</td>
+<td>AI 엔지니어링 6단계 개념 (비유·그림·수식)</td>
+<td>설명 + 토론</td>
+</tr>
+<tr>
+<td>1:10 ~ 1:20</td>
+<td>휴식</td>
+<td></td>
+</tr>
+<tr>
+<td>1:20 ~ 2:30</td>
+<td>개발 환경 설치 (Git, JDK, Node, Docker, Claude Code, API 키)</td>
+<td>실습</td>
+</tr>
+<tr>
+<td>2:30 ~ 2:50</td>
+<td>첫 번째 Claude Code 대화 · 설치 확인 체크리스트</td>
+<td>실습</td>
+</tr>
+<tr>
+<td>2:50 ~ 3:00</td>
+<td>정리 · 퀴즈 · 과제 안내</td>
+<td>정리</td>
+</tr>
+</tbody></table></div>
+<h2 id="1-학습-목표">1. 학습 목표<a class="anchor" href="#1-학습-목표" aria-label="이 절의 링크">#</a></h2>
+<p>이번 주가 끝나면 여러분은 다음을 할 수 있습니다.</p>
+<ol>
+<li>AI 엔지니어링 6단계(바이브·프롬프트·컨텍스트·하네스·루프·그래프)를 <strong>한 문장씩</strong> 설명할 수 있다.</li>
+<li>각 단계가 <strong>이전 단계의 어떤 한계</strong>를 해결하기 위해 등장했는지 말할 수 있다.</li>
+<li>9주 동안 만들 <strong>&quot;AI 스터디 플래너&quot;</strong> 의 구조(프론트엔드·백엔드·DB·AI·배포)를 그림으로 그릴 수 있다.</li>
+<li>실습에 필요한 개발 도구를 모두 설치하고 동작을 확인할 수 있다.</li>
+</ol>
+<hr>
+<h2 id="2-9주-로드맵-한눈에-보기">2. 9주 로드맵 한눈에 보기<a class="anchor" href="#2-9주-로드맵-한눈에-보기" aria-label="이 절의 링크">#</a></h2>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    W1[&quot;1주&lt;br/&gt;전체 지도&lt;br/&gt;환경 설치&quot;] --&gt; W2[&quot;2주&lt;br/&gt;바이브코딩&lt;br/&gt;Git·GitHub&quot;]
+    W2 --&gt; W3[&quot;3주&lt;br/&gt;프롬프트&lt;br/&gt;CRUD + AI요약&quot;]
+    W3 --&gt; W4[&quot;4주&lt;br/&gt;컨텍스트&lt;br/&gt;CLAUDE.md + RAG&quot;]
+    W4 --&gt; W5[&quot;5주&lt;br/&gt;하네스&lt;br/&gt;Hooks·테스트·Docker·CI&quot;]
+    W5 --&gt; W6[&quot;6주&lt;br/&gt;루프&lt;br/&gt;AI 스터디 코치&quot;]
+    W6 --&gt; W7[&quot;7주&lt;br/&gt;그래프&lt;br/&gt;학습계획 워크플로우&quot;]
+    W7 --&gt; W8[&quot;8주&lt;br/&gt;CI/CD&lt;br/&gt;AWS 자동배포&quot;]
+    W8 --&gt; W9[&quot;9주&lt;br/&gt;포트폴리오&lt;br/&gt;README 한·일&quot;]</pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>주차</th>
+<th>엔지니어링 단계</th>
+<th>프로젝트에 추가되는 것</th>
+<th>Git 태그</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>전체 개요</td>
+<td>개발 환경</td>
+<td>-</td>
+</tr>
+<tr>
+<td>2</td>
+<td>바이브코딩</td>
+<td>프로젝트 뼈대, D-Day 카운터</td>
+<td><code>week-02</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>프롬프트 엔지니어링</td>
+<td>할 일·노트 CRUD, AI 노트 요약</td>
+<td><code>week-03</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>컨텍스트 엔지니어링</td>
+<td><code>CLAUDE.md</code>, 설계 문서, 노트 기반 질의응답(RAG)</td>
+<td><code>week-04</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>하네스 엔지니어링</td>
+<td>권한·Hooks·Skill·Subagent, 테스트, Docker, CI</td>
+<td><code>week-05</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>루프 엔지니어링</td>
+<td>도구를 쓰는 &quot;AI 스터디 코치&quot; 에이전트</td>
+<td><code>week-06</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>그래프 엔지니어링</td>
+<td>학습계획 생성 워크플로우(StateGraph)</td>
+<td><code>week-07</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td>CI/CD</td>
+<td>GitHub Actions → GHCR → AWS EC2 자동 배포</td>
+<td><code>week-08</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td>포트폴리오</td>
+<td><code>README.md</code>(한국어) + <code>README.ja.md</code>(일본어)</td>
+<td><code>v1.0.0</code></td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="3-우리가-만들-것-ai-스터디-플래너">3. 우리가 만들 것: AI 스터디 플래너<a class="anchor" href="#3-우리가-만들-것-ai-스터디-플래너" aria-label="이 절의 링크">#</a></h2>
+<p>시험·과제를 관리하고, 공부 노트를 정리하며, AI가 공부 계획을 짜 주는 웹 서비스입니다.</p>
+<h3 id="31-완성된-시스템-구조">3.1 완성된 시스템 구조<a class="anchor" href="#31-완성된-시스템-구조" aria-label="이 절의 링크">#</a></h3>
+<div class="diagram"><pre class="mermaid">flowchart TB
+    subgraph Browser[&quot;사용자 브라우저&quot;]
+        UI[&quot;React + TypeScript&lt;br/&gt;할 일 · 노트 · 코치 · 계획 화면&quot;]
+    end
+    subgraph EC2[&quot;AWS EC2 (Docker Compose)&quot;]
+        NGINX[&quot;frontend 컨테이너&lt;br/&gt;Nginx: 정적 파일 + /api 프록시&quot;]
+        API[&quot;backend 컨테이너&lt;br/&gt;Spring Boot (Java 21)&quot;]
+        DB[(&quot;db 컨테이너&lt;br/&gt;MariaDB&quot;)]
+    end
+    GEM[&quot;Google Gemini API&quot;]
+    GH[&quot;GitHub&lt;br/&gt;코드 저장소 + Actions + GHCR&quot;]
+
+    UI --&gt;|&quot;HTTP&quot;| NGINX
+    NGINX --&gt;|&quot;/api/*&quot;| API
+    API --&gt;|&quot;JPA&quot;| DB
+    API --&gt;|&quot;REST (generateContent)&quot;| GEM
+    GH --&gt;|&quot;자동 배포 (SSH)&quot;| EC2</pre></div>
+<h3 id="32-기능-목록과-관련-단계">3.2 기능 목록과 관련 단계<a class="anchor" href="#32-기능-목록과-관련-단계" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>화면</th>
+<th>기능</th>
+<th>주로 배우는 엔지니어링</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>할 일</td>
+<td>과목별 할 일 등록·상태 변경·삭제, D-Day 표시</td>
+<td>바이브코딩, 프롬프트</td>
+</tr>
+<tr>
+<td>노트</td>
+<td>공부 노트 작성, <strong>AI 3줄 요약</strong></td>
+<td>프롬프트</td>
+</tr>
+<tr>
+<td>노트 Q&amp;A</td>
+<td>&quot;내 노트에서&quot; 답을 찾아 주는 질문 응답</td>
+<td>컨텍스트 (RAG)</td>
+</tr>
+<tr>
+<td>AI 코치</td>
+<td>&quot;이번 주 할 일 정리해 줘&quot; → AI가 <strong>도구를 반복 호출</strong>하며 처리</td>
+<td>루프</td>
+</tr>
+<tr>
+<td>AI 계획</td>
+<td>목표·시험일 입력 → 분석→초안→검증→수정 <strong>워크플로우</strong>로 계획 생성</td>
+<td>그래프</td>
+</tr>
+<tr>
+<td>(보이지 않는 곳)</td>
+<td>테스트 자동 실행, 위험 명령 차단, 자동 배포</td>
+<td>하네스, CI/CD</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h3 id="33-이-과정에서-계속-쓰이는-기본-용어">3.3 이 과정에서 계속 쓰이는 기본 용어<a class="anchor" href="#33-이-과정에서-계속-쓰이는-기본-용어" aria-label="이 절의 링크">#</a></h3>
+<p>처음 듣는 용어가 많아도 괜찮습니다. 아래 표는 9주 내내 반복해서 나오니 지금은 <strong>&quot;대충 이런 뜻이구나&quot;</strong> 정도로만 읽어 두세요.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>용어</th>
+<th>쉬운 뜻</th>
+<th>비유</th>
+<th>우리 프로젝트에서 왜 쓰나</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>프론트엔드</strong> (Frontend)</td>
+<td>사용자가 보고 누르는 <strong>화면</strong> 부분</td>
+<td>식당의 홀(메뉴판·테이블)</td>
+<td>할 일·노트·AI 결과를 보여 주는 React 화면</td>
+</tr>
+<tr>
+<td><strong>백엔드</strong> (Backend)</td>
+<td>화면 뒤에서 데이터를 처리하는 <strong>서버</strong> 프로그램</td>
+<td>식당의 주방</td>
+<td>저장·조회·AI 호출을 처리하는 Spring Boot</td>
+</tr>
+<tr>
+<td><strong>데이터베이스</strong> (DB)</td>
+<td>데이터를 표 형태로 <strong>오래 보관</strong>하는 곳</td>
+<td>식당의 창고</td>
+<td>할 일과 노트를 MariaDB에 저장</td>
+</tr>
+<tr>
+<td><strong>API</strong></td>
+<td>프로그램끼리 <strong>주고받는 약속된 창구</strong></td>
+<td>주방의 주문 창구</td>
+<td>화면이 <code>/api/tasks</code>로 서버에 요청</td>
+</tr>
+<tr>
+<td><strong>REST API</strong></td>
+<td>주소(URL)와 동작(GET·POST 등)으로 자원을 다루는 API 방식</td>
+<td>&quot;3번 테이블(주소)에 주문 추가(POST)&quot;</td>
+<td>할 일 등록 = <code>POST /api/tasks</code></td>
+</tr>
+<tr>
+<td><strong>LLM</strong></td>
+<td>글을 이해하고 만들어 내는 <strong>대규모 언어 모델</strong></td>
+<td>엄청나게 많이 읽은 작가</td>
+<td>Gemini가 요약·계획을 만든다</td>
+</tr>
+<tr>
+<td><strong>에이전트</strong> (Agent)</td>
+<td>목표를 위해 <strong>스스로 도구를 골라 쓰며</strong> 일하는 AI 프로그램</td>
+<td>심부름센터 직원</td>
+<td>Claude Code, 6주차 AI 코치</td>
+</tr>
+<tr>
+<td><strong>클라우드</strong> (AWS)</td>
+<td>인터넷으로 빌려 쓰는 <strong>남의 컴퓨터</strong></td>
+<td>렌터카</td>
+<td>8주차에 서버를 빌려 서비스 공개</td>
+</tr>
+<tr>
+<td><strong>컨테이너</strong> (Docker)</td>
+<td>프로그램과 실행 환경을 <strong>통째로 포장</strong>한 상자</td>
+<td>이삿짐 컨테이너</td>
+<td>내 PC·서버 어디서나 똑같이 실행</td>
+</tr>
+<tr>
+<td><strong>CI/CD</strong></td>
+<td>코드를 올리면 <strong>자동으로 검사(CI)하고 배포(CD)</strong> 하는 흐름</td>
+<td>공장의 자동 검수·출고 라인</td>
+<td>push하면 테스트 후 AWS에 자동 반영</td>
+</tr>
+</tbody></table></div>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    U[&quot;👩 사용자&quot;] --&gt;|&quot;화면 클릭&quot;| FE[&quot;프론트엔드&lt;br/&gt;(홀)&quot;]
+    FE --&gt;|&quot;API 요청&quot;| BE[&quot;백엔드&lt;br/&gt;(주방)&quot;]
+    BE --&gt;|&quot;저장·조회&quot;| DB[(&quot;DB&lt;br/&gt;(창고)&quot;)]
+    BE --&gt;|&quot;AI 요청&quot;| LLM[&quot;LLM&lt;br/&gt;(외부 전문가)&quot;]
+    BE --&gt;|&quot;결과(JSON)&quot;| FE</pre></div>
+<h2 id="4-ai-엔지니어링-6단계-큰-그림">4. AI 엔지니어링 6단계 — 큰 그림<a class="anchor" href="#4-ai-엔지니어링-6단계-큰-그림" aria-label="이 절의 링크">#</a></h2>
+<h3 id="41-하나의-비유로-전체를-이해하기-천재-신입-인턴">4.1 하나의 비유로 전체를 이해하기: &quot;천재 신입 인턴&quot;<a class="anchor" href="#41-하나의-비유로-전체를-이해하기-천재-신입-인턴" aria-label="이 절의 링크">#</a></h3>
+<blockquote>
+<p>AI는 <strong>엄청나게 똑똑하지만, 우리 회사에 오늘 처음 출근한 신입 인턴</strong>이라고 생각해 봅시다.</p>
+<p>세상 지식은 많지만 <strong>우리 프로젝트의 사정은 아무것도 모릅니다.</strong> 그리고 가끔 <strong>자신 있게 틀립니다.</strong></p>
+</blockquote>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>인턴에게 일을 시키는 방식</th>
+<th>핵심 질문</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>① 바이브코딩</td>
+<td>&quot;대충 이런 느낌으로 만들어 줘~&quot;</td>
+<td><strong>무엇을</strong> 원하는지 말로 전달하면 되나?</td>
+</tr>
+<tr>
+<td>② 프롬프트 엔지니어링</td>
+<td>잘 쓴 <strong>업무 지시서</strong> 한 장</td>
+<td><strong>어떻게 말해야</strong> 원하는 결과가 나오나?</td>
+</tr>
+<tr>
+<td>③ 컨텍스트 엔지니어링</td>
+<td>지시서 + <strong>인수인계 자료 묶음</strong></td>
+<td>AI가 <strong>무엇을 알고 있어야</strong> 하나?</td>
+</tr>
+<tr>
+<td>④ 하네스 엔지니어링</td>
+<td>사원증 권한, 업무 규칙, <strong>자동 검사 장치</strong>가 갖춰진 사무실</td>
+<td>AI가 <strong>안전하고 일관되게</strong> 일하려면 어떤 환경이 필요한가?</td>
+</tr>
+<tr>
+<td>⑤ 루프 엔지니어링</td>
+<td>&quot;하고 → 확인하고 → 고치고&quot;를 <strong>스스로 반복</strong></td>
+<td>AI가 <strong>언제 다시 하고, 언제 멈춰야</strong> 하나?</td>
+</tr>
+<tr>
+<td>⑥ 그래프 엔지니어링</td>
+<td>여러 담당자가 있는 <strong>업무 흐름도(결재 라인)</strong></td>
+<td>여러 단계를 <strong>어떤 순서와 조건으로</strong> 연결하나?</td>
+</tr>
+</tbody></table></div>
+<h3 id="42-양파-그림-바깥-단계는-안쪽-단계를-감싼다">4.2 양파 그림: 바깥 단계는 안쪽 단계를 &quot;감싼다&quot;<a class="anchor" href="#42-양파-그림-바깥-단계는-안쪽-단계를-감싼다" aria-label="이 절의 링크">#</a></h3>
+<p>각 단계는 이전 단계를 <strong>버리는 것이 아니라 감싸는 것</strong>입니다. 그래프 안에는 루프가, 루프 안에는 하네스가, 그 안에는 컨텍스트와 프롬프트가 들어 있습니다.</p>
+<div class="diagram"><pre class="mermaid">flowchart TB
+    subgraph G[&quot;⑥ 그래프: 여러 단계·에이전트를 흐름도로 연결&quot;]
+        subgraph L[&quot;⑤ 루프: 실행 → 검증 → 수정 반복&quot;]
+            subgraph H[&quot;④ 하네스: 도구·권한·규칙·테스트&quot;]
+                subgraph C[&quot;③ 컨텍스트: 필요한 정보 선별&quot;]
+                    subgraph P[&quot;② 프롬프트: 지시문&quot;]
+                        M((&quot;LLM&lt;br/&gt;모델&quot;))
+                    end
+                end
+            end
+        end
+    end</pre></div>
+<h3 id="43-각-단계가-통제하는-범위가-점점-넓어진다">4.3 각 단계가 &quot;통제하는 범위&quot;가 점점 넓어진다<a class="anchor" href="#43-각-단계가-통제하는-범위가-점점-넓어진다" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>엔지니어가 설계하는 대상</th>
+<th>단위</th>
+<th>예시 산출물</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>바이브코딩</td>
+<td>(설계하지 않음) 의도만 전달</td>
+<td>대화 한 번</td>
+<td>&quot;로그인 페이지 만들어 줘&quot;</td>
+</tr>
+<tr>
+<td>프롬프트</td>
+<td><strong>한 번의 요청 문장</strong></td>
+<td>메시지 1개</td>
+<td>역할·작업·제약·형식이 들어간 지시문</td>
+</tr>
+<tr>
+<td>컨텍스트</td>
+<td><strong>모델이 보는 정보 전체</strong></td>
+<td>컨텍스트 창 1개</td>
+<td><code>CLAUDE.md</code>, 설계 문서, 검색된 노트</td>
+</tr>
+<tr>
+<td>하네스</td>
+<td><strong>모델을 둘러싼 실행 환경</strong></td>
+<td>세션/프로젝트</td>
+<td>권한 설정, Hooks, 테스트, 린터, Skill</td>
+</tr>
+<tr>
+<td>루프</td>
+<td><strong>반복과 종료 조건</strong></td>
+<td>작업 1개(여러 번 호출)</td>
+<td>도구 호출 루프, 테스트 통과까지 수정</td>
+</tr>
+<tr>
+<td>그래프</td>
+<td><strong>여러 단계의 흐름과 상태</strong></td>
+<td>업무 프로세스</td>
+<td>노드·엣지·상태로 된 워크플로우</td>
+</tr>
+</tbody></table></div>
+<h3 id="44-수식으로-보는-6단계">4.4 수식으로 보는 6단계<a class="anchor" href="#44-수식으로-보는-6단계" aria-label="이 절의 링크">#</a></h3>
+<p>어렵게 생각하지 마세요. 수식은 <strong>&quot;무엇이 무엇에 영향을 주는가&quot;</strong> 를 짧게 쓴 메모입니다.</p>
+<blockquote class="tip"><p>💡 <strong>수식이 낯설어도 괜찮습니다.</strong> 이 교안의 수식은 계산 시험용이 아니라 <strong>&quot;무엇이 결과에 영향을 주는가&quot;를 한 줄로 요약한 그림</strong>입니다. 기호 읽는 법만 알면 충분합니다: <span class="math-inline">\(P(A \mid B)\)</span>는 &quot;B일 때 A일 확률&quot;, <span class="math-inline">\(\times\)</span>는 곱하기, <span class="math-inline">\(x_t\)</span>는 &quot;t번째의 x&quot;.</p>
+</blockquote>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 토큰(Token)</strong></p>
+<p><strong>뜻</strong>: LLM이 글을 처리하는 <strong>가장 작은 조각</strong>. 단어 하나일 수도, 단어의 일부일 수도 있습니다. (&quot;스프링부트&quot; → &quot;스프링&quot; + &quot;부트&quot;)</p>
+<p><strong>비유</strong>: 레고 블록. LLM은 문장을 블록 단위로 쌓아 올립니다.</p>
+<p><strong>왜 알아야 하나</strong>: AI 사용 요금, 처리 속도, 한 번에 읽을 수 있는 양(컨텍스트 창)이 모두 <strong>토큰 수</strong>로 정해지기 때문입니다. (3·4주차에 자세히)</p>
+</blockquote>
+<p><strong>(1) LLM은 &quot;다음에 올 단어(토큰)를 확률로 고르는 함수&quot;입니다.</strong></p>
+<div class="math-block">\[P(\text{다음 토큰} \mid \text{지금까지의 모든 입력})\]</div>
+<p>→ 출력은 <strong>입력(프롬프트 + 컨텍스트)</strong> 에 따라 달라집니다. 그래서 ②, ③ 단계가 중요합니다.</p>
+<p><strong>(2) 출력 품질은 여러 요소의 곱처럼 작동합니다.</strong></p>
+<div class="math-block">\[\text{결과 품질} \approx \text{모델 능력} \times \text{프롬프트 명확성} \times \text{컨텍스트 적합성} \times \text{하네스 신뢰성}\]</div>
+<p>→ 곱셈이므로 <strong>하나라도 0에 가까우면 전체가 무너집니다.</strong> 아무리 좋은 모델도 컨텍스트가 엉터리면 결과가 엉터리입니다.</p>
+<p><strong>(3) 에이전트 = 모델 + 하네스</strong> (2026년 업계에서 널리 쓰이는 정의)</p>
+<div class="math-block">\[\text{Agent} = \text{Model} + \text{Harness}\]</div>
+<p>→ 모델이 &quot;엔진&quot;이라면 하네스는 &quot;핸들·브레이크·계기판&quot;입니다.</p>
+<p><strong>(4) 루프는 &quot;피드백을 받아 다음 상태로 가는 점화식&quot;입니다.</strong></p>
+<div class="math-block">\[x_{t+1} = \text{Agent}(x_t,\ \text{feedback}_t), \quad \text{멈춤 조건: } \text{verify}(x_t) = \text{통과} \ \text{또는}\ t = t_{\max}\]</div>
+<p><strong>(5) 그래프는 &quot;노드(V), 엣지(E), 상태(S)&quot;의 묶음입니다.</strong></p>
+<div class="math-block">\[G = (V,\ E,\ S), \qquad \text{다음 노드} = \text{router}(\text{현재 노드},\ S)\]</div>
+<hr>
+<h2 id="5-단계별-핵심-개념-미리보기">5. 단계별 핵심 개념 미리보기<a class="anchor" href="#5-단계별-핵심-개념-미리보기" aria-label="이 절의 링크">#</a></h2>
+<h3 id="①-바이브코딩-vibe-coding-말로-만들기">① 바이브코딩 (Vibe Coding) — &quot;말로 만들기&quot;<a class="anchor" href="#①-바이브코딩-vibe-coding-말로-만들기" aria-label="이 절의 링크">#</a></h3>
+<ul>
+<li><strong>정의</strong>: 코드를 직접 한 줄씩 쓰기보다, 원하는 것을 <strong>자연어로 설명</strong>하고 AI가 만든 코드를 실행해 보며 &quot;느낌(vibe)&quot;대로 고쳐 나가는 방식.</li>
+<li><strong>장점</strong>: 매우 빠름. 아이디어 → 동작하는 화면까지 몇 분.</li>
+<li><strong>한계</strong>: 코드를 이해하지 못한 채 쌓이면 <strong>고칠 수 없는 코드</strong>가 됩니다. 보안·성능·일관성 문제를 놓치기 쉽습니다.</li>
+</ul>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">나: &quot;시험 D-Day 카운터 컴포넌트 만들어 줘&quot;
+AI: (코드 생성) → 실행해 보니 날짜가 하루 틀림
+나: &quot;하루 틀려. 고쳐 줘&quot;
+AI: (수정) → 이번엔 다른 곳이 깨짐 ...   ← 바이브코딩의 전형적인 늪</code></pre></div>
+<h3 id="②-프롬프트-엔지니어링-잘-묻기">② 프롬프트 엔지니어링 — &quot;잘 묻기&quot;<a class="anchor" href="#②-프롬프트-엔지니어링-잘-묻기" aria-label="이 절의 링크">#</a></h3>
+<ul>
+<li><strong>정의</strong>: 원하는 결과가 나오도록 <strong>지시문을 설계</strong>하는 기술.</li>
+<li><strong>공식</strong> (이번 수업에서 계속 쓸 템플릿):</li>
+</ul>
+<div class="math-block">\[\text{좋은 프롬프트} = \text{역할} + \text{맥락} + \text{작업} + \text{제약} + \text{출력 형식} + \text{예시}\]</div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>나쁜 프롬프트</th>
+<th>좋은 프롬프트</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&quot;할 일 API 만들어 줘&quot;</td>
+<td>&quot;너는 Spring Boot 4 백엔드 개발자야. <code>Task</code> 엔티티(제목·과목·마감일·상태)에 대한 REST CRUD API를 만들어. 패키지는 <code>com.example.planner.task</code>, DTO는 record로, 검증은 Bean Validation을 사용해. 결과는 파일별 코드 블록으로 보여 줘.&quot;</td>
+</tr>
+</tbody></table></div>
+<h3 id="③-컨텍스트-엔지니어링-잘-알려-주기">③ 컨텍스트 엔지니어링 — &quot;잘 알려 주기&quot;<a class="anchor" href="#③-컨텍스트-엔지니어링-잘-알려-주기" aria-label="이 절의 링크">#</a></h3>
+<ul>
+<li><strong>정의</strong>: 모델이 답을 만들 때 <strong>보는 정보 전체(컨텍스트 창)</strong> 를 설계하는 것. 프롬프트는 그 일부일 뿐입니다.</li>
+<li>컨텍스트 창은 <strong>책상 크기가 정해진 작업대</strong>와 같습니다. 필요한 자료만 올려야 일이 잘 됩니다.</li>
+</ul>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    subgraph CW[&quot;컨텍스트 창 (크기 제한 있음)&quot;]
+        S[&quot;시스템 지시&quot;]
+        R[&quot;프로젝트 규칙&lt;br/&gt;CLAUDE.md&quot;]
+        D[&quot;관련 문서·코드&quot;]
+        T[&quot;도구 결과&quot;]
+        Hs[&quot;대화 기록&quot;]
+        Q[&quot;지금 질문&quot;]
+    end
+    CW --&gt; LLM((&quot;LLM&quot;)) --&gt; A[&quot;답변&quot;]</pre></div>
+<div class="math-block">\[\text{토큰}_{\text{시스템}} + \text{토큰}_{\text{규칙}} + \text{토큰}_{\text{자료}} + \text{토큰}_{\text{대화}} + \text{토큰}_{\text{질문}} \le \text{컨텍스트 창 크기}\]</div>
+<h3 id="④-하네스-엔지니어링-잘-일하는-환경-만들기">④ 하네스 엔지니어링 — &quot;잘 일하는 환경 만들기&quot;<a class="anchor" href="#④-하네스-엔지니어링-잘-일하는-환경-만들기" aria-label="이 절의 링크">#</a></h3>
+<ul>
+<li><strong>하네스(harness)</strong> 는 원래 말에 채우는 <strong>마구(굴레·고삐)</strong> 입니다. 힘센 말을 원하는 방향으로, 안전하게 달리게 하는 장치죠.</li>
+<li>2026년 업계 정의: <strong>에이전트에서 모델을 뺀 나머지 전부</strong>(지시 파일, 도구, 권한, 테스트, 리뷰 절차, 피드백 장치)가 하네스입니다.</li>
+<li>하네스는 두 종류의 장치로 나눌 수 있습니다.</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>종류</th>
+<th>언제 작동?</th>
+<th>비유</th>
+<th>우리 프로젝트 예</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>가이드 (Guide, 피드포워드)</strong></td>
+<td>AI가 행동하기 <strong>전</strong></td>
+<td>운전 전 내비게이션 안내</td>
+<td><code>CLAUDE.md</code>, 코딩 규칙, Skill</td>
+</tr>
+<tr>
+<td><strong>센서 (Sensor, 피드백)</strong></td>
+<td>AI가 행동한 <strong>후</strong></td>
+<td>차선 이탈 경보</td>
+<td>컴파일, 테스트, 린터, Hooks, 코드 리뷰 에이전트</td>
+</tr>
+</tbody></table></div>
+<h3 id="⑤-루프-엔지니어링-스스로-반복하게-하기">⑤ 루프 엔지니어링 — &quot;스스로 반복하게 하기&quot;<a class="anchor" href="#⑤-루프-엔지니어링-스스로-반복하게-하기" aria-label="이 절의 링크">#</a></h3>
+<ul>
+<li><strong>정의</strong>: AI가 <strong>목표를 이룰 때까지</strong> &quot;행동 → 관찰 → 판단&quot;을 반복하는 흐름과, <strong>언제 다시 하고 언제 멈출지</strong>를 설계하는 것.</li>
+<li>핵심 질문 4가지: <strong>무엇을 재시도? 무엇으로 검증? 언제 멈춤? 언제 사람에게 물어봄?</strong></li>
+</ul>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    A[&quot;목표 입력&quot;] --&gt; B[&quot;생각&lt;br/&gt;(LLM)&quot;]
+    B --&gt;|&quot;도구 필요&quot;| C[&quot;행동&lt;br/&gt;(도구 실행)&quot;]
+    C --&gt; D[&quot;관찰&lt;br/&gt;(결과 확인)&quot;]
+    D --&gt; B
+    B --&gt;|&quot;완료&quot;| E[&quot;최종 답변&quot;]
+    D --&gt;|&quot;최대 반복 초과&quot;| F[&quot;중단 + 사람에게 보고&quot;]</pre></div>
+<h3 id="⑥-그래프-엔지니어링-흐름도로-설계하기">⑥ 그래프 엔지니어링 — &quot;흐름도로 설계하기&quot;<a class="anchor" href="#⑥-그래프-엔지니어링-흐름도로-설계하기" aria-label="이 절의 링크">#</a></h3>
+<ul>
+<li><strong>정의</strong>: AI 애플리케이션을 <strong>노드(작업)·엣지(다음 경로)·상태(공유 데이터)</strong> 로 이루어진 실행 가능한 그래프로 설계하는 것.</li>
+<li>루프 하나에 모든 것을 맡기면 예측하기 어렵습니다. 그래프는 <strong>&quot;어떤 단계에서 어디로 갈 수 있는지&quot;를 미리 정해</strong> 신뢰성을 높입니다.</li>
+</ul>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    S((시작)) --&gt; A[&quot;분석&lt;br/&gt;(LLM)&quot;]
+    A --&gt; B[&quot;초안 작성&lt;br/&gt;(LLM)&quot;]
+    B --&gt; C{&quot;검증&lt;br/&gt;(코드)&quot;}
+    C --&gt;|&quot;문제 있음 &amp; 2회 미만&quot;| D[&quot;수정 지시&quot;]
+    D --&gt; B
+    C --&gt;|&quot;통과&quot;| E[&quot;확정&quot;]
+    E --&gt; X((끝))</pre></div>
+<blockquote class="tip"><p>💡 <strong>루프 vs 그래프 한 줄 정리</strong></p>
+<p>루프는 &quot;AI가 알아서 반복&quot; — <strong>자율성</strong>이 높음.</p>
+<p>그래프는 &quot;사람이 설계한 길 위에서 AI가 일함&quot; — <strong>예측 가능성</strong>이 높음.</p>
+<p>실무에서는 그래프의 노드 하나 안에 작은 루프가 들어가는 식으로 <strong>섞어서</strong> 씁니다.</p>
+</blockquote>
+<hr>
+<h2 id="6-6단계-비교-총정리표">6. 6단계 비교 총정리표<a class="anchor" href="#6-6단계-비교-총정리표" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>구분</th>
+<th>바이브</th>
+<th>프롬프트</th>
+<th>컨텍스트</th>
+<th>하네스</th>
+<th>루프</th>
+<th>그래프</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 동사</td>
+<td>말한다</td>
+<td>묻는다</td>
+<td>알려 준다</td>
+<td>갖춰 준다</td>
+<td>반복시킨다</td>
+<td>연결한다</td>
+</tr>
+<tr>
+<td>실패 원인</td>
+<td>의도 모호</td>
+<td>지시 모호</td>
+<td>정보 부족·과다</td>
+<td>검증 부재</td>
+<td>무한 반복·조기 종료</td>
+<td>흐름 설계 오류</td>
+</tr>
+<tr>
+<td>사람의 역할</td>
+<td>사용자</td>
+<td>작성자</td>
+<td>편집자</td>
+<td>환경 설계자</td>
+<td>감독관</td>
+<td>설계자(아키텍트)</td>
+</tr>
+<tr>
+<td>이번 실습 도구</td>
+<td>Claude Code</td>
+<td>Claude Code, Gemini</td>
+<td><code>CLAUDE.md</code>, RAG</td>
+<td><code>.claude/</code> 설정, JUnit, CI</td>
+<td>Gemini Function Calling</td>
+<td>Java StateGraph</td>
+</tr>
+<tr>
+<td>실습 주차</td>
+<td>2주</td>
+<td>3주</td>
+<td>4주</td>
+<td>5주</td>
+<td>6주</td>
+<td>7주</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="7-사용할-기술-스택과-이유">7. 사용할 기술 스택과 이유<a class="anchor" href="#7-사용할-기술-스택과-이유" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>영역</th>
+<th>기술</th>
+<th>선택 이유</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AI 코딩 도구</td>
+<td><strong>Claude Code</strong> (CLI)</td>
+<td><code>CLAUDE.md</code>·Hooks·Skill·Subagent·MCP 등 하네스 기능이 풍부해 실습에 적합</td>
+</tr>
+<tr>
+<td>앱 내부 LLM</td>
+<td><strong>Google Gemini API</strong> (무료 등급)</td>
+<td>학생 비용 0원으로 시작 가능, Function Calling 지원</td>
+</tr>
+<tr>
+<td>프론트엔드</td>
+<td><strong>React + Vite + TypeScript</strong></td>
+<td>가장 널리 쓰이고 AI가 잘 다루는 조합</td>
+</tr>
+<tr>
+<td>백엔드</td>
+<td><strong>Spring Boot 4 + Java 21</strong></td>
+<td>국내·일본 취업 시장에서 수요가 높음</td>
+</tr>
+<tr>
+<td>DB</td>
+<td><strong>MariaDB</strong></td>
+<td>MySQL 호환 오픈소스, Docker로 쉽게 실행</td>
+</tr>
+<tr>
+<td>버전 관리</td>
+<td><strong>Git + GitHub</strong></td>
+<td>협업·포트폴리오의 기본</td>
+</tr>
+<tr>
+<td>컨테이너</td>
+<td><strong>Docker + Docker Compose</strong></td>
+<td>&quot;내 PC에선 되는데&quot; 문제 해결</td>
+</tr>
+<tr>
+<td>CI/CD</td>
+<td><strong>GitHub Actions + GHCR</strong></td>
+<td>저장소와 바로 연결, 무료 사용량 제공</td>
+</tr>
+<tr>
+<td>배포</td>
+<td><strong>AWS EC2</strong></td>
+<td>클라우드 서버의 기본기 학습</td>
+</tr>
+</tbody></table></div>
+<blockquote class="warn"><p>⚠️ <strong>비용 안내</strong></p>
+<ul>
+<li><p>Claude Code는 Claude <strong>유료 구독(Pro 이상)</strong> 또는 API 크레딧이 필요합니다. 구독이 어려운 학생은 강사 안내에 따라 무료 대안 도구로 같은 실습을 진행할 수 있도록 각 주차에 <strong>&quot;대안&quot;</strong> 을 표시했습니다.</p>
+</li>
+<li><p>Gemini API 무료 등급은 <strong>모델별 분당/일일 요청 수 제한</strong>이 있고, 2026년 하반기 기준으로 Flash 계열보다 <strong>Flash-Lite 계열의 일일 한도가 훨씬 넉넉</strong>합니다. 그래서 실습 기본값을 <code>gemini-flash-lite-latest</code>로 잡고, 모델 이름은 환경 변수로 바꿀 수 있게 만듭니다. 한도는 수시로 바뀌므로 수업 전에 <a href="https://aistudio.google.com">Google AI Studio</a>에서 확인하세요.</p>
+</li>
+<li><p>무료 등급에 입력한 데이터는 서비스 개선에 쓰일 수 있으므로 <strong>개인정보·비밀번호를 넣지 마세요.</strong></p>
+</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="8-실습-①-개발-환경-설치">8. 실습 ① 개발 환경 설치<a class="anchor" href="#8-실습-①-개발-환경-설치" aria-label="이 절의 링크">#</a></h2>
+<h3 id="80-설치하기-전에-각-도구는-무엇이고-왜-필요한가">8.0 설치하기 전에 — 각 도구는 무엇이고 왜 필요한가?<a class="anchor" href="#80-설치하기-전에-각-도구는-무엇이고-왜-필요한가" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>도구</th>
+<th>한 줄 설명</th>
+<th>비유</th>
+<th>이 과정에서 하는 일</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>터미널</strong></td>
+<td>글자로 컴퓨터에 명령하는 창 (Windows: PowerShell, macOS: 터미널)</td>
+<td>컴퓨터와의 <strong>채팅창</strong></td>
+<td>모든 설치·실행 명령을 입력</td>
+</tr>
+<tr>
+<td><strong>Git</strong></td>
+<td>파일의 <strong>변경 이력</strong>을 저장하는 프로그램</td>
+<td>게임의 <strong>세이브 포인트</strong></td>
+<td>실습 단계마다 저장, 망가지면 되돌리기</td>
+</tr>
+<tr>
+<td><strong>JDK</strong> (Java Development Kit)</td>
+<td>Java 프로그램을 <strong>만들고 실행</strong>하는 도구 묶음</td>
+<td>Java 전용 공구 상자</td>
+<td>Spring Boot 백엔드 실행</td>
+</tr>
+<tr>
+<td><strong>Node.js / npm</strong></td>
+<td>브라우저 밖에서 JavaScript를 실행하는 프로그램 / 그 <strong>부품(패키지) 설치기</strong></td>
+<td>JS 엔진 / 부품 마트</td>
+<td>React 화면 개발 서버, 라이브러리 설치</td>
+</tr>
+<tr>
+<td><strong>Docker</strong></td>
+<td>프로그램을 <strong>컨테이너</strong>로 실행하는 도구</td>
+<td>어디서나 똑같은 <strong>도시락 통</strong></td>
+<td>MariaDB 실행, 배포</td>
+</tr>
+<tr>
+<td><strong>VS Code / IntelliJ</strong></td>
+<td>코드를 읽고 고치는 <strong>편집기(IDE)</strong></td>
+<td>작업 책상</td>
+<td>AI가 만든 코드 읽기·수정</td>
+</tr>
+<tr>
+<td><strong>Claude Code</strong></td>
+<td>터미널에서 대화하며 <strong>코드를 읽고·쓰고·실행</strong>하는 AI 에이전트</td>
+<td>옆자리의 <strong>천재 인턴</strong></td>
+<td>9주간 모든 실습의 파트너</td>
+</tr>
+<tr>
+<td><strong>Gemini API 키</strong></td>
+<td>우리 앱이 Gemini AI를 부를 수 있는 <strong>비밀 출입증</strong></td>
+<td>회원 카드</td>
+<td>앱의 요약·코치·계획 기능</td>
+</tr>
+</tbody></table></div>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — LTS (Long Term Support)</strong></p>
+<p><strong>뜻</strong>: 오랫동안(보통 몇 년) 보안 패치를 지원하는 <strong>안정 버전</strong>.</p>
+<p><strong>왜 쓰나</strong>: 최신 기능보다 <strong>안정성</strong>이 중요하기 때문입니다. 수업 중 갑자기 동작이 바뀌는 일을 막아 줍니다. (Java 21, Node.js 24가 LTS)</p>
+</blockquote>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — 환경 변수 (Environment Variable)</strong></p>
+<p><strong>뜻</strong>: 프로그램 <strong>바깥(운영체제)</strong> 에 저장해 두고 프로그램이 읽어 가는 설정 값. 예: <code>GEMINI_API_KEY</code></p>
+<p><strong>비유</strong>: 집 열쇠를 <strong>코드(집 안)</strong> 에 두지 않고 <strong>경비실(운영체제)</strong> 에 맡겨 두는 것.</p>
+<p><strong>왜 쓰나</strong>: API 키·비밀번호를 코드에 직접 쓰면 GitHub에 올릴 때 <strong>유출</strong>됩니다. 환경 변수로 빼 두면 코드는 공개해도 비밀은 지킬 수 있습니다.</p>
+</blockquote>
+<h3 id="81-설치-목록">8.1 설치 목록<a class="anchor" href="#81-설치-목록" aria-label="이 절의 링크">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>도구</th>
+<th>권장 버전</th>
+<th>확인 명령</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Git</td>
+<td>최신</td>
+<td><code>git --version</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>JDK (Temurin)</td>
+<td>21 LTS</td>
+<td><code>java -version</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Node.js</td>
+<td>24 LTS (22도 가능)</td>
+<td><code>node -v</code>, <code>npm -v</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Docker Desktop</td>
+<td>최신</td>
+<td><code>docker --version</code>, <code>docker compose version</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>VS Code 또는 IntelliJ IDEA</td>
+<td>최신</td>
+<td>-</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Claude Code</td>
+<td>최신</td>
+<td><code>claude --version</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>GitHub 계정</td>
+<td>-</td>
+<td>웹 로그인</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Gemini API 키</td>
+<td>-</td>
+<td>아래 8.4 참고</td>
+</tr>
+<tr>
+<td>9</td>
+<td>AWS 계정</td>
+<td>-</td>
+<td>8주차 전까지 준비</td>
+</tr>
+</tbody></table></div>
+<h3 id="82-운영체제별-설치-명령">8.2 운영체제별 설치 명령<a class="anchor" href="#82-운영체제별-설치-명령" aria-label="이 절의 링크">#</a></h3>
+<p><strong>Windows (PowerShell, 관리자 권한)</strong></p>
+<div class="code-block"><div class="code-head"><span>powershell</span><button class="copy" type="button">복사</button></div><pre><code class="language-powershell">winget install --id Git.Git -e
+winget install --id EclipseAdoptium.Temurin.21.JDK -e
+winget install --id OpenJS.NodeJS.LTS -e
+winget install --id Docker.DockerDesktop -e
+winget install --id Microsoft.VisualStudioCode -e
+# Claude Code (네이티브 설치)
+irm https://claude.ai/install.ps1 | iex</code></pre></div>
+<p><strong>macOS (터미널, Homebrew 사용)</strong></p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">brew install git node
+brew install --cask temurin@21 docker visual-studio-code
+# Claude Code (네이티브 설치)
+curl -fsSL https://claude.ai/install.sh | bash</code></pre></div>
+<p><strong>Ubuntu / WSL2</strong></p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">sudo apt update &amp;&amp; sudo apt install -y git curl
+sudo apt install -y openjdk-21-jdk
+# Node.js LTS (nvm 사용)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+source ~/.bashrc &amp;&amp; nvm install --lts
+# Docker
+curl -fsSL https://get.docker.com | sudo sh
+sudo usermod -aG docker $USER   # 로그아웃 후 다시 로그인
+# Claude Code
+curl -fsSL https://claude.ai/install.sh | bash</code></pre></div>
+<blockquote class="tip"><p>💡 설치 후 <code>claude</code> 명령을 찾을 수 없다면 터미널을 새로 열거나, <code>~/.local/bin</code>이 PATH에 있는지 확인하세요.</p>
+</blockquote>
+<h3 id="83-git-초기-설정">8.3 Git 초기 설정<a class="anchor" href="#83-git-초기-설정" aria-label="이 절의 링크">#</a></h3>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">git config --global user.name &quot;홍길동&quot;
+git config --global user.email &quot;gildong@example.com&quot;   # GitHub 가입 이메일과 동일하게
+git config --global init.defaultBranch main
+git config --global core.autocrlf input                 # Windows는 true</code></pre></div>
+<h3 id="84-gemini-api-키-발급">8.4 Gemini API 키 발급<a class="anchor" href="#84-gemini-api-키-발급" aria-label="이 절의 링크">#</a></h3>
+<ol>
+<li><a href="https://aistudio.google.com">Google AI Studio</a>에 Google 계정으로 로그인합니다.</li>
+<li>왼쪽 메뉴 <strong>Get API key → Create API key</strong>를 누릅니다.</li>
+<li>발급된 키를 <strong>메모장이 아닌 비밀번호 관리 도구</strong>에 보관합니다.</li>
+<li>동작을 확인합니다. (키는 <code>x-goog-api-key</code> 헤더로 보냅니다.)</li>
+</ol>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — 발급받은 키가 동작하는지 확인</span></h4>
+<p><strong>macOS / Linux / WSL</strong></p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">export GEMINI_API_KEY=&quot;여기에_발급받은_키&quot;
+curl -s &quot;https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent&quot; \
+  -H &quot;x-goog-api-key: $GEMINI_API_KEY&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;contents&quot;:[{&quot;parts&quot;:[{&quot;text&quot;:&quot;자기소개를 한 문장으로 해 줘&quot;}]}]}'</code></pre></div>
+<p><strong>Windows PowerShell</strong></p>
+<div class="code-block"><div class="code-head"><span>powershell</span><button class="copy" type="button">복사</button></div><pre><code class="language-powershell">$env:GEMINI_API_KEY = &quot;여기에_발급받은_키&quot;
+$body = '{&quot;contents&quot;:[{&quot;parts&quot;:[{&quot;text&quot;:&quot;자기소개를 한 문장으로 해 줘&quot;}]}]}'
+Invoke-RestMethod -Method Post `
+  -Uri &quot;https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent&quot; `
+  -Headers @{ &quot;x-goog-api-key&quot; = $env:GEMINI_API_KEY } `
+  -ContentType &quot;application/json; charset=utf-8&quot; -Body $body</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 이런 JSON이 돌아오면 성공</span></h4>
+<div class="code-block"><div class="code-head"><span>json</span><button class="copy" type="button">복사</button></div><pre><code class="language-json">{
+  &quot;candidates&quot;: [
+    {
+      &quot;content&quot;: {
+        &quot;parts&quot;: [ { &quot;text&quot;: &quot;저는 Google이 만든 AI 어시스턴트 Gemini입니다.&quot; } ],
+        &quot;role&quot;: &quot;model&quot;
+      },
+      &quot;finishReason&quot;: &quot;STOP&quot;
+    }
+  ],
+  &quot;usageMetadata&quot;: { &quot;promptTokenCount&quot;: 9, &quot;candidatesTokenCount&quot;: 15, &quot;totalTokenCount&quot;: 24 }
+}</code></pre></div>
+<ul>
+<li><code>candidates[0].content.parts[0].text</code> 위치에 <strong>AI의 답변</strong>이 들어 있습니다. (문장은 매번 다를 수 있습니다)</li>
+<li><code>usageMetadata</code>는 이번 요청에 쓴 <strong>토큰 수</strong>입니다. 3주차에 다시 봅니다.</li>
+<li><code>401</code>/<code>403</code> 오류 → 키가 잘못되었거나 복사할 때 공백이 들어간 경우, <code>404</code> → 모델 이름 오류, <code>429</code> → 요청 한도 초과(1분 후 재시도)</li>
+</ul>
+<blockquote class="warn"><p>⚠️ <strong>API 키는 절대 GitHub에 올리지 마세요.</strong> 2주차에 <code>.gitignore</code>와 <code>.env</code>로 안전하게 관리하는 방법을 배웁니다.</p>
+<p>모델 이름 오류(404)가 나면 AI Studio의 모델 목록에서 현재 사용 가능한 Flash-Lite 모델 이름으로 바꾸세요.</p>
+</blockquote>
+<h3 id="85-claude-code-첫-실행">8.5 Claude Code 첫 실행<a class="anchor" href="#85-claude-code-첫-실행" aria-label="이 절의 링크">#</a></h3>
+<blockquote class="term"><p>📖 <strong>용어 풀이 — Claude Code</strong></p>
+<p><strong>뜻</strong>: Anthropic이 만든 <strong>터미널용 AI 코딩 에이전트</strong>. 우리가 말로 지시하면 프로젝트 파일을 읽고, 코드를 쓰고, 명령을 실행합니다.</p>
+<p><strong>채팅 AI와의 차이</strong>: 웹 채팅 AI는 코드를 <strong>보여 주기만</strong> 하고 복사·붙여넣기는 사람이 합니다. Claude Code는 <strong>내 프로젝트 폴더에서 직접 파일을 만들고 실행</strong>합니다. 그래서 &quot;무엇을 허락할지&quot;가 중요해집니다(하네스).</p>
+</blockquote>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — 연습용 폴더에서 Claude Code 시작</span></h4>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">mkdir ~/ai-lab &amp;&amp; cd ~/ai-lab
+claude</code></pre></div>
+<p>처음 실행하면 브라우저가 열리며 <strong>로그인 화면</strong>이 나옵니다. 로그인하고 터미널로 돌아오면 입력창(<code>&gt;</code>)이 보입니다.</p>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — 첫 대화</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">안녕! 너는 무엇을 할 수 있니? 3줄로 알려 줘.</code></pre></div>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">이 폴더에 hello.txt 파일을 만들고 &quot;AI 엔지니어링 1주차&quot;라고 써 줘.</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 화면은 대략 이렇게 진행됩니다</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">&gt; 이 폴더에 hello.txt 파일을 만들고 &quot;AI 엔지니어링 1주차&quot;라고 써 줘.
+
+● hello.txt 파일을 만들겠습니다.
+
+● Write(hello.txt)
+  ╭───────────────────────────────────────────────╮
+  │ Create file hello.txt                          │
+  │   1 AI 엔지니어링 1주차                         │
+  │                                                │
+  │ Do you want to create hello.txt?               │
+  │ ❯ 1. Yes                                       │
+  │   2. Yes, allow all edits during this session  │
+  │   3. No, and tell Claude what to do differently│
+  ╰───────────────────────────────────────────────╯</code></pre></div>
+<ul>
+<li>AI가 파일을 만들기 <strong>전에 허락을 구합니다.</strong> <code>1. Yes</code>를 고르면 파일이 생깁니다.</li>
+<li>이것이 바로 <strong>하네스의 &quot;권한&quot; 장치</strong>입니다. 5주차에 &quot;어떤 일은 묻지 않고 허용, 어떤 일은 절대 금지&quot;를 직접 설정합니다.</li>
+<li>확인: 다른 터미널에서 <code>cat hello.txt</code>(Windows: <code>type hello.txt</code>)를 입력해 내용이 보이면 성공입니다.</li>
+</ul>
+<blockquote class="tip"><p>💡 실제 화면의 모양(테두리, 문구)은 Claude Code 버전에 따라 조금씩 다릅니다. <strong>&quot;계획 → 허락 요청 → 실행&quot;</strong> 의 흐름만 기억하세요.</p>
+</blockquote>
+<p>자주 쓰는 Claude Code 명령:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>명령</th>
+<th>기능</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/help</code></td>
+<td>도움말</td>
+</tr>
+<tr>
+<td><code>/init</code></td>
+<td>프로젝트를 분석해 <code>CLAUDE.md</code> 초안 생성 (4주차)</td>
+</tr>
+<tr>
+<td><code>/clear</code></td>
+<td>대화(컨텍스트) 비우기</td>
+</tr>
+<tr>
+<td><code>/compact</code></td>
+<td>대화를 요약해 컨텍스트 절약</td>
+</tr>
+<tr>
+<td><code>/model</code></td>
+<td>사용할 모델 선택</td>
+</tr>
+<tr>
+<td><code>Shift+Tab</code></td>
+<td>모드 전환(일반 ↔ 자동 수락 ↔ 계획 모드)</td>
+</tr>
+<tr>
+<td><code>Esc</code></td>
+<td>AI 작업 중단</td>
+</tr>
+<tr>
+<td><code>@파일명</code></td>
+<td>특정 파일을 컨텍스트에 포함</td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p><strong>대안 (Claude 구독이 없는 경우)</strong>: Gemini CLI 등 무료 등급이 있는 터미널 AI 도구로도 대부분의 실습을 따라 할 수 있습니다. 규칙 파일 이름(<code>CLAUDE.md</code> ↔ <code>GEMINI.md</code> 등)과 설정 위치만 다릅니다.</p>
+</blockquote>
+<hr>
+<h2 id="9-실습-②-설치-확인-체크리스트">9. 실습 ② 설치 확인 체크리스트<a class="anchor" href="#9-실습-②-설치-확인-체크리스트" aria-label="이 절의 링크">#</a></h2>
+<p>아래 스크립트를 실행해 모든 도구가 준비되었는지 확인합니다.</p>
+<h4 class="step step-cmd"><span class="step-icon">⌨️</span><span>직접 실행 — 설치 확인 스크립트</span></h4>
+<p><strong>check-env.sh</strong> (macOS/Linux/WSL)</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">#!/usr/bin/env bash
+check() {
+  if command -v &quot;$1&quot; &gt;/dev/null 2&gt;&amp;1; then
+    echo &quot;✅ $1: $($1 $2 2&gt;&amp;1 | head -n 1)&quot;
+  else
+    echo &quot;❌ $1 이(가) 설치되지 않았습니다&quot;
+  fi
+}
+check git --version
+check java -version
+check node -v
+check npm -v
+check docker --version
+check claude --version
+if [ -n &quot;$GEMINI_API_KEY&quot; ]; then echo &quot;✅ GEMINI_API_KEY 설정됨&quot;; else echo &quot;❌ GEMINI_API_KEY 없음&quot;; fi</code></pre></div>
+<div class="code-block"><div class="code-head"><span>bash</span><button class="copy" type="button">복사</button></div><pre><code class="language-bash">chmod +x check-env.sh &amp;&amp; ./check-env.sh</code></pre></div>
+<p><strong>check-env.ps1</strong> (Windows PowerShell)</p>
+<div class="code-block"><div class="code-head"><span>powershell</span><button class="copy" type="button">복사</button></div><pre><code class="language-powershell">$tools = @(
+  @{ Name = &quot;git&quot;; Arg = &quot;--version&quot; },
+  @{ Name = &quot;java&quot;; Arg = &quot;-version&quot; },
+  @{ Name = &quot;node&quot;; Arg = &quot;-v&quot; },
+  @{ Name = &quot;npm&quot;; Arg = &quot;-v&quot; },
+  @{ Name = &quot;docker&quot;; Arg = &quot;--version&quot; },
+  @{ Name = &quot;claude&quot;; Arg = &quot;--version&quot; }
+)
+foreach ($t in $tools) {
+  if (Get-Command $t.Name -ErrorAction SilentlyContinue) {
+    $v = &amp; $t.Name $t.Arg 2&gt;&amp;1 | Select-Object -First 1
+    Write-Host &quot;OK  $($t.Name): $v&quot;
+  } else {
+    Write-Host &quot;NG  $($t.Name) 이(가) 설치되지 않았습니다&quot;
+  }
+}
+if ($env:GEMINI_API_KEY) { Write-Host &quot;OK  GEMINI_API_KEY 설정됨&quot; } else { Write-Host &quot;NG  GEMINI_API_KEY 없음&quot; }</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — 모두 ✅가 나오면 준비 완료</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">✅ git: git version 2.47.1
+✅ java: openjdk version &quot;21.0.5&quot; 2024-10-15 LTS
+✅ node: v24.11.0
+✅ npm: 11.6.1
+✅ docker: Docker version 28.5.1, build e180ab8
+✅ claude: 2.x.x (Claude Code)
+✅ GEMINI_API_KEY 설정됨</code></pre></div>
+<p>버전 숫자는 여러분의 PC와 달라도 됩니다. ❌가 나온 항목만 8.2절 명령으로 다시 설치하세요.</p>
+<h4 class="step step-ai"><span class="step-icon">🤖</span><span>Claude Code 프롬프트 — AI에게 같은 확인을 시켜 보기</span></h4>
+<div class="code-block prompt"><div class="code-head"><span>🤖 Claude Code 입력창에 붙여 넣기</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">내 PC에 Git, Java, Node, Docker가 설치되어 있는지 확인하고 버전을 표로 정리해 줘.</code></pre></div>
+<h4 class="step step-result"><span class="step-icon">✅</span><span>결과 확인 — AI가 &quot;도구&quot;를 쓰는 모습 관찰</span></h4>
+<div class="code-block"><div class="code-head"><span>text</span><button class="copy" type="button">복사</button></div><pre><code class="language-plaintext">● Bash(git --version &amp;&amp; java -version &amp;&amp; node -v &amp;&amp; docker --version)
+  ⎿ git version 2.47.1 ...
+
+| 도구   | 버전     | 상태 |
+|--------|----------|------|
+| Git    | 2.47.1   | ✅   |
+| Java   | 21.0.5   | ✅   |
+| ...    | ...      | ...  |</code></pre></div>
+<p>AI가 직접 <strong>터미널 명령을 실행하는 도구(Bash)</strong> 를 호출하고, 그 결과를 읽어 표로 정리했습니다. 이것이 6주차에 직접 만들어 볼 <strong>도구 호출(Tool Calling)</strong> 입니다.</p>
+<hr>
+<h2 id="10-토론-활동-10분">10. 토론 활동 (10분)<a class="anchor" href="#10-토론-활동-10분" aria-label="이 절의 링크">#</a></h2>
+<p>조별로 아래 질문에 답해 봅시다.</p>
+<ol>
+<li>바이브코딩만으로 졸업작품을 만들면 어떤 문제가 생길까요?</li>
+<li>같은 질문인데 AI의 답이 매번 달라지는 이유는 무엇일까요? (힌트: 4.4의 확률 수식)</li>
+<li>회사가 AI에게 &quot;운영 서버 DB 삭제 권한&quot;을 주지 않는 이유는? 어떤 단계와 관련이 있나요?</li>
+<li>&quot;테스트가 통과할 때까지 계속 고쳐&quot;라고 시키면 무엇이 위험할까요?</li>
+</ol>
+<hr>
+<h2 id="11-정리-퀴즈">11. 정리 퀴즈<a class="anchor" href="#11-정리-퀴즈" aria-label="이 절의 링크">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>문제</th>
+<th>정답</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>&quot;모델이 보는 정보 전체&quot;를 설계하는 단계는?</td>
+<td>컨텍스트 엔지니어링</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Agent = Model + ( ? )</td>
+<td>Harness</td>
+</tr>
+<tr>
+<td>3</td>
+<td>하네스 장치 중 AI가 행동한 <strong>후</strong> 작동하는 것을 무엇이라 부르나?</td>
+<td>센서(피드백)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>루프 설계에서 반드시 정해야 하는 것 두 가지는?</td>
+<td>검증 방법, 종료 조건(최대 반복 등)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>그래프를 이루는 세 요소는?</td>
+<td>노드, 엣지, 상태</td>
+</tr>
+<tr>
+<td>6</td>
+<td>루프와 그래프 중 예측 가능성이 더 높은 것은?</td>
+<td>그래프</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="12-과제">12. 과제<a class="anchor" href="#12-과제" aria-label="이 절의 링크">#</a></h2>
+<ol>
+<li><strong>설치 인증</strong>: <code>check-env</code> 실행 결과 화면 캡처를 제출합니다.</li>
+<li><strong>6단계 한 줄 정의 카드</strong>: 각 단계를 <strong>나만의 비유</strong>로 한 문장씩 정의해 오세요. (예: &quot;하네스는 자전거의 보조 바퀴다&quot;)</li>
+<li><strong>사전 준비</strong>: GitHub 계정을 만들고 프로필 사진·이름을 설정해 두세요. (9주차 포트폴리오에 사용)</li>
+</ol>
+<hr>
+<h2 id="참고-자료">참고 자료<a class="anchor" href="#참고-자료" aria-label="이 절의 링크">#</a></h2>
+<ul>
+<li>Martin Fowler 사이트, <em>Harness engineering for coding agent users</em> (2026.04)</li>
+<li>IBM Think, <em>What is loop engineering?</em> (2026.07)</li>
+<li>LangChain Blog, <em>3 Years of Graph Engineering with LangGraph</em> (2026.07)</li>
+<li>Claude Code 공식 문서: <a href="https://code.claude.com/docs">https://code.claude.com/docs</a></li>
+<li>Gemini API 공식 문서: <a href="https://ai.google.dev/gemini-api/docs">https://ai.google.dev/gemini-api/docs</a></li>
+</ul>
+<hr>
+<h2 id="13-지금까지의-진행-상황-다음-주-예고">13. 지금까지의 진행 상황 &amp; 다음 주 예고<a class="anchor" href="#13-지금까지의-진행-상황-다음-주-예고" aria-label="이 절의 링크">#</a></h2>
+<h3 id="131-1주차-진행-상황">13.1 1주차 진행 상황<a class="anchor" href="#131-1주차-진행-상황" aria-label="이 절의 링크">#</a></h3>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    W1[&quot;✅ 1주&lt;br/&gt;전체 지도&lt;br/&gt;환경 설치&quot;]:::done --&gt; W2[&quot;2주&lt;br/&gt;바이브코딩&quot;] --&gt; W3[&quot;3주&lt;br/&gt;프롬프트&quot;] --&gt; W4[&quot;4주&lt;br/&gt;컨텍스트&quot;] --&gt; W5[&quot;5주&lt;br/&gt;하네스&quot;] --&gt; W6[&quot;6주&lt;br/&gt;루프&quot;] --&gt; W7[&quot;7주&lt;br/&gt;그래프&quot;] --&gt; W8[&quot;8주&lt;br/&gt;CI/CD&quot;] --&gt; W9[&quot;9주&lt;br/&gt;포트폴리오&quot;]
+    classDef done fill:#dcfce7,stroke:#16a34a</pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>구분</th>
+<th>완료한 것</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>이해</td>
+<td>AI 엔지니어링 6단계의 뜻과 순서, &quot;천재 신입 인턴&quot; 비유, Agent = Model + Harness</td>
+</tr>
+<tr>
+<td>환경</td>
+<td>Git · JDK 21 · Node.js · Docker · 편집기 · Claude Code 설치, Gemini API 키 발급</td>
+</tr>
+<tr>
+<td>경험</td>
+<td>Claude Code 첫 대화, 파일 생성 시 <strong>허락 요청(권한)</strong> 체험, AI의 <strong>도구 호출</strong> 관찰</td>
+</tr>
+<tr>
+<td>프로젝트</td>
+<td>아직 없음 (다음 주에 시작!)</td>
+</tr>
+</tbody></table></div>
+<h3 id="132-다음-주2주차-예고-바이브코딩">13.2 다음 주(2주차) 예고 — 바이브코딩<a class="anchor" href="#132-다음-주2주차-예고-바이브코딩" aria-label="이 절의 링크">#</a></h3>
+<ul>
+<li><strong>배울 것</strong>: AI에게 <strong>말로만</strong> 시켜서 프로젝트 뼈대(React + Spring Boot + MariaDB)를 만들고, 그 <strong>속도와 함정</strong>을 동시에 체험합니다. 모든 작업을 <strong>Git으로 기록</strong>해 GitHub에 올립니다.</li>
+<li><strong>왜 배우나</strong>: 가장 쉬운 AI 활용법부터 시작해야, 다음 단계(프롬프트·컨텍스트…)가 <strong>왜 필요한지</strong> 몸으로 느낄 수 있습니다.</li>
+<li><strong>미리 준비</strong>: ① GitHub 계정 로그인 확인 ② Docker Desktop 실행해 두기 ③ <code>check-env</code>가 모두 ✅인지 확인</li>
+</ul>
+<hr>
+<h2 id="14-일본-취업-대비-it-용어-1주차">14. 🇯🇵 일본 취업 대비 IT 용어 (1주차)<a class="anchor" href="#14-일본-취업-대비-it-용어-1주차" aria-label="이 절의 링크">#</a></h2>
+<p>일본 IT 기업 면접·이력서·업무에서 그대로 쓰이는 표현입니다. <strong>가타카나 용어는 영어 발음을 일본식으로 읽은 것</strong>이 많아 익숙해지면 금방 외워집니다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>한국어</th>
+<th>日本語</th>
+<th>읽는 법</th>
+<th>예문 (日本語)</th>
+<th>예문 해석</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>생성형 AI</td>
+<td>生成AI</td>
+<td>せいせいエーアイ</td>
+<td>生成AIを活用して開発効率を向上させました。</td>
+<td>생성형 AI를 활용해 개발 효율을 향상시켰습니다.</td>
+</tr>
+<tr>
+<td>대규모 언어 모델</td>
+<td>大規模言語モデル（LLM）</td>
+<td>だいきぼげんごモデル</td>
+<td>大規模言語モデルのAPIをアプリに組み込みました。</td>
+<td>LLM의 API를 앱에 통합했습니다.</td>
+</tr>
+<tr>
+<td>프롬프트</td>
+<td>プロンプト</td>
+<td>푸론푸토</td>
+<td>出力が安定するようにプロンプトを改善しました。</td>
+<td>출력이 안정되도록 프롬프트를 개선했습니다.</td>
+</tr>
+<tr>
+<td>컨텍스트</td>
+<td>コンテキスト</td>
+<td>콘테키스토</td>
+<td>必要な情報だけをコンテキストに含めるよう工夫しました。</td>
+<td>필요한 정보만 컨텍스트에 넣도록 궁리했습니다.</td>
+</tr>
+<tr>
+<td>에이전트</td>
+<td>エージェント</td>
+<td>에-젠토</td>
+<td>ツールを呼び出すAIエージェントを実装しました。</td>
+<td>도구를 호출하는 AI 에이전트를 구현했습니다.</td>
+</tr>
+<tr>
+<td>개발 환경</td>
+<td>開発環境</td>
+<td>かいはつかんきょう</td>
+<td>開発環境の構築手順をREADMEにまとめました。</td>
+<td>개발 환경 구축 절차를 README에 정리했습니다.</td>
+</tr>
+<tr>
+<td>환경 구축</td>
+<td>環境構築</td>
+<td>かんきょうこうちく</td>
+<td>環境構築でつまずいた点を記録しました。</td>
+<td>환경 구축에서 막혔던 점을 기록했습니다.</td>
+</tr>
+<tr>
+<td>환경 변수</td>
+<td>環境変数</td>
+<td>かんきょうへんすう</td>
+<td>APIキーは環境変数で管理しています。</td>
+<td>API 키는 환경 변수로 관리하고 있습니다.</td>
+</tr>
+<tr>
+<td>도입</td>
+<td>導入</td>
+<td>どうにゅう</td>
+<td>新しいツールの導入を提案しました。</td>
+<td>새로운 도구의 도입을 제안했습니다.</td>
+</tr>
+<tr>
+<td>버전 관리</td>
+<td>バージョン管理</td>
+<td>바-존 칸리</td>
+<td>Gitでバージョン管理を行いました。</td>
+<td>Git으로 버전 관리를 했습니다.</td>
+</tr>
+<tr>
+<td>요구사항</td>
+<td>要件</td>
+<td>ようけん</td>
+<td>要件を整理してから実装に入りました。</td>
+<td>요구사항을 정리한 뒤 구현에 들어갔습니다.</td>
+</tr>
+<tr>
+<td>구현</td>
+<td>実装</td>
+<td>じっそう</td>
+<td>ログイン機能を実装しました。</td>
+<td>로그인 기능을 구현했습니다.</td>
+</tr>
+</tbody></table></div>
+<blockquote class="speak"><p>💬 <strong>면접에서 이렇게 말해 보세요</strong></p>
+<p>「生成AIをただ使うだけでなく、プロンプト・コンテキスト・ハーネスの段階に分けて、品質を管理しながら開発しました。」</p>
+<p>(생성형 AI를 그냥 쓰는 것이 아니라, 프롬프트·컨텍스트·하네스 단계로 나누어 품질을 관리하면서 개발했습니다.)</p>
+</blockquote>
+<p><a href="week02-vibe-coding.html">다음 주: 2주차 · 바이브코딩 →</a></p>
+
+</article>
+<nav class="pager">
+  <a href="index.html"><small>← 처음</small>과정 소개</a>
+  <a class="next" href="week02-vibe-coding.html"><small>다음 →</small>2주차 · 바이브코딩</a>
+</nav>
+</main>
+<aside class="toc"><h4>이 페이지에서</h4>
+<a class="h2" href="#이-교안을-읽는-법-9주-공통">📘 이 교안을 읽는 법 (9주 공통)</a>
+<a class="h3" href="#한-번의-실습은-이렇게-흘러갑니다">한 번의 실습은 이렇게 흘러갑니다</a>
+<a class="h2" href="#0-오늘의-수업-진행표-3시간">0. 오늘의 수업 진행표 (3시간)</a>
+<a class="h2" href="#1-학습-목표">1. 학습 목표</a>
+<a class="h2" href="#2-9주-로드맵-한눈에-보기">2. 9주 로드맵 한눈에 보기</a>
+<a class="h2" href="#3-우리가-만들-것-ai-스터디-플래너">3. 우리가 만들 것: AI 스터디 플래너</a>
+<a class="h3" href="#31-완성된-시스템-구조">3.1 완성된 시스템 구조</a>
+<a class="h3" href="#32-기능-목록과-관련-단계">3.2 기능 목록과 관련 단계</a>
+<a class="h3" href="#33-이-과정에서-계속-쓰이는-기본-용어">3.3 이 과정에서 계속 쓰이는 기본 용어</a>
+<a class="h2" href="#4-ai-엔지니어링-6단계-큰-그림">4. AI 엔지니어링 6단계 — 큰 그림</a>
+<a class="h3" href="#41-하나의-비유로-전체를-이해하기-천재-신입-인턴">4.1 하나의 비유로 전체를 이해하기: &quot;천재 신입 인턴&quot;</a>
+<a class="h3" href="#42-양파-그림-바깥-단계는-안쪽-단계를-감싼다">4.2 양파 그림: 바깥 단계는 안쪽 단계를 &quot;감싼다&quot;</a>
+<a class="h3" href="#43-각-단계가-통제하는-범위가-점점-넓어진다">4.3 각 단계가 &quot;통제하는 범위&quot;가 점점 넓어진다</a>
+<a class="h3" href="#44-수식으로-보는-6단계">4.4 수식으로 보는 6단계</a>
+<a class="h2" href="#5-단계별-핵심-개념-미리보기">5. 단계별 핵심 개념 미리보기</a>
+<a class="h3" href="#①-바이브코딩-vibe-coding-말로-만들기">① 바이브코딩 (Vibe Coding) — &quot;말로 만들기&quot;</a>
+<a class="h3" href="#②-프롬프트-엔지니어링-잘-묻기">② 프롬프트 엔지니어링 — &quot;잘 묻기&quot;</a>
+<a class="h3" href="#③-컨텍스트-엔지니어링-잘-알려-주기">③ 컨텍스트 엔지니어링 — &quot;잘 알려 주기&quot;</a>
+<a class="h3" href="#④-하네스-엔지니어링-잘-일하는-환경-만들기">④ 하네스 엔지니어링 — &quot;잘 일하는 환경 만들기&quot;</a>
+<a class="h3" href="#⑤-루프-엔지니어링-스스로-반복하게-하기">⑤ 루프 엔지니어링 — &quot;스스로 반복하게 하기&quot;</a>
+<a class="h3" href="#⑥-그래프-엔지니어링-흐름도로-설계하기">⑥ 그래프 엔지니어링 — &quot;흐름도로 설계하기&quot;</a>
+<a class="h2" href="#6-6단계-비교-총정리표">6. 6단계 비교 총정리표</a>
+<a class="h2" href="#7-사용할-기술-스택과-이유">7. 사용할 기술 스택과 이유</a>
+<a class="h2" href="#8-실습-①-개발-환경-설치">8. 실습 ① 개발 환경 설치</a>
+<a class="h3" href="#80-설치하기-전에-각-도구는-무엇이고-왜-필요한가">8.0 설치하기 전에 — 각 도구는 무엇이고 왜 필요한가?</a>
+<a class="h3" href="#81-설치-목록">8.1 설치 목록</a>
+<a class="h3" href="#82-운영체제별-설치-명령">8.2 운영체제별 설치 명령</a>
+<a class="h3" href="#83-git-초기-설정">8.3 Git 초기 설정</a>
+<a class="h3" href="#84-gemini-api-키-발급">8.4 Gemini API 키 발급</a>
+<a class="h3" href="#85-claude-code-첫-실행">8.5 Claude Code 첫 실행</a>
+<a class="h2" href="#9-실습-②-설치-확인-체크리스트">9. 실습 ② 설치 확인 체크리스트</a>
+<a class="h2" href="#10-토론-활동-10분">10. 토론 활동 (10분)</a>
+<a class="h2" href="#11-정리-퀴즈">11. 정리 퀴즈</a>
+<a class="h2" href="#12-과제">12. 과제</a>
+<a class="h2" href="#참고-자료">참고 자료</a>
+<a class="h2" href="#13-지금까지의-진행-상황-다음-주-예고">13. 지금까지의 진행 상황 &amp; 다음 주 예고</a>
+<a class="h3" href="#131-1주차-진행-상황">13.1 1주차 진행 상황</a>
+<a class="h3" href="#132-다음-주2주차-예고-바이브코딩">13.2 다음 주(2주차) 예고 — 바이브코딩</a>
+<a class="h2" href="#14-일본-취업-대비-it-용어-1주차">14. 🇯🇵 일본 취업 대비 IT 용어 (1주차)</a>
+</aside>
+</div>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/dockerfile.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/nginx.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/powershell.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/groovy.min.js"></script>
+<script defer src="assets/app.js"></script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose', fontFamily: 'Pretendard, sans-serif' });
+  await mermaid.run({ querySelector: 'pre.mermaid' });
+</script>
+</body>
+</html>

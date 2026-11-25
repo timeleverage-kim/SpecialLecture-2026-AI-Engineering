@@ -1,0 +1,13 @@
+{
+  "name": "ai-engineering-lecture",
+  "version": "1.0.0",
+  "private": true,
+  "description": "바이브코딩에서 그래프 엔지니어링까지 — 9주 AI 엔지니어링 특강 교안",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-html.mjs"
+  },
+  "devDependencies": {
+    "marked": "^18.0.0"
+  }
+}

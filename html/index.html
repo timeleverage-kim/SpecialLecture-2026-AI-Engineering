@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI와 함께하는 풀스택 개발 — 바이브코딩에서 그래프 엔지니어링까지</title>
+<meta name="description" content="컴퓨터공학과 2학년 대상 9주(27시간) AI 엔지니어링 특강 교안">
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="topbar">
+  
+  <a class="brand" href="index.html">AI <span>Engineering</span> Lab</a>
+  <div class="spacer"></div>
+  
+</header>
+<section class="hero">
+  <h1>AI와 함께하는 풀스택 개발<br>바이브코딩에서 그래프 엔지니어링까지</h1>
+  <p>컴퓨터공학과 2학년 대상 특강 · 3시간 × 9주(27시간) · TypeScript(React) + Spring Boot + MariaDB 프로젝트
+  <strong>"AI 스터디 플래너"</strong>를 만들며 AI 엔지니어링 6단계를 이해하고 실습으로 익힙니다.</p>
+  <div class="ladder">
+    <span>바이브코딩</span><i>→</i><span>프롬프트</span><i>→</i><span>컨텍스트</span><i>→</i>
+    <span>하네스</span><i>→</i><span>루프</span><i>→</i><span>그래프</span><i>＋</i><span>CI/CD · AWS</span><i>＋</i><span>README 한·日</span>
+  </div>
+</section>
+
+<section class="section">
+  <h2>📅 주차별 강의</h2>
+  <div class="cards">
+<a class="card" href="week01-overview.html">
+  <span class="num">WEEK 01 · 개요</span>
+  <h3>AI 엔지니어링 6단계 전체 지도</h3>
+  <p>바이브·프롬프트·컨텍스트·하네스·루프·그래프를 &quot;천재 신입 인턴&quot; 비유와 수식으로 한눈에 이해하고 개발 환경을 설치합니다.</p>
+  <div class="tags"><span>개념</span><span>환경 설치</span><span>Claude Code</span><span>Gemini API</span></div>
+</a>
+<a class="card" href="week02-vibe-coding.html">
+  <span class="num">WEEK 02 · ① 바이브</span>
+  <h3>바이브코딩 + Git·GitHub 기초</h3>
+  <p>말로 프로젝트 뼈대(React·Spring Boot·MariaDB)를 만들고 D-Day 카운터로 바이브코딩의 속도와 함정을 체험합니다.</p>
+  <div class="tags"><span>Vite</span><span>Spring Initializr</span><span>Docker Compose</span><span>Git·PR</span></div>
+</a>
+<a class="card" href="week03-prompt-engineering.html">
+  <span class="num">WEEK 03 · ② 프롬프트</span>
+  <h3>프롬프트 엔지니어링</h3>
+  <p>토큰·temperature 원리와 6요소 프롬프트를 익히고, 구조화된 지시로 CRUD API와 Gemini 노트 요약을 구현합니다.</p>
+  <div class="tags"><span>Few-shot</span><span>JSON 출력</span><span>CRUD</span><span>Gemini REST</span></div>
+</a>
+<a class="card" href="week04-context-engineering.html">
+  <span class="num">WEEK 04 · ③ 컨텍스트</span>
+  <h3>컨텍스트 엔지니어링</h3>
+  <p>토큰 예산과 Write·Select·Compress·Isolate 전략, CLAUDE.md, TF-IDF 기반 RAG로 &quot;내 노트에서 답하기&quot;를 만듭니다.</p>
+  <div class="tags"><span>CLAUDE.md</span><span>RAG</span><span>TF-IDF</span><span>설계 문서</span></div>
+</a>
+<a class="card" href="week05-harness-engineering.html">
+  <span class="num">WEEK 05 · ④ 하네스</span>
+  <h3>하네스 엔지니어링</h3>
+  <p>권한·Hooks·Skill·Subagent·MCP로 AI의 작업 환경을 만들고, 가짜 LLM 테스트·Docker·GitHub Actions CI를 구성합니다.</p>
+  <div class="tags"><span>Hooks</span><span>Skill</span><span>Subagent</span><span>JUnit·Vitest</span><span>CI</span></div>
+</a>
+<a class="card" href="week06-loop-engineering.html">
+  <span class="num">WEEK 06 · ⑤ 루프</span>
+  <h3>루프 엔지니어링</h3>
+  <p>Stop Hook 검증 루프와 헤드리스 수정 루프, Gemini Function Calling으로 도구를 반복 호출하는 AI 스터디 코치를 구현합니다.</p>
+  <div class="tags"><span>ReAct</span><span>Function Calling</span><span>Stop Hook</span><span>claude -p</span></div>
+</a>
+<a class="card" href="week07-graph-engineering.html">
+  <span class="num">WEEK 07 · ⑥ 그래프</span>
+  <h3>그래프 엔지니어링</h3>
+  <p>노드·엣지·상태로 StateGraph 엔진을 직접 만들고, LLM 노드와 코드 검증 노드가 섞인 학습계획 워크플로우를 구현합니다.</p>
+  <div class="tags"><span>StateGraph</span><span>조건부 엣지</span><span>평가-최적화</span><span>LangGraph 비교</span></div>
+</a>
+<a class="card" href="week08-cicd-aws.html">
+  <span class="num">WEEK 08 · 배포</span>
+  <h3>CI/CD 완성 — GitHub Actions → GHCR → AWS EC2</h3>
+  <p>테스트를 통과한 코드만 이미지로 만들어 GHCR에 올리고, EC2에서 Docker Compose로 자동 배포·헬스 체크·롤백합니다.</p>
+  <div class="tags"><span>GitHub Actions</span><span>GHCR</span><span>EC2</span><span>Secrets</span><span>롤백</span></div>
+</a>
+<a class="card" href="week09-portfolio-readme.html">
+  <span class="num">WEEK 09 · 정리</span>
+  <h3>포트폴리오 완성 — 한국어 + 일본어 README</h3>
+  <p>채용 담당자가 30초에 이해하는 README를 한국어·일본어로 작성하고, 번역 하네스·릴리스·발표·회고로 마무리합니다.</p>
+  <div class="tags"><span>README</span><span>日本語</span><span>번역 Skill</span><span>v1.0.0</span><span>KPT</span></div>
+</a>
+  </div>
+</section>
+
+<section class="section">
+  <h2>🧭 과정 한눈에 보기</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3>🎯 최종 결과물</h3>
+      <ul>
+        <li>AWS EC2에 자동 배포된 <strong>AI 스터디 플래너</strong> 웹 서비스</li>
+        <li>할 일 · 노트 · AI 요약 · 노트 Q&amp;A(RAG) · AI 코치(루프) · AI 학습계획(그래프)</li>
+        <li>Claude Code 하네스(<code>CLAUDE.md</code>, Hooks, Skill, Subagent)와 테스트·CI/CD</li>
+        <li>한국어 + 일본어 README 포트폴리오, <code>v1.0.0</code> 릴리스</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>🛠 기술 스택</h3>
+      <ul>
+        <li><strong>Frontend</strong> React · Vite · TypeScript</li>
+        <li><strong>Backend</strong> Spring Boot 4 · Java 21 · JPA</li>
+        <li><strong>DB</strong> MariaDB 11.8 (테스트: H2)</li>
+        <li><strong>AI</strong> Claude Code(개발) · Gemini API(앱 내부)</li>
+        <li><strong>DevOps</strong> Git · GitHub · Docker · GitHub Actions · GHCR · AWS EC2</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>⏱ 매주 수업 구성</h3>
+      <ul>
+        <li><strong>설명</strong> 비유 · 그림 · 도표 · 수식으로 개념 이해</li>
+        <li><strong>실습</strong> 따라 하면 동작하는 단계별 코드</li>
+        <li><strong>정리</strong> 퀴즈 · 비교표 · 회고 · 과제</li>
+        <li><strong>진행 상황 & 다음 주 예고</strong> 지금까지 만든 것과 준비물</li>
+        <li><strong>🇯🇵 일본 취업 IT 용어</strong> 주차별 12개 + 면접 예문</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>📘 자료 사용법</h3>
+      <ul>
+        <li><strong>🤖 Claude Code 프롬프트</strong> — AI에게 붙여 넣을 지시문</li>
+        <li><strong>⌨️ 직접 실행</strong> · <strong>✅ 결과 확인</strong> · <strong>📄 참고 코드</strong> · <strong>📖 용어 풀이</strong></li>
+        <li>왼쪽 목차에서 주차 선택, 오른쪽에서 절 이동, 코드는 <strong>복사</strong> 버튼으로</li>
+        <li>상단 <strong>Markdown 원본</strong>은 GitHub·노션 업로드용</li>
+        <li>인쇄(⌘/Ctrl + P) 시 본문만 깔끔하게 출력</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer class="site">AI와 함께하는 풀스택 개발 — 바이브코딩에서 그래프 엔지니어링까지 · 컴퓨터공학과 특강 교안</footer>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/dockerfile.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/nginx.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/powershell.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/groovy.min.js"></script>
+<script defer src="assets/app.js"></script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose', fontFamily: 'Pretendard, sans-serif' });
+  await mermaid.run({ querySelector: 'pre.mermaid' });
+</script>
+</body>
+</html>
